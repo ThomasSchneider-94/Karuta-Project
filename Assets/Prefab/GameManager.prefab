@@ -44,6 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 221e571f9717e3747b1674b6b07bf07e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoplay: 0
-  playPause: 0
+  autoPlay: 1
+  playPause: 1
   hideAnswer: 0
+  allowMirrorMatch: 0
+  allowDifferentCategory: 0
+  currentCategory: 0
+  defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}

@@ -2,37 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
-using UnityEditor.PackageManager;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Data;
+using Karuta.ScriptableObjects;
+using static Karuta.ScriptableObjects.JsonObjects;
+using Karuta.UIComponent;
+using System.Text;
 
-namespace Karuta
+namespace Karuta.Menu
 {
-    #region Download Json Objects
-    [Serializable]
-    public class DownloadDeck
-    {
-        public string name;
-        public string category;
-        public string type;
-        public string cover;
-        public List<DownloadCard> cards;
-    }
-
-    [Serializable]
-    public class DownloadCard
-    {
-        public string anime;
-        public string type;
-        public string visual;
-        public string sound;
-    }
-    #endregion Download Json Objects
-
     public class DownloadManager : MonoBehaviour
     {
         private GameManager gameManager;
@@ -54,14 +31,16 @@ namespace Karuta
          *      - Download and check cover
          */
 
-        private JsonDeckInfoList jsonDeckInfoList;
+        private JsonObjects.JsonDeckInfoList jsonDeckInfoList;
         private string[] visualFiles;
         private string[] soundFiles;
 
         public void Start()
         {
             gameManager = GameManager.Instance;
-            jsonDeckInfoList = new JsonDeckInfoList
+            gameManager.ChangeCategory.AddListener(HideShowDeckDownloadToggles);
+
+            jsonDeckInfoList = new JsonObjects.JsonDeckInfoList
             {
                 deckInfoList = new List<JsonDeckInfo>()
             };
@@ -97,8 +76,10 @@ namespace Karuta
             }
         }
 
-        // Update the list of decks
+        /* ======================================== UPDATE THE DECK LIST ======================================== */
+
         #region Update Deck list
+        // Download the deck list and update the local one
         public void UpdateDeckList()
         {
             List<TextAsset> textAssets = DownloadDeckList();
@@ -106,10 +87,26 @@ namespace Karuta
             SaveDecks(textAssets);
 
             gameManager.RefreshDeckList();
+            RefreshDeckDownloadToggles();
         }
 
+        // Download the deck list
         private List<TextAsset> DownloadDeckList()
         {
+
+
+            //UnityWebRequest request = UnityWebRequest.Get("/deck_names");
+
+
+
+
+
+
+
+
+
+
+
             // TODO: Function where you download all the decks file
             return new List<TextAsset>() { testDeck };
         }
@@ -132,13 +129,18 @@ namespace Karuta
         // Save a deck into the persistant files
         private void SaveDeck(TextAsset textDeck)
         {
-            DownloadDeck downloadDeck = JsonUtility.FromJson<DownloadDeck>(textDeck.text);
+            JsonDeck downloadDeck = JsonUtility.FromJson<JsonDeck>(textDeck.text);
+
+            if (downloadDeck == null) { return; }
+
+            downloadDeck.category = downloadDeck.category.ToUpper();
+            downloadDeck.type = downloadDeck.type.ToUpper();
 
             // Check deck validity
-            if (downloadDeck == null || !IsDeckValid(downloadDeck)) { return; }
+            if (!IsDeckValid(downloadDeck)) { return; }
 
             // Create Deck Info Object
-            var jsonDeckInfo = new JsonDeckInfo 
+            var jsonDeckInfo = new JsonDeckInfo
             {
                 name = downloadDeck.name,
                 category = (int)(DeckInfo.DeckCategory)System.Enum.Parse(typeof(DeckInfo.DeckCategory), downloadDeck.category),
@@ -151,21 +153,7 @@ namespace Karuta
             jsonDeckInfoList.deckInfoList.Add(jsonDeckInfo);
 
             // Create Cards Object
-            JsonCards jsonCards = new ()
-            {
-                cards = new List<JsonCard>()
-            };
-            foreach (DownloadCard downloadCard in downloadDeck.cards)
-            {
-                var jsonCard = new JsonCard
-                {
-                    anime = downloadCard.anime,
-                    type = downloadCard.type,
-                    visual = downloadCard.visual,
-                    sound = downloadCard.sound
-                };
-                jsonCards.cards.Add(jsonCard);
-            }
+            JsonCards jsonCards = new() { cards = downloadDeck.cards };
 
             // Save Cards List
             if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category)))
@@ -177,7 +165,7 @@ namespace Karuta
         }
 
         // Check if deck is valid (do not check the number of cards)
-        private bool IsDeckValid(DownloadDeck downloadDeck)
+        private bool IsDeckValid(JsonDeck downloadDeck)
         {
             // Check Deck Information
             if (downloadDeck.name == null || downloadDeck.category == null || downloadDeck.type == null || downloadDeck.cover == null && downloadDeck.cards == null) // All attributes are not null
@@ -185,12 +173,12 @@ namespace Karuta
                 Debug.Log(string.Format("Deck {0} has null attributes: category: {1}; type: {2}; cover {3}", downloadDeck.name, downloadDeck.category, downloadDeck.type, downloadDeck.cover));
                 return false;
             }
-            if (!IsEnumValue<DeckInfo.DeckCategory>(downloadDeck.category)) // Category
+            if (!IsEnumValue<DeckInfo.DeckCategory>(downloadDeck.category) || downloadDeck.category == DeckInfo.DeckCategory.CATEGORY_NB.ToString()) // Category
             {
                 Debug.Log(string.Format("Deck {0} category do not match Enum: {1}", downloadDeck.name, downloadDeck.category));
                 return false; 
-            } 
-            if (!IsEnumValue<DeckInfo.DeckType>(downloadDeck.type)) // Type
+            }
+            if (!IsEnumValue<DeckInfo.DeckType>(downloadDeck.type) || downloadDeck.type == DeckInfo.DeckType.TYPE_NB.ToString()) // Type
             {
                 Debug.Log(string.Format("Deck {0} type do not match Enum: {1}", downloadDeck.name, downloadDeck.type));
                 return false; 
@@ -202,7 +190,7 @@ namespace Karuta
             }
 
             // Check Cards Information
-            foreach(DownloadCard downloadCard in downloadDeck.cards)
+            foreach(JsonCard downloadCard in downloadDeck.cards)
             {
                 if (downloadCard.anime == null || downloadCard.type == null || downloadCard.visual == null) 
                 {
@@ -234,9 +222,9 @@ namespace Karuta
         }
 
         // Check if the decks cards are already downloaded in the system
-        private bool IsDeckAlreadyDownloaded(List<DownloadCard> downloadCards)
+        private bool IsDeckAlreadyDownloaded(List<JsonCard> downloadCards)
         {
-            foreach (DownloadCard downloadCard in downloadCards)
+            foreach (JsonCard downloadCard in downloadCards)
             {
                 if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".png"))
                     && !Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".jpg")))
@@ -256,115 +244,119 @@ namespace Karuta
         }
         #endregion Update Deck list
 
-        // Download Deck Content
+
+
+        /* ======================================== Download Deck Content ======================================== */
+
         #region Download Deck
+
+        #region Toggles Gestion
+        // Create all the Download toggles
         private void CreateDownloadToggles()
         {
             foreach (DeckInfo deck in gameManager.GetDeckList())
             {
-                Debug.Log(deck.Dump());
-                CreateDownloadToggle(deck.GetName());
+                Debug.Log("Download : " + deck.Dump());
+                if (!deck.IsDownloaded())
+                {
+                    CreateDownloadToggle(deck.GetName());
+                }
             }
             HideShowDeckDownloadToggles();
         }
 
+        // Create a Download Toggle
         private void CreateDownloadToggle(string deckName)
         {
             DeckDownloadToggle deckDownloadToggle = GameObject.Instantiate(deckDownloadTogglePrefab, Vector3.zero, Quaternion.identity);
-            //RectTransform toggleTransform = deckDownloadToggle.GetComponent<RectTransform>();
 
             deckDownloadToggle.transform.SetParent(deckTogglesParent); // setting parent
-
-            // To add a custom size
-            //toggleTransform.sizeDelta = new Vector2(toggleSize, toggleSize);
-            //toggleTransform.localScale = new Vector2(1, 1);
 
             // Set Toggle
             deckDownloadToggle.SetDeckName(deckName);
             deckDownloadToggle.SetIsOnWithoutNotify(false);
 
+            deckDownloadToggle.ChangeToggleValue.AddListener(CheckIfAllToggleSelectioned);
+
             deckToggles.Add(deckDownloadToggle);
         }
 
+        // Refresh the download toggles Download toggles
+        private void RefreshDeckDownloadToggles()
+        {
+            foreach (DeckDownloadToggle deckDownloadToggle in deckToggles)
+            {
+                GameObject.Destroy(deckDownloadToggle.gameObject);
+            }
+            deckToggles.Clear();
+
+            CreateDownloadToggles();
+        }
+
+        // Hide or Show the deck download toggle if the 
         public void HideShowDeckDownloadToggles()
         {
             List<DeckInfo> deckList = gameManager.GetDeckList();
             DeckInfo.DeckCategory currentCategory = gameManager.GetCurrentCategory();
             bool differentCategory = gameManager.GetDifferentCategory();
 
-            Debug.Log("Show / Hide");
             for (int i = 0; i < deckList.Count; i++)
             {
-                deckToggles[i].gameObject.SetActive(!deckList[i].IsDownloaded() && (differentCategory || currentCategory == deckList[i].GetCategory()));
+                deckToggles[i].gameObject.SetActive((differentCategory || currentCategory == deckList[i].GetCategory()));
             }
         }
 
+        // Select all Download toggles
         public void SetAllToggleIsOn()
         {
             bool isOn = selectAllToggle.isOn;
 
             foreach(DeckDownloadToggle deckDownloadToggle in deckToggles)
             {
-                deckDownloadToggle.SetIsOnWithoutNotify(isOn && deckDownloadToggle.gameObject.activeSelf);
+                deckDownloadToggle.SetIsOnWithoutNotify(isOn);
             }
         }
 
-
-        /*
-        private void createButton(float place, int index, Navigation newNav)
+        // Check if alla active toggles are on
+        public void CheckIfAllToggleSelectioned()
         {
-            GameObject purchaseButton = GameObject.Instantiate(purchaseButtonPrefab, Vector3.zero, Quaternion.identity);
-            RectTransform rectTrans = purchaseButton.GetComponent<RectTransform>();
-
-            purchaseButton.transform.SetParent(purchaseUI.transform); // setting parent
-            rectTrans.anchoredPosition = new Vector2(place * (buttonSize + buttonSpacing), 0f); // set position
-
-
-            // To add a custom size (prefab as normally the good size)
-            rectTrans.sizeDelta = new Vector2(buttonBackgroundSize, buttonBackgroundSize);
-            rectTrans.localScale = new Vector2(1, 1);
-            RectTransform rectTransButton = unitImage.gameObject.GetComponent<RectTransform>();
-            rectTransButton.sizeDelta = new Vector2(buttonSize, buttonSize);
-
-            // Add image to the button
-            Texture2D tex = Resources.Load<Texture2D>(((Troup.UnitType)index).ToString());
-
-            Image buttonImage = unitImage.gameObject.GetComponent<Image>();
-            buttonImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-
-            // Add function to the button
-            Button button = purchaseButton.GetComponent<Button>();
-            button.onClick.AddListener(delegate { chooseTroup(index); });
-
-            // Get unit informations
-            GameObject unitInfo = purchaseButton.transform.GetChild(1).gameObject;
-            if (gameManager.getUnitPrefabs()[index - 1] != null)
+            foreach (DeckDownloadToggle deckDownloadToggle in deckToggles)
             {
-                Troup unit = gameManager.getUnitPrefabs()[index - 1].GetComponent<Troup>();
-                unitInfo.GetComponent<UnitInfo>().completeValues(unit.getCost(), unit.getHealth(),
-                                                                 unit.getArmor(), unit.getSpeed(),
-                                                                 unit.getAttack(), unit.getAttackSpeed(),
-                                                                 unit.getAttackRange(), unit.getAbilityRecharge());
+                if (!deckDownloadToggle.IsOn() && deckDownloadToggle.gameObject.activeSelf) {
+                    
+                    selectAllToggle.SetIsOnWithoutNotify(false);
+
+                    return; }
             }
-            unitInfo.SetActive(false);
+            selectAllToggle.SetIsOnWithoutNotify(true);
+        }
+        #endregion Toggles Gestion
 
-            // Add event to the button
-            EventTrigger eventTrigger = purchaseButton.GetComponent<EventTrigger>();
+        #region Download
+        // Download the files of the decks selectionned
+        public void DownloadSelectioned()
+        {
+            List<DeckInfo> deckList = gameManager.GetDeckList();
+            StringBuilder dump = new();
 
-            EventTrigger.Entry enterEntry = new EventTrigger.Entry();
-            enterEntry.eventID = EventTriggerType.PointerEnter;
-            enterEntry.callback.AddListener((eventData) => { unitInfo.SetActive(true); });
-            eventTrigger.triggers.Add(enterEntry);
+            for (int i = 0; i < deckToggles.Count; i++)
+            {
+                if (deckToggles[i].IsOn() && deckToggles[i].gameObject.activeSelf)
+                {
+                    dump.Append(deckList[i].name + "; ");
+                }
+            }
 
-            EventTrigger.Entry exitEntry = new EventTrigger.Entry();
-            exitEntry.eventID = EventTriggerType.PointerExit;
-            exitEntry.callback.AddListener((eventData) => { unitInfo.SetActive(false); });
-            eventTrigger.triggers.Add(exitEntry);
+            // TODO : Download decks
 
-            //Assign the new navigation to the button
-            button.navigation = newNav;
-        }*/
+            Debug.Log(dump.ToString());
+        }
+        #endregion Download
+
         #endregion Download Deck
+
+
+
 
         public void TestAdd()
         {

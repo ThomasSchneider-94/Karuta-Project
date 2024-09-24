@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using TMPro;
-using UnityEditor;
 using UnityEngine;
+using Karuta.ScriptableObjects;
+using static Karuta.ScriptableObjects.JsonObjects;
+using UnityEngine.Events;
 
 namespace Karuta
 {
@@ -12,21 +13,19 @@ namespace Karuta
     {
         public static GameManager Instance { get; private set; }
 
-        [Header("Download Manager")]
-        [SerializeField] private DownloadManager downloadManager;
-
         [Header("Options")]
         [SerializeField] private bool autoPlay = true;
         [SerializeField] private bool playPause = true;
         [SerializeField] private bool hideAnswer = false;
         [SerializeField] private bool allowMirrorMatch = false;
         [SerializeField] private bool allowDifferentCategory = false;
-        [SerializeField] private DeckInfo.DeckCategory currentCategory = DeckInfo.DeckCategory.Karuta;
+        [SerializeField] private DeckInfo.DeckCategory currentCategory = DeckInfo.DeckCategory.KARUTA;
 
         [Header("Default Sprite")]
         [SerializeField] private Sprite defaultSprite;
 
         private readonly List<DeckInfo> deckInfoList = new ();
+        public UnityEvent ChangeCategory { get; } = new UnityEvent();
 
         public void OnEnable()
         {
@@ -40,70 +39,9 @@ namespace Karuta
                 Destroy(gameObject); // Détruisez les doublons
             }
             DontDestroyOnLoad(gameObject);
-        }
 
-        public void Start()
-        {
             LoadDecksInformations();
         }
-
-        #region Set / Get Options
-        public void SetAutoPlay(bool autoPlay)
-        {
-            this.autoPlay = autoPlay;
-        }
-        public bool GetAutoPlay()
-        {
-            return autoPlay;
-        }
-        public void SetPlayPause(bool playPause)
-        {
-            this.playPause = playPause;
-        }
-        public bool GetPlayPause()
-        {
-            return playPause;
-        }
-        public void SetHideAnswer(bool hideAnswer)
-        {
-            this.hideAnswer = hideAnswer;
-        }
-        public bool GetHideAnswer()
-        {
-            return hideAnswer;
-        }
-        public void SetMirrorMatches(bool allowMirrorMatch)
-        {
-            this.allowMirrorMatch = allowMirrorMatch;
-        }
-        public bool GetMirrorMatches()
-        {
-            return allowMirrorMatch;
-        }
-        public void SetDifferentCategory(bool differentCategory)
-        {
-            this.allowDifferentCategory = differentCategory;
-            downloadManager.HideShowDeckDownloadToggles();
-        }
-        public bool GetDifferentCategory()
-        {
-            return allowDifferentCategory;
-        }
-        public void SetCurrentCategory(DeckInfo.DeckCategory category)
-        {
-            this.currentCategory = category;
-            downloadManager.HideShowDeckDownloadToggles();
-        }
-        public void NextCurrentCategory()
-        {
-            this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
-            downloadManager.HideShowDeckDownloadToggles();
-        }
-        public DeckInfo.DeckCategory GetCurrentCategory()
-        {
-            return currentCategory;
-        }
-        #endregion Set / Get  Options
 
         #region Deck List
         private void LoadDecksInformations()
@@ -117,7 +55,9 @@ namespace Karuta
                 // Lire le contenu du fichier
                 foreach (JsonDeckInfo jsonDeckInfo in JsonUtility.FromJson<JsonDeckInfoList>(File.ReadAllText(filePath)).deckInfoList)
                 {
-                    deckInfoList.Add(new DeckInfo(jsonDeckInfo));
+                    DeckInfo deckInfo = ScriptableObject.CreateInstance<DeckInfo>();
+                    deckInfo.Init(jsonDeckInfo);
+                    deckInfoList.Add(deckInfo);
                 }
             }
             Debug.Log(Dump());
@@ -147,6 +87,70 @@ namespace Karuta
         }
         #endregion Deck List
 
+        #region Options
+
+        #region Setter
+        public void SetAutoPlay(bool autoPlay)
+        {
+            this.autoPlay = autoPlay;
+        }
+        public void SetPlayPause(bool playPause)
+        {
+            this.playPause = playPause;
+        }
+        public void SetHideAnswer(bool hideAnswer)
+        {
+            this.hideAnswer = hideAnswer;
+        }
+        public void SetMirrorMatches(bool allowMirrorMatch)
+        {
+            this.allowMirrorMatch = allowMirrorMatch;
+        }
+        public void SetDifferentCategory(bool differentCategory)
+        {
+            this.allowDifferentCategory = differentCategory;
+            ChangeCategory.Invoke();
+        }
+        public void SetCurrentCategory(DeckInfo.DeckCategory category)
+        {
+            this.currentCategory = category;
+            ChangeCategory.Invoke();
+        }
+        public void NextCurrentCategory()
+        {
+            this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
+            ChangeCategory.Invoke();
+        }
+        #endregion Setter
+
+        #region Getter
+        public bool GetAutoPlay()
+        {
+            return autoPlay;
+        }
+        public bool GetPlayPause()
+        {
+            return playPause;
+        }
+        public bool GetHideAnswer()
+        {
+            return hideAnswer;
+        }
+        public bool GetMirrorMatches()
+        {
+            return allowMirrorMatch;
+        }
+        public bool GetDifferentCategory()
+        {
+            return allowDifferentCategory;
+        }
+        public DeckInfo.DeckCategory GetCurrentCategory()
+        {
+            return currentCategory;
+        }
+        #endregion Getter
+
+        #endregion Options
         public Sprite LoadSprite(string folder, string fileName)
         {
             string filePath;

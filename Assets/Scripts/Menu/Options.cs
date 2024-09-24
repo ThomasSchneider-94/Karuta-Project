@@ -1,11 +1,9 @@
-using Karuta;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using Karuta.ScriptableObjects;
+using Karuta.UIComponent;
 
-namespace Karuta
+namespace Karuta.Menu
 {
     public class Options : MonoBehaviour
     {
@@ -19,14 +17,14 @@ namespace Karuta
         [SerializeField] private Toggle allowDifferentCategoriesToggle;
 
         [Header("Deck Category")]
-        [SerializeField] private Image categoryIcon;
-        [SerializeField] private Image categoryButtonBackground;
-        [SerializeField] private Sprite karutoIcon;
-        [SerializeField] private Sprite karutaIcon;
+        [SerializeField] private ThreeLayerButton[] categoryButtons;
+        [SerializeField] private Sprite[] categorySprites;
 
         // Start is called before the first frame update
         void Start()
         {
+            if (categorySprites.Length < (int)DeckInfo.DeckCategory.CATEGORY_NB) { Debug.LogError("Not enought Category Sprite"); }
+
             gameManager = GameManager.Instance;
             InitializeOptions();
         }
@@ -77,18 +75,11 @@ namespace Karuta
         }
         private void UpdateCategoryIcon()
         {
-            categoryButtonBackground.gameObject.SetActive(!gameManager.GetDifferentCategory());
-            switch (gameManager.GetCurrentCategory())
+            foreach (ThreeLayerButton categoryButton in categoryButtons)
             {
-                case DeckInfo.DeckCategory.Karuta:
-                    categoryIcon.sprite = karutaIcon;
-                    break;
-                case DeckInfo.DeckCategory.Karuto:
-                    categoryIcon.sprite = karutoIcon;
-                    break;
-                default:
-                    break;
-            }
+                categoryButton.gameObject.SetActive(!gameManager.GetDifferentCategory());
+                categoryButton.SetIconSprite(categorySprites[(int)gameManager.GetCurrentCategory()]);
+            }            
         }
         #endregion Decks Category
     }

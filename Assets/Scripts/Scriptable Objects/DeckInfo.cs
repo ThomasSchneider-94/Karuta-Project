@@ -6,45 +6,29 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Device;
 
-namespace Karuta {
-
-    #region Json Decks
-    [Serializable]
-    public class JsonDeckInfo
-    {
-        public string name;
-        public int category;
-        public int type;
-        public string cover;
-        public bool isDownloaded;
-    }
-
-    [Serializable]
-    public class JsonDeckInfoList
-    {
-        public List<JsonDeckInfo> deckInfoList;
-    }
-    #endregion Json Decks
-
+namespace Karuta.ScriptableObjects
+{
     public class DeckInfo : ScriptableObject
     {
         public enum DeckCategory
         {
-            Karuta,
-            Karuto,
+            KARUTA,
+            KARUTO,
             CATEGORY_NB
         }
         public enum DeckType
         {
-            Casual,
-            Normal
+            CASUAL,
+            NORMAL,
+            FREESTYLE,
+            TYPE_NB
         }
 
-        private readonly string deckName;
-        private readonly DeckInfo.DeckCategory category;
-        private readonly DeckInfo.DeckType type;
-        private readonly Sprite cover;
-        private readonly bool isDownloaded;
+        private string deckName;
+        private DeckInfo.DeckCategory category;
+        private DeckInfo.DeckType type;
+        private Sprite cover;
+        private bool isDownloaded;
 
         #region Construtors
         public DeckInfo(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, bool isDownloaded)
@@ -56,7 +40,25 @@ namespace Karuta {
             this.isDownloaded = isDownloaded;
         }
 
-        public DeckInfo(JsonDeckInfo jsonDeckInfo)
+        public DeckInfo(JsonObjects.JsonDeckInfo jsonDeckInfo)
+        {
+            this.deckName = jsonDeckInfo.name;
+            this.category = (DeckCategory)jsonDeckInfo.category;
+            this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
+            this.cover = GameManager.Instance.LoadSprite("Covers", jsonDeckInfo.cover);
+            this.isDownloaded = jsonDeckInfo.isDownloaded;
+        }
+
+        public void Init(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, bool isDownloaded)
+        {
+            this.deckName = name;
+            this.category = category;
+            this.type = type;
+            this.cover = cover;
+            this.isDownloaded = isDownloaded;
+        }
+
+        public void Init(JsonObjects.JsonDeckInfo jsonDeckInfo)
         {
             this.deckName = jsonDeckInfo.name;
             this.category = (DeckCategory)jsonDeckInfo.category;

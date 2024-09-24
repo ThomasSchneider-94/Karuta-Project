@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Runtime.InteropServices;
 
-namespace Katuta
+namespace Karuta.UIComponent
 {
     public class VolumeSlider : MonoBehaviour
     {
@@ -24,7 +24,6 @@ namespace Katuta
         [SerializeField] private TextMeshProUGUI volumeValueText;
         [SerializeField] private Image volumeIcon;
         
-        // Start is called before the first frame update
         void Start()
         {
             soundManager = SoundManager.Instance;
@@ -39,6 +38,7 @@ namespace Katuta
             UpdateSoundIcon();
         }
 
+        // Set the sound icon to its corresponding value
         private void UpdateSoundIcon()
         {
             if (soundManager.IsGeneralVolumeOn())
