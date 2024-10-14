@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using TMPro;
 using UnityEngine;
@@ -71,6 +72,38 @@ namespace Karuta.ScriptableObjects
         public string Dump()
         {
             return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", deckName, category.ToString(), type.ToString(), cover.name, isDownloaded);
+        }
+
+        /// <summary>
+        /// Return if the deck is greater than the given deck argument
+        /// </summary>
+        /// <param name="deck"></param>
+        /// <returns></returns>
+        public bool IsGreaterThan(DeckInfo deck)
+        {
+            if ((int)category < (int)deck.category)
+            {
+                return false;
+            }
+            else if ((int)category > (int)deck.category)
+            {
+                return true;
+            }
+            else
+            {
+                if ((int)type < (int)deck.type)
+                {
+                    return false;
+                }
+                else if ((int)type > (int)deck.type)
+                {
+                    return true;
+                }
+                else
+                {
+                    return String.Compare(deckName, deck.deckName) > 0;
+                }
+            }
         }
 
         #region Getter

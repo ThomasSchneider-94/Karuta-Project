@@ -20,10 +20,10 @@ namespace Karuta.Menu
         [Header("Decks Download")]
         [SerializeField] private Toggle selectAllToggle;
         [SerializeField] private DeckDownloadToggle deckDownloadTogglePrefab;
-        [SerializeField] private Transform deckTogglesParent;
+        [SerializeField] private VerticalLayoutGroup deckTogglesParent;
         [SerializeField] private float toggleSize;
         [SerializeField] private float toggleSpace;
-        private List<DeckDownloadToggle> deckToggles;
+        private readonly List<DeckDownloadToggle> deckToggles = new ();
 
         /* TODO :
          *      - Download deck information
@@ -35,24 +35,26 @@ namespace Karuta.Menu
         private string[] visualFiles;
         private string[] soundFiles;
 
-        public void Start()
+        private void Awake()
         {
             gameManager = GameManager.Instance;
-            gameManager.ChangeCategory.AddListener(HideShowDeckDownloadToggles);
+
+            // GameManager Events
+            gameManager.UpdateCategoryEvent.AddListener(HideNonUsedToggles);
+            gameManager.UpdateDeckListEvent.AddListener(UpdateDeckDownloadToggles);
+            Debug.Log("Dowload Subscription");
 
             jsonDeckInfoList = new JsonObjects.JsonDeckInfoList
             {
                 deckInfoList = new List<JsonDeckInfo>()
             };
-            deckToggles = new List<DeckDownloadToggle>();
 
             selectAllToggle.SetIsOnWithoutNotify(false);
 
             InitDirectories();
-            CreateDownloadToggles();
         }
 
-        private void InitDirectories()
+        private static void InitDirectories()
         {
             if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Decks")))
             {
@@ -79,18 +81,22 @@ namespace Karuta.Menu
         /* ======================================== UPDATE THE DECK LIST ======================================== */
 
         #region Update Deck list
-        // Download the deck list and update the local one
+        /// <summary>
+        /// Download the deck list and update the local one
+        /// </summary>
         public void UpdateDeckList()
         {
             List<TextAsset> textAssets = DownloadDeckList();
 
             SaveDecks(textAssets);
 
-            gameManager.RefreshDeckList();
-            RefreshDeckDownloadToggles();
+            gameManager.UpdateDeckList();
         }
 
-        // Download the deck list
+        /// <summary>
+        /// Download the deck list
+        /// </summary>
+        /// <returns></returns>
         private List<TextAsset> DownloadDeckList()
         {
 
@@ -111,7 +117,10 @@ namespace Karuta.Menu
             return new List<TextAsset>() { testDeck };
         }
 
-        // Save a deck list into the persistant files
+        /// <summary>
+        /// Save a deck list into the persistant files
+        /// </summary>
+        /// <param name="textAssets"></param>
         private void SaveDecks(List<TextAsset> textAssets)
         {
             jsonDeckInfoList.deckInfoList.Clear();
@@ -126,7 +135,10 @@ namespace Karuta.Menu
             File.WriteAllText(Path.Combine(Application.persistentDataPath, "DecksInfo.json"), JsonUtility.ToJson(jsonDeckInfoList));
         }
 
-        // Save a deck into the persistant files
+        /// <summary>
+        /// Save a deck into the persistant files
+        /// </summary>
+        /// <param name="textDeck"></param>
         private void SaveDeck(TextAsset textDeck)
         {
             JsonDeck downloadDeck = JsonUtility.FromJson<JsonDeck>(textDeck.text);
@@ -164,28 +176,32 @@ namespace Karuta.Menu
             File.WriteAllText(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category, downloadDeck.name + ".json"), JsonUtility.ToJson(jsonCards));
         }
 
-        // Check if deck is valid (do not check the number of cards)
+        /// <summary>
+        /// Check if deck is valid (do not check the number of cards)
+        /// </summary>
+        /// <param name="downloadDeck"></param>
+        /// <returns></returns>
         private bool IsDeckValid(JsonDeck downloadDeck)
         {
             // Check Deck Information
             if (downloadDeck.name == null || downloadDeck.category == null || downloadDeck.type == null || downloadDeck.cover == null && downloadDeck.cards == null) // All attributes are not null
             {
-                Debug.Log(string.Format("Deck {0} has null attributes: category: {1}; type: {2}; cover {3}", downloadDeck.name, downloadDeck.category, downloadDeck.type, downloadDeck.cover));
+                Debug.Log("D_ " + string.Format("Deck {0} has null attributes: category: {1}; type: {2}; cover {3}", downloadDeck.name, downloadDeck.category, downloadDeck.type, downloadDeck.cover));
                 return false;
             }
             if (!IsEnumValue<DeckInfo.DeckCategory>(downloadDeck.category) || downloadDeck.category == DeckInfo.DeckCategory.CATEGORY_NB.ToString()) // Category
             {
-                Debug.Log(string.Format("Deck {0} category do not match Enum: {1}", downloadDeck.name, downloadDeck.category));
+                Debug.Log("D_ " + string.Format("Deck {0} category do not match Enum: {1}", downloadDeck.name, downloadDeck.category));
                 return false; 
             }
             if (!IsEnumValue<DeckInfo.DeckType>(downloadDeck.type) || downloadDeck.type == DeckInfo.DeckType.TYPE_NB.ToString()) // Type
             {
-                Debug.Log(string.Format("Deck {0} type do not match Enum: {1}", downloadDeck.name, downloadDeck.type));
+                Debug.Log("D_ " + string.Format("Deck {0} type do not match Enum: {1}", downloadDeck.name, downloadDeck.type));
                 return false; 
             } 
             if (DeckAlreadyExist(downloadDeck.name, (int)(DeckInfo.DeckCategory)System.Enum.Parse(typeof(DeckInfo.DeckCategory), downloadDeck.category))) // Name does not already exist
             {
-                Debug.Log(string.Format("Deck {0} already exist", downloadDeck.name));
+                Debug.Log("D_ " + string.Format("Deck {0} already exist", downloadDeck.name));
                 return false; 
             }
 
@@ -194,7 +210,7 @@ namespace Karuta.Menu
             {
                 if (downloadCard.anime == null || downloadCard.type == null || downloadCard.visual == null) 
                 {
-                    Debug.Log(string.Format("Card {0} of deck {1} has null attributes: type: {2}; visual {3}", downloadCard.anime, downloadDeck.name, downloadCard.type, downloadCard.visual));
+                    Debug.Log("D_ " + string.Format("Card {0} of deck {1} has null attributes: type: {2}; visual {3}", downloadCard.anime, downloadDeck.name, downloadCard.type, downloadCard.visual));
                     return false; 
                 }
             }
@@ -202,12 +218,23 @@ namespace Karuta.Menu
             return true;
         }
 
-        public bool IsEnumValue<T>(string value) where T : struct
+        /// <summary>
+        /// Check if the string is part of a given Enum
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool IsEnumValue<T>(string value) where T : struct
         {
             return Enum.IsDefined(typeof(T), value);
         }
 
-        // Check if the deck does not already exist in the decks previously saved
+        /// <summary>
+        /// Check if the deck does not already exist in the decks previously saved
+        /// </summary>
+        /// <param name="deckName"></param>
+        /// <param name="deckCategory"></param>
+        /// <returns></returns>
         private bool DeckAlreadyExist(string deckName, int deckCategory) 
         {
             foreach (JsonDeckInfo deckInfo in jsonDeckInfoList.deckInfoList)
@@ -221,7 +248,11 @@ namespace Karuta.Menu
             return false;
         }
 
-        // Check if the decks cards are already downloaded in the system
+        /// <summary>
+        /// Check if the decks cards are already downloaded in the system
+        /// </summary>
+        /// <param name="downloadCards"></param>
+        /// <returns></returns>
         private bool IsDeckAlreadyDownloaded(List<JsonCard> downloadCards)
         {
             foreach (JsonCard downloadCard in downloadCards)
@@ -229,14 +260,14 @@ namespace Karuta.Menu
                 if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".png"))
                     && !Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".jpg")))
                 {
-                    Debug.Log("Visual " + downloadCard.visual + " for " + downloadCard.anime + " does not exist");
+                    Debug.Log("D_ Visual " + downloadCard.visual + " for " + downloadCard.anime + " does not exist");
                     return false;
                 }
 
                 if (!Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCard.sound + ".mp3"))
                     && !Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCard.sound + ".wav")))
                 {
-                    Debug.Log("Sound for " + downloadCard.anime + " does not exist");
+                    Debug.Log("D_ Sound for " + downloadCard.anime + " does not exist");
                     return false;
                 }
             }
@@ -244,46 +275,18 @@ namespace Karuta.Menu
         }
         #endregion Update Deck list
 
-
-
         /* ======================================== Download Deck Content ======================================== */
 
         #region Download Deck
 
-        #region Toggles Gestion
-        // Create all the Download toggles
-        private void CreateDownloadToggles()
+        #region Toggles Creation
+        /// <summary>
+        /// Update the decks download toggles
+        /// </summary>
+        private void UpdateDeckDownloadToggles()
         {
-            foreach (DeckInfo deck in gameManager.GetDeckList())
-            {
-                Debug.Log("Download : " + deck.Dump());
-                if (!deck.IsDownloaded())
-                {
-                    CreateDownloadToggle(deck.GetName());
-                }
-            }
-            HideShowDeckDownloadToggles();
-        }
+            //Debug.Log("!D Update Deck Toggles")
 
-        // Create a Download Toggle
-        private void CreateDownloadToggle(string deckName)
-        {
-            DeckDownloadToggle deckDownloadToggle = GameObject.Instantiate(deckDownloadTogglePrefab, Vector3.zero, Quaternion.identity);
-
-            deckDownloadToggle.transform.SetParent(deckTogglesParent); // setting parent
-
-            // Set Toggle
-            deckDownloadToggle.SetDeckName(deckName);
-            deckDownloadToggle.SetIsOnWithoutNotify(false);
-
-            deckDownloadToggle.ChangeToggleValue.AddListener(CheckIfAllToggleSelectioned);
-
-            deckToggles.Add(deckDownloadToggle);
-        }
-
-        // Refresh the download toggles Download toggles
-        private void RefreshDeckDownloadToggles()
-        {
             foreach (DeckDownloadToggle deckDownloadToggle in deckToggles)
             {
                 GameObject.Destroy(deckDownloadToggle.gameObject);
@@ -293,42 +296,94 @@ namespace Karuta.Menu
             CreateDownloadToggles();
         }
 
-        // Hide or Show the deck download toggle if the 
-        public void HideShowDeckDownloadToggles()
+        /// <summary>
+        /// Create all the Download toggles
+        /// </summary>
+        private void CreateDownloadToggles()
+        {
+            //Debug.Log("!D Create Deck Toggles")
+
+            foreach (DeckInfo deck in gameManager.GetDeckList())
+            {
+                CreateDownloadToggle(deck.GetName());
+            }
+            HideNonUsedToggles();
+        }
+
+        /// <summary>
+        /// Create a Download Toggle
+        /// </summary>
+        /// <param name="deckName"></param>
+        private void CreateDownloadToggle(string deckName)
+        {
+            DeckDownloadToggle deckDownloadToggle = GameObject.Instantiate(deckDownloadTogglePrefab);
+
+            deckDownloadToggle.transform.SetParent(deckTogglesParent.transform); // setting parent
+
+            // Set Toggle Values
+            deckDownloadToggle.SetDeckName(deckName);
+            deckDownloadToggle.SetIsOnWithoutNotify(false);
+
+            deckDownloadToggle.ChangeToggleValue.AddListener(CheckIfAllToggleSelectioned);
+
+            deckToggles.Add(deckDownloadToggle);
+        }
+        #endregion Toggles Creation
+
+        #region Toggles Gestion
+        /// <summary>
+        /// Hide or Show the deck download toggle. Hide if the deck is already downloaded or its category is not the current one
+        /// </summary>
+        private void HideNonUsedToggles()
         {
             List<DeckInfo> deckList = gameManager.GetDeckList();
-            DeckInfo.DeckCategory currentCategory = gameManager.GetCurrentCategory();
-            bool differentCategory = gameManager.GetDifferentCategory();
 
             for (int i = 0; i < deckList.Count; i++)
             {
-                deckToggles[i].gameObject.SetActive((differentCategory || currentCategory == deckList[i].GetCategory()));
+                if (!deckList[i].IsDownloaded() && gameManager.IsCategoryActive(deckList[i].GetCategory()))
+                {
+                    deckToggles[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    deckToggles[i].gameObject.SetActive(false);
+                    deckToggles[i].SetIsOnWithoutNotify(false);
+                }
             }
+            CheckIfAllToggleSelectioned();
         }
 
-        // Select all Download toggles
+        /// <summary>
+        /// Check if all active toggles are on
+        /// </summary>
+        public void CheckIfAllToggleSelectioned()
+        {
+            foreach (DeckDownloadToggle deckDownloadToggle in deckToggles)
+            {
+                if (!deckDownloadToggle.IsOn() && deckDownloadToggle.gameObject.activeSelf)
+                {
+
+                    selectAllToggle.SetIsOnWithoutNotify(false);
+                    return;
+                }
+            }
+            selectAllToggle.SetIsOnWithoutNotify(true);
+        }
+
+        /// <summary>
+        /// Set all the active toggles to the value of the SelectAll toggle
+        /// </summary>
         public void SetAllToggleIsOn()
         {
             bool isOn = selectAllToggle.isOn;
 
             foreach(DeckDownloadToggle deckDownloadToggle in deckToggles)
             {
-                deckDownloadToggle.SetIsOnWithoutNotify(isOn);
+                if (deckDownloadToggle.gameObject.activeSelf)
+                {
+                    deckDownloadToggle.SetIsOnWithoutNotify(isOn);
+                }
             }
-        }
-
-        // Check if alla active toggles are on
-        public void CheckIfAllToggleSelectioned()
-        {
-            foreach (DeckDownloadToggle deckDownloadToggle in deckToggles)
-            {
-                if (!deckDownloadToggle.IsOn() && deckDownloadToggle.gameObject.activeSelf) {
-                    
-                    selectAllToggle.SetIsOnWithoutNotify(false);
-
-                    return; }
-            }
-            selectAllToggle.SetIsOnWithoutNotify(true);
         }
         #endregion Toggles Gestion
 
@@ -349,7 +404,7 @@ namespace Karuta.Menu
 
             // TODO : Download decks
 
-            Debug.Log(dump.ToString());
+            Debug.Log("D_ " + dump.ToString());
         }
         #endregion Download
 
@@ -361,7 +416,7 @@ namespace Karuta.Menu
         public void TestAdd()
         {
             SaveDecks(new List<TextAsset>() { testDeck });
-            gameManager.RefreshDeckList();
+            gameManager.UpdateDeckList();
         }
     }
 }

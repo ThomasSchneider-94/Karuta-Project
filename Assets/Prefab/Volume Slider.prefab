@@ -265,12 +265,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c1dfecbc9625b94e95bf723fb39145c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lowVolume: {fileID: 1435821816, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
-  mediumVolume: {fileID: -1590405745, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
-  highVolume: {fileID: -122259568, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
-  noVolume: {fileID: -1517767756, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
+  lowVolume: {fileID: -1338388781, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
+  mediumVolume: {fileID: -482256126, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
+  highVolume: {fileID: -332133251, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
+  noVolume: {fileID: 657876725, guid: 583ddc4c2f86bd74182dce586a203361, type: 3}
   volumeSlider: {fileID: 6047040382590409371}
-  volumeValueText: {fileID: 6284269029633109943}
+  volumeValueTextMesh: {fileID: 6284269029633109943}
   volumeIcon: {fileID: 7008942642663727366}
 --- !u!1 &3567630280037998894
 GameObject:

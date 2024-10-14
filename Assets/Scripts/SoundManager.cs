@@ -10,7 +10,7 @@ namespace Karuta
         public static SoundManager Instance { get; private set; }
 
         [Header("General Volume")]
-        [SerializeField] AudioMixer mixer;
+        [SerializeField] private AudioMixer mixer;
         [SerializeField] float generalVolume = 0.5f;
         [SerializeField] bool isGeneralOn = true;
 

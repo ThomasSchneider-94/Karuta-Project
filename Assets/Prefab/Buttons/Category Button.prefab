@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5151722921721143390}
-  - component: {fileID: 241031850464150835}
+  - component: {fileID: 5024538749939032196}
   - component: {fileID: 5904257385852864383}
   - component: {fileID: 3687473762516325266}
   - component: {fileID: 5038821737185942801}
@@ -40,7 +40,7 @@ RectTransform:
   m_AnchoredPosition: {x: -90, y: -90}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &241031850464150835
+--- !u!114 &5024538749939032196
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,20 +49,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 43114838983638397}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc7c33372bf275641be28d64f6243466, type: 3}
+  m_Script: {fileID: 11500000, guid: 5e89f2e60309e0941b11ce198079dc1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buttonImageSprite: {fileID: 21300000, guid: c1fd93e3cb62588419c598926ec016b8, type: 3}
-  iconBackgoundSprite: {fileID: 21300000, guid: c1fd93e3cb62588419c598926ec016b8, type: 3}
-  iconSprite: {fileID: 21300000, guid: 7ccb54a184ca5fa459595be4bd5429a8, type: 3}
-  buttonImageColor: {r: 0.06666667, g: 0.07058824, b: 0.9921569, a: 1}
-  iconBackgroundColor: {r: 0, g: 0.78090096, b: 1, a: 1}
-  iconColor: {r: 1, g: 1, b: 1, a: 1}
-  iconBackgroundScale: {x: 0.9, y: 0.9}
-  iconScale: {x: 1, y: 1}
-  buttonImage: {fileID: 5038821737185942801}
-  iconBackground: {fileID: 4701060046410007172}
-  icon: {fileID: 2773188267073508263}
+  firstLayerColor: {r: 0.050980397, g: 0.08627451, b: 0.9921569, a: 1}
+  firstLayerSprite: {fileID: 21300000, guid: c1fd93e3cb62588419c598926ec016b8, type: 3}
+  firstLayerImage: {fileID: 5038821737185942801}
+  secondLayerColor: {r: 0, g: 0.7803922, b: 1, a: 1}
+  secondLayerSprite: {fileID: 21300000, guid: c1fd93e3cb62588419c598926ec016b8, type: 3}
+  secondLayerScale: {x: 0.9, y: 0.9}
+  secondLayerImage: {fileID: 4701060046410007172}
+  thirdLayerColor: {r: 1, g: 1, b: 1, a: 1}
+  thirdLayerSprite: {fileID: 21300000, guid: 7ccb54a184ca5fa459595be4bd5429a8, type: 3}
+  thirdLayerScale: {x: 1, y: 1}
+  thirdLayerImage: {fileID: 2773188267073508263}
 --- !u!114 &5904257385852864383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.06666667, g: 0.07058824, b: 0.9921569, a: 1}
+  m_Color: {r: 0.050980397, g: 0.08627451, b: 0.9921569, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -136,7 +136,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: c1fd93e3cb62588419c598926ec016b8, type: 3}
-  m_Type: 1
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.78090096, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.7803922, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

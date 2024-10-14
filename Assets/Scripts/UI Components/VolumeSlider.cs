@@ -21,10 +21,10 @@ namespace Karuta.UIComponent
 
         [Header("Intern Objects")]
         [SerializeField] private Slider volumeSlider;
-        [SerializeField] private TextMeshProUGUI volumeValueText;
+        [SerializeField] private TextMeshProUGUI volumeValueTextMesh;
         [SerializeField] private Image volumeIcon;
         
-        void Start()
+        void Awake()
         {
             soundManager = SoundManager.Instance;
 
@@ -34,7 +34,7 @@ namespace Karuta.UIComponent
         private void InitSlider()
         {
             volumeSlider.SetValueWithoutNotify(soundManager.GetGeneralVolumeValue());
-            volumeValueText.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
+            volumeValueTextMesh.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
             UpdateSoundIcon();
         }
 
@@ -60,7 +60,7 @@ namespace Karuta.UIComponent
         {
             soundManager.SetGeneralVolumeOn(true);
             soundManager.SetVolume(volumeSlider.value);
-            volumeValueText.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
+            volumeValueTextMesh.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
             UpdateSoundIcon();
         }
 

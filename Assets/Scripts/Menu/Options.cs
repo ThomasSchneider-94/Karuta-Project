@@ -68,17 +68,19 @@ namespace Karuta.Menu
             gameManager.SetDifferentCategory(allowDifferentCategoriesToggle.isOn);
             UpdateCategoryIcon();
         }
+
         public void NextCategory()
         {
             gameManager.NextCurrentCategory();
             UpdateCategoryIcon();
         }
+
         private void UpdateCategoryIcon()
         {
             foreach (ThreeLayerButton categoryButton in categoryButtons)
             {
                 categoryButton.gameObject.SetActive(!gameManager.GetDifferentCategory());
-                categoryButton.SetIconSprite(categorySprites[(int)gameManager.GetCurrentCategory()]);
+                categoryButton.SetThirdLayerSprite(categorySprites[(int)gameManager.GetCurrentCategory()]);
             }            
         }
         #endregion Decks Category
