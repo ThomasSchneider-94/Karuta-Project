@@ -6,22 +6,23 @@ using UnityEngine.UI;
 namespace Karuta.UIComponent
 {
     [RequireComponent(typeof(Button))]
-    public class SelectionButton : ThreeLayerButton
+    public class SelectionButton : MultiLayerButton
     {
         [Header("Name")]
         [SerializeField] private TextMeshProUGUI deckNameTextMesh;
         [SerializeField] private string deckName;
         [SerializeField] private float nameSpacing = 20;
 
-        [Header("Mask")]
-        [SerializeField] private Image mask;
+        [Header("Selected Color")]
+        [SerializeField] private bool isSelected = false;
+        [SerializeField] private Color selectedColor;
 
-        [Header("Button")]
-        [SerializeField] private Button button;
-        [SerializeField] private bool isInteractable;
-        [SerializeField] private bool isSelectionned;
+        [Header("Counter")]
+        [SerializeField] private int count;
+        [SerializeField] private Image counterImage;
+        [SerializeField] private TextMeshProUGUI counterTextMesh;
 
-        #region Deck Name
+        #region Setter
         public void SetDeckName(string name)
         {
             deckName = name;
@@ -31,9 +32,11 @@ namespace Karuta.UIComponent
         public void SetNameSpacing(float spacing)
         {
             nameSpacing = spacing;
-            deckNameTextMesh.transform.localPosition = new Vector2(0, -(thirdLayerImage.rectTransform.sizeDelta.y / 2 + spacing));
+            deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + spacing));
         }
+        #endregion Setter
 
+        #region Getter
         public string GetDeckName()
         {
             return deckName;
@@ -43,130 +46,76 @@ namespace Karuta.UIComponent
         {
             return nameSpacing;
         }
-        #endregion Deck Name
+        #endregion Getter
 
-        #region Mask
-        public override void SetSecondLayerSprite(Sprite sprite)
+        #region Selection
+        public void SelectButton()
         {
-            base.SetSecondLayerSprite(sprite);
-            mask.sprite = sprite;
-        }
+            isSelected = true;
+            targetGraphic.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
 
-        public override void SetThirdLayerScale(Vector2 scale)
-        {
-            secondLayerScale = scale;
-            mask.transform.localScale = scale;
-        }
-        #endregion Mask
+            // Counter
+            count++;
+            counterImage.gameObject.SetActive(count > 1);
+            counterTextMesh.text = count.ToString();
 
-        #region Button Interaction
-
-        #region Colors
-        private Color CalculateSecondLayerNonIteractableColor()
-        {
-            return new Color((float)NonInteractableRed(secondLayerColor.r),
-                             (float)NonInteractableGreen(secondLayerColor.g),
-                             (float)NonInteractableBlue(secondLayerColor.b),
-                             1);
-        }
-
-        private Color CalculateThirdLayerNonIteractableColor()
-        {
-            return new Color((float)NonInteractableRed(thirdLayerColor.r),
-                             (float)NonInteractableGreen(thirdLayerColor.g),
-                             (float)NonInteractableBlue(thirdLayerColor.b),
-                             1);
-        }
-
-        /*
-         * To understand the choose for the magic numbers in this section, see the ColorExperiments document
-         */
-
-        /// <summary>
-        /// Gives an approximation of the non interactable red component of the color
-        /// </summary>
-        /// <param name="red"></param>
-        /// <returns></returns>
-        private static double NonInteractableRed(float red)
-        {
-            return (0.5803922 - 0.08627451) * red + 0.08627451;
-        }
-
-        /// <summary>
-        /// Gives an approximation of the non interactable green component of the color
-        /// </summary>
-        /// <param name="green"></param>
-        /// <returns></returns>
-        private static double NonInteractableGreen(float green)
-        {
-            return (0.5921569 - 0.1607843) * green + 0.1607843;
-        }
-
-        /// <summary>
-        /// Gives an approximation of the non interactable blue component of the color
-        /// </summary>
-        /// <param name="blue"></param>
-        /// <returns></returns>
-        private static double NonInteractableBlue(float blue)
-        {
-            return (0.6117647 - 0.2313726) * blue + 0.2313726;
-        }
-        #endregion Colors
-
-        public void SetInteractable(bool interactable)
-        {
-            button.interactable = interactable;
-
-            if (interactable)
+            foreach (ButtonLayer layer in buttonLayers)
             {
-                secondLayerImage.color = secondLayerColor;
-                thirdLayerImage.color = thirdLayerColor;
+                layer.image.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
+            }
+        }
+
+        public void DeselectButton()
+        {
+            isSelected = false;
+            targetGraphic.CrossFadeColor(colors.normalColor * colors.colorMultiplier, 0f, true, true);
+
+            // Counter
+            count = 0;
+            counterImage.gameObject.SetActive(false);
+
+            foreach (ButtonLayer layer in buttonLayers)
+            {
+                layer.image.CrossFadeColor(colors.normalColor * colors.colorMultiplier, 0f, true, true);
+            }
+        }
+
+        public void SetCounter(int count)
+        {
+            this.count = count;
+            counterImage.gameObject.SetActive(count > 1);
+            counterTextMesh.text = count.ToString();
+        }
+        #endregion Selection
+
+        protected override void DoStateTransition(Selectable.SelectionState state, bool instant)
+        {
+            if (isSelected)
+            {
+                targetGraphic.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
+
+                foreach (ButtonLayer layer in buttonLayers)
+                {
+                    layer.image.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
+                }
             }
             else
             {
-                secondLayerImage.color = CalculateSecondLayerNonIteractableColor();
-                thirdLayerImage.color = CalculateThirdLayerNonIteractableColor();
+                base.DoStateTransition(state, instant);
             }
         }
-
-        public bool GetInteractable()
-        {
-            return button.interactable;
-        }
-        #endregion Button Interaction
-
-        #region Button Selection
-        public void SetSelectionned(bool selectionned)
-        {
-            isSelectionned = selectionned;
-            Debug.Log(deckName + " " + selectionned);
-        }
-
-        public bool GetSelectionned()
-        {
-            return isSelectionned;
-        }
-        #endregion Button Selection
-
-        #region Button Function
-
-
-
-
-
-        #endregion Button Function
 
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
 
-            Vector2 size = firstLayerImage.rectTransform.sizeDelta;
-            
-            mask.rectTransform.sizeDelta = size;
-            deckNameTextMesh.rectTransform.sizeDelta = Vector2.Scale(size, new Vector2(1.5f, 0.25f));
-            deckNameTextMesh.rectTransform.localPosition = new Vector2(0, -(size.y / 2 + nameSpacing));
+            deckNameTextMesh.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetGraphic.rectTransform.sizeDelta.x);
+            deckNameTextMesh.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetGraphic.rectTransform.sizeDelta.y * 0.75f);
+
+
+            deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
         }
-        
+
         protected override void OnValidate()
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
@@ -175,7 +124,7 @@ namespace Karuta.UIComponent
 
             SetDeckName(deckName);
             SetNameSpacing(nameSpacing);
-            SetInteractable(isInteractable);
+            SetCounter(count);
         }
     }
 }

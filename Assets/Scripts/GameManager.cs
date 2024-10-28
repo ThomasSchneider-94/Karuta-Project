@@ -6,19 +6,23 @@ using UnityEngine;
 using Karuta.ScriptableObjects;
 using static Karuta.ScriptableObjects.JsonObjects;
 using UnityEngine.Events;
-using System.Linq;
-using Unity.VisualScripting;
-using System.Threading;
 
 namespace Karuta
 {
     public class GameManager : MonoBehaviour
     {
+        /* TODO : 
+         * - Add arrow buttons to UI
+         * - Add the selection for the number of deck
+         * - The download (with loading screen)
+         * - THE GAME
+         */
+
+
         public static GameManager Instance { get; private set; }
 
         [Header("Options")]
         [SerializeField] private bool autoPlay = true;
-        [SerializeField] private bool playPause = true;
         [SerializeField] private bool hideAnswer = false;
         [SerializeField] private bool allowMirrorMatch = false;
         [SerializeField] private bool allowDifferentCategory = false;
@@ -26,9 +30,9 @@ namespace Karuta
 
         [Header("Decks")]
         [Range(0, 4)]
-        [SerializeField] private int chosenDecksNumber = 2;
-        [SerializeField] private List<String> chosenDecksName;
-        private readonly List<DeckInfo> chosenDecks = new ();
+        [SerializeField] private int selectedDecksMax = 2;
+        [SerializeField] private List<String> chosenDecksName = new();
+        private readonly List<int> selectedDecks = new ();
 
         [Header("Default Sprite")]
         [SerializeField] private Sprite defaultSprite;
@@ -43,29 +47,48 @@ namespace Karuta
         private readonly List<DeckInfo> deckInfoList = new ();
         private readonly List<int> decksCount = new((int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB);
 
+        // Events
         public UnityEvent UpdateCategoryEvent { get; } = new UnityEvent();
+        public UnityEvent InitializeDeckListEvent { get; } = new UnityEvent();
         public UnityEvent UpdateDeckListEvent { get; } = new UnityEvent();
+        public UnityEvent UpdateMirorMatchEvent { get; } = new UnityEvent();
 
         public void OnEnable()
         {
-            // Assurez-vous qu'il n'y a qu'une seule instance du GameManager
+            // Be sure that there is only one instance of GameManager
             if (Instance == null)
             {
                 Instance = this;
             }
             else
             {
-                Destroy(gameObject); // Détruisez les doublons
+                Destroy(gameObject); // Destroy if another GameManager exist
             }
             DontDestroyOnLoad(gameObject);
         }
 
         private void Start()
         {
-            UpdateDeckList();
+            InitializeDeckList();
         }
 
-        #region Deck List
+        #region Load Deck List
+        /// <summary>
+        /// Initialize list of deck informations
+        /// </summary>
+        private void InitializeDeckList()
+        {
+            for (int i = 0; i < (int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB; i++)
+            {
+                decksCount.Add(0);
+            }
+
+            LoadDecksInformations();
+
+            Debug.Log("Invoke Initialize Deck list Event");
+            InitializeDeckListEvent.Invoke();
+        }
+
         /// <summary>
         /// Update list of decks information
         /// </summary>
@@ -81,7 +104,7 @@ namespace Karuta
 
             LoadDecksInformations();
 
-            Debug.Log("Invoke Load Event");
+            Debug.Log("Invoke Update Deck list Event");
             UpdateDeckListEvent.Invoke();
         }
 
@@ -158,33 +181,25 @@ namespace Karuta
 
             return dump.ToString();
         }
+        #endregion Load Deck List
 
-        #region Getter
+        #region Deck List Getter
+
+        #region Count
+        /// <summary>
+        /// Get the number of deck of each category / type
+        /// </summary>
+        /// <returns></returns>
         public List<int> GetDecksCount()
         {
             return decksCount;
         }
 
-        public int GetTypeIndex(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
-        {
-            int start = GetCategoryIndex(category);
-            for (int i = 0; i < (int)type; i++)
-            {
-                start += decksCount[(int)category * (int)DeckInfo.DeckType.TYPE_NB + i];
-            }
-            return start;
-        }
-
-        public int GetCategoryIndex(DeckInfo.DeckCategory category)
-        {
-            int start = 0;
-            for (int i = 0; i < (int)category * (int)DeckInfo.DeckType.TYPE_NB; i++)
-            {
-                start += decksCount[i];
-            }
-            return start;
-        }
-
+        /// <summary>
+        /// Get the number of deck of a category
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
         public int GetCategoryCount(DeckInfo.DeckCategory category)
         {
             int totalCount = 0;
@@ -195,14 +210,59 @@ namespace Karuta
             return totalCount;
         }
 
+        /// <summary>
+        /// Get the number of deck of a type
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public int GetTypeCount(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
         {
             return decksCount[(int)category * (int)DeckInfo.DeckType.TYPE_NB + (int)type];
         }
+        #endregion Count
+
+        #region Index
+        /// <summary>
+        /// Get the index of the first deck of the category
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        public int GetCategoryIndex(DeckInfo.DeckCategory category)
+        {
+            int start = 0;
+            for (int i = 0; i < (int)category * (int)DeckInfo.DeckType.TYPE_NB; i++)
+            {
+                start += decksCount[i];
+            }
+            return start;
+        }
+
+        /// <summary>
+        /// Get the index of the first deck of the type
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public int GetTypeIndex(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
+        {
+            int start = GetCategoryIndex(category);
+            for (int i = 0; i < (int)type; i++)
+            {
+                start += decksCount[(int)category * (int)DeckInfo.DeckType.TYPE_NB + i];
+            }
+            return start;
+        }
+        #endregion Index
 
         public List<DeckInfo> GetDeckList()
         {
             return deckInfoList;
+        }
+
+        public DeckInfo GetDeck(int i)
+        {
+            return deckInfoList[i];
         }
 
         public List<DeckInfo> GetCategoryDeckList(DeckInfo.DeckCategory category)
@@ -213,9 +273,7 @@ namespace Karuta
         {
             return deckInfoList.GetRange(GetTypeIndex(category, type), GetTypeCount(category, type));
         }
-        #endregion Getter
-
-        #endregion Deck List
+        #endregion Deck List Getter
 
         #region Options
 
@@ -224,32 +282,45 @@ namespace Karuta
         {
             this.autoPlay = autoPlay;
         }
-        public void SetPlayPause(bool playPause)
-        {
-            this.playPause = playPause;
-        }
+
         public void SetHideAnswer(bool hideAnswer)
         {
             this.hideAnswer = hideAnswer;
         }
+
         public void SetMirrorMatches(bool allowMirrorMatch)
         {
             this.allowMirrorMatch = allowMirrorMatch;
+            UpdateMirorMatchEvent.Invoke();
         }
+
         public void SetDifferentCategory(bool differentCategory)
         {
             this.allowDifferentCategory = differentCategory;
             UpdateCategoryEvent.Invoke();
         }
+
         public void SetCurrentCategory(DeckInfo.DeckCategory category)
         {
             this.currentCategory = category;
             UpdateCategoryEvent.Invoke();
         }
+
         public void NextCurrentCategory()
         {
+            DeckInfo.DeckCategory currentCategoryTmp = this.currentCategory;
+
             this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
-            UpdateCategoryEvent.Invoke();
+            while (this.currentCategory != currentCategoryTmp && GetCategoryCount(this.currentCategory) == 0)
+            {
+                this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
+            }
+
+            if (this.currentCategory != currentCategoryTmp)
+            {
+                UpdateCategoryEvent.Invoke();
+            }
+
         }
         #endregion Setter
 
@@ -258,26 +329,32 @@ namespace Karuta
         {
             return autoPlay;
         }
-        public bool GetPlayPause()
-        {
-            return playPause;
-        }
+
         public bool GetHideAnswer()
         {
             return hideAnswer;
         }
-        public bool GetMirrorMatches()
+
+        public bool AreMirrorMatchesAllowded()
         {
             return allowMirrorMatch;
         }
-        public bool GetDifferentCategory()
+
+        public bool AreDifferentCategoryAllowded()
         {
             return allowDifferentCategory;
         }
+
         public DeckInfo.DeckCategory GetCurrentCategory()
         {
             return currentCategory;
         }
+
+        /// <summary>
+        /// Get if the category is the currently active
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
         public bool IsCategoryActive(DeckInfo.DeckCategory category)
         {
             return allowDifferentCategory || category == currentCategory;
@@ -286,32 +363,35 @@ namespace Karuta
 
         #endregion Options
 
-        #region Chosen Decks
-        public bool IsChosenDecksFull()
+        #region Selected Decks
+        public bool IsSelectedDecksFull()
         {
-            return chosenDecks.Count >= chosenDecksNumber;
+            return selectedDecks.Count >= selectedDecksMax;
         }
 
-        public void AddChosenDeck(DeckInfo deck)
+        public void AddSelectedDeck(int deckIndex)
         {
-            if (chosenDecks.Count < chosenDecksNumber)
+            if (selectedDecks.Count < selectedDecksMax)
             {
-                chosenDecks.Add(deck);
-                chosenDecksName.Add(deck.GetName());
+                selectedDecks.Add(deckIndex);
+                chosenDecksName.Add(deckInfoList[deckIndex].GetName());
             }
         }
 
-        public void RemoveChosenDeck(DeckInfo deck)
+        public void RemoveSelectedDeck(int deckIndex)
         {
-            chosenDecks.Remove(deck);
-            chosenDecksName.Remove(deck.GetName());
+            while (selectedDecks.Contains(deckIndex))
+            {
+                selectedDecks.Remove(deckIndex);
+                chosenDecksName.Remove(deckInfoList[deckIndex].GetName());
+            }
         }
 
-        public List<DeckInfo> GetChosenDecks()
+        public List<int> GetSelectedDecks()
         {
-            return chosenDecks;
+            return selectedDecks;
         }
-        #endregion Chosen Decks
+        #endregion Selected Decks
 
         public Sprite LoadSprite(string folder, string fileName)
         {

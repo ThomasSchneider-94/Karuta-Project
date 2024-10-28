@@ -1,11 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Device;
 
 namespace Karuta.ScriptableObjects
 {
@@ -68,7 +62,7 @@ namespace Karuta.ScriptableObjects
             this.isDownloaded = jsonDeckInfo.isDownloaded;
         }
         #endregion Construtors
-
+        
         public string Dump()
         {
             return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", deckName, category.ToString(), type.ToString(), cover.name, isDownloaded);

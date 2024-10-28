@@ -1,92 +1,60 @@
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEditor;
+using System.Collections.Generic;
+using UnityEngine.UIElements;
+using UnityEngine.InputSystem.Android;
+using System.Linq;
 
 namespace Karuta.UIComponent
 {
-    abstract public class Container : MonoBehaviour
+    public class Container : MonoBehaviour
     {
         [Header("Container Values")]
         [SerializeField] protected string containerName;
         [SerializeField] protected float nameScale;
-        [SerializeField] protected float nameSpacing;
+        [SerializeField] private float nameWidth;
+
+        [Header("Spacing")]
+        [SerializeField] private float spacing;
 
         [Header("Container Elements")]
         [SerializeField] protected VerticalLayoutGroup containerLayout;
         [SerializeField] protected RectTransform containerRectTransform;
         [SerializeField] protected TextMeshProUGUI nameTextMesh;
         [SerializeField] protected RectTransform nameRectTransform;
-        [SerializeField] protected RectTransform subContainerRectTransform;
 
-        #region Add Items
-        /// <summary>
-        /// Add a list of items to the container
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="items"></param>
-        public virtual void AddItems<T>(List<T> items) where T : Component
+        private readonly List<RectTransform> childRectTransforms = new();
+
+        public void FindChildRectTransforms()
         {
-            foreach(T item in items)
+            childRectTransforms.Clear();
+
+            for (int i = 1; i < containerRectTransform.childCount; i++)
             {
-                item.transform.SetParent(subContainerRectTransform);
+                childRectTransforms.Add(containerRectTransform.GetChild(i).GetComponent<RectTransform>());
             }
-            ResizeContainer();
         }
 
-        /// <summary>
-        /// Add an item to the container
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        public virtual void AddItem<T>(T item) where T : Component
-        {
-            item.transform.SetParent(subContainerRectTransform);
-            ResizeContainer();
-        }
-        #endregion Add Items
-
-        #region Size
-        /// <summary>
-        /// Set the size of the container so that it fits the size of its components
-        /// </summary>
         public void ResizeContainer()
         {
-            ResizeSubContainer();
+            if (childRectTransforms.Count == 0)
+            {
+                FindChildRectTransforms();
+            }
 
-            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, CalculateWidth());
-            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, CalculateHeight());
+            float width = nameRectTransform.sizeDelta.x * nameScale;
+            if (childRectTransforms.Count > 0)
+            {
+                width = Mathf.Max(width, childRectTransforms.Max(child => child.sizeDelta.x));
+            }
+            float height = nameRectTransform.sizeDelta.y * nameScale + childRectTransforms.Sum(child => child.sizeDelta.y) + spacing * (childRectTransforms.Count - 1);
+
+
+            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
-
-        /// <summary>
-        /// Set the size of the subcontainer so that it fits the size of its components
-        /// </summary>
-        private void ResizeSubContainer()
-        {
-            subContainerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, CalculateSubContainerWidth());
-            subContainerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, CalculateSubContainerHeight());
-        }
-
-        abstract protected float CalculateSubContainerWidth();
-
-        abstract protected float CalculateSubContainerHeight();
-
-        protected float CalculateWidth()
-        {
-            return Mathf.Max(nameRectTransform.sizeDelta.x * nameScale, subContainerRectTransform.sizeDelta.x);
-        }
-
-        protected float CalculateHeight()
-        {
-            return nameRectTransform.sizeDelta.y * nameScale + nameSpacing + subContainerRectTransform.sizeDelta.y;
-        }
-
-        public Vector2 GetSize()
-        {
-            return containerRectTransform.sizeDelta;
-        }
-        #endregion Size
 
         #region Setter
         public void SetName(string name)
@@ -97,51 +65,58 @@ namespace Karuta.UIComponent
 
         public void SetNameScale(float scale)
         {
-            nameScale = scale;
+            this.nameScale = scale;
             nameRectTransform.localScale = new Vector3(scale, scale, scale);
 
             ResizeContainer();
         }
 
-        public void SetNameSpacing(float spacing)
+        public void SetNameWidth(float width)
         {
-            nameSpacing = spacing;
+            this.nameWidth = width;
+            nameRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
+            ResizeContainer();
+        }
+
+        public void SetSpacing(float spacing)
+        {
+            this.spacing = spacing;
+            containerLayout.spacing = spacing;
+
+            ResizeContainer();
+        }
+
+        public void SetAllParameters(string name, float nameScale, float nameWidth, float spacing)
+        {
+            // Name
+            this.containerName = name;
+            nameTextMesh.text = name;
+
+            // Name Scale
+            this.nameScale = nameScale;
+            nameRectTransform.localScale = new Vector3(nameScale, nameScale, nameScale);
+
+            // Name Width
+            this.nameWidth = nameWidth;
+            nameRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, nameWidth);
+
+            // Spacing
+            this.spacing = spacing;
             containerLayout.spacing = spacing;
 
             ResizeContainer();
         }
         #endregion Setter
 
-        #region Getter
-        public string GetName()
-        {
-            return containerName;
-        }
-
-        public float GetNameScale()
-        {
-            return nameScale;
-        }
-
-        public float GetNameSpacing()
-        {
-            return nameSpacing;
-        }
-
-        public virtual RectTransform GetSubContainer()
-        {
-            return subContainerRectTransform;
-        }
-        #endregion Getter
-
-        // Called if changes in code or editor (not called at runtime)
-        virtual protected void OnValidate()
+        private void OnValidate()
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
 
-            SetName(containerName);
-            SetNameScale(nameScale);
-            SetNameSpacing(nameSpacing);
+            nameTextMesh.text = containerName;
+            nameRectTransform.localScale = new Vector3(nameScale, nameScale, nameScale);
+            nameRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, nameWidth);
+            containerLayout.spacing = spacing;
 
             ResizeContainer();
         }

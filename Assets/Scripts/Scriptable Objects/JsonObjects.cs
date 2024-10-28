@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,21 +6,36 @@ namespace Karuta.ScriptableObjects
 {   
     public class JsonObjects : ScriptableObject
     {
-        /* DECK */
-        #region Deck
         [Serializable]
-        public class JsonDeck
+        public class ConfigData
+        {
+            public string serverIP;
+        }
+
+        /* DOWNLOAD */
+        #region Download
+        [Serializable]
+        public class DownloadDeck
         {
             public string name;
             public string category;
             public string type;
             public string cover;
-            public List<JsonCard> cards;
+            public List<DownloadCard> cards;
         }
-        #endregion Deck
+
+        [Serializable]
+        public class DownloadCard
+        {
+            public string anime;
+            public string type;
+            public string visual;
+            public string audio;
+        }
+        #endregion Download
 
         /* CARDS */
-        #region Cards
+        #region Card Information
 
         [Serializable]
         public class JsonCard
@@ -29,7 +43,9 @@ namespace Karuta.ScriptableObjects
             public string anime;
             public string type;
             public string visual;
-            public string sound;
+            public bool isVisualDownloaded;
+            public string audio;
+            public bool isAudioDownloaded;
         }
 
         [Serializable]
@@ -39,7 +55,7 @@ namespace Karuta.ScriptableObjects
         }
         #endregion Cards
 
-        /* DECK INFORMATION */
+        /* DECK */
         #region Deck Information
 
         [Serializable]

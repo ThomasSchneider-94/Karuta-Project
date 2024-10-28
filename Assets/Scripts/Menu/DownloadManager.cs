@@ -4,18 +4,20 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
 using Karuta.ScriptableObjects;
-using static Karuta.ScriptableObjects.JsonObjects;
 using Karuta.UIComponent;
 using System.Text;
+using System.Collections;
+using UnityEngine.Networking;
+using static Karuta.ScriptableObjects.JsonObjects;
+using Unity.VisualScripting.FullSerializer;
+using System.Net;
 
 namespace Karuta.Menu
 {
     public class DownloadManager : MonoBehaviour
     {
-        private GameManager gameManager;
 
-        [Header("Debug")]
-        [SerializeField] private TextAsset testDeck;
+        private GameManager gameManager;
 
         [Header("Decks Download")]
         [SerializeField] private Toggle selectAllToggle;
@@ -29,20 +31,25 @@ namespace Karuta.Menu
          *      - Download deck information
          *      - Download visuals / sounds
          *      - Download and check cover
+         *      - Waiting Screen
          */
 
         private JsonObjects.JsonDeckInfoList jsonDeckInfoList;
         private string[] visualFiles;
         private string[] soundFiles;
 
+        private List<string> deckNames;
+        private List<string> deckInformations;
+
         private void Awake()
         {
             gameManager = GameManager.Instance;
 
             // GameManager Events
-            gameManager.UpdateCategoryEvent.AddListener(HideNonUsedToggles);
+            gameManager.InitializeDeckListEvent.AddListener(CreateDownloadToggles);
             gameManager.UpdateDeckListEvent.AddListener(UpdateDeckDownloadToggles);
-            Debug.Log("Dowload Subscription");
+            gameManager.UpdateCategoryEvent.AddListener(HideNonUsedToggles);
+            //Debug.Log("Dowload Subscription")
 
             jsonDeckInfoList = new JsonObjects.JsonDeckInfoList
             {
@@ -86,48 +93,93 @@ namespace Karuta.Menu
         /// </summary>
         public void UpdateDeckList()
         {
-            List<TextAsset> textAssets = DownloadDeckList();
+            string serverIP = JsonUtility.FromJson<ConfigData>(Resources.Load<TextAsset>("config").text).serverIP;
 
-            SaveDecks(textAssets);
+            StartCoroutine(UpdateDeckListCoroutine(serverIP));
+        }
+
+        public IEnumerator UpdateDeckListCoroutine(string serverIP)
+        {
+            yield return StartCoroutine(DownloadDeckList(serverIP));
+
+            deckInformations = new();
+
+            foreach (string deckName in deckNames)
+            {
+                if (deckName != null && deckName != "")
+                {
+                    Debug.Log(deckName);
+                    yield return StartCoroutine(DownloadDeckInformation(serverIP, deckName));
+                }
+            }
+
+            SaveDecks();
 
             gameManager.UpdateDeckList();
         }
 
         /// <summary>
-        /// Download the deck list
+        /// Dowload the name of all the decks
         /// </summary>
+        /// <param name="serverIP"></param>
         /// <returns></returns>
-        private List<TextAsset> DownloadDeckList()
+        private IEnumerator DownloadDeckList(string serverIP)
         {
+            // Initiate the request
+            using UnityWebRequest webRequest = UnityWebRequest.Get(serverIP + "deck_names");
+            // Send the request and wait for a response
+            yield return webRequest.SendWebRequest();
 
+            // Check for errors
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error: {webRequest.error}");
+            }
+            else
+            {
+                // Process received data
+                deckNames = new List<string>(webRequest.downloadHandler.text.Split("\n"));
+            }
+        }
 
-            //UnityWebRequest request = UnityWebRequest.Get("/deck_names");
+        /// <summary>
+        /// Download the information of a deck from its name
+        /// </summary>
+        /// <param name="serverIP"></param>
+        /// <param name="deckName"></param>
+        /// <returns></returns>
+        private IEnumerator DownloadDeckInformation(string serverIP, string deckName)
+        {
+            // Initiate the request
+            using UnityWebRequest webRequest = UnityWebRequest.Get(serverIP + "deck_metadata/" + deckName);
 
+            // Send the request and wait for a response
+            yield return webRequest.SendWebRequest();
 
-
-
-
-
-
-
-
-
-
-            // TODO: Function where you download all the decks file
-            return new List<TextAsset>() { testDeck };
+            // Check for errors
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Error: {webRequest.error}");
+            }
+            else
+            {
+                // Process received data
+                Debug.Log("Response: " + webRequest.downloadHandler.text);
+                deckInformations.Add(webRequest.downloadHandler.text);
+            }
         }
 
         /// <summary>
         /// Save a deck list into the persistant files
         /// </summary>
         /// <param name="textAssets"></param>
-        private void SaveDecks(List<TextAsset> textAssets)
+        private void SaveDecks()
         {
             jsonDeckInfoList.deckInfoList.Clear();
             visualFiles = Directory.GetFiles(Path.Combine(Application.persistentDataPath, "Visuals"));
             soundFiles = Directory.GetFiles(Path.Combine(Application.persistentDataPath, "Sounds"));
 
-            foreach (TextAsset jsonDeck in textAssets) 
+            foreach (string jsonDeck in deckInformations) 
             {
                 SaveDeck(jsonDeck);
             }
@@ -139,9 +191,9 @@ namespace Karuta.Menu
         /// Save a deck into the persistant files
         /// </summary>
         /// <param name="textDeck"></param>
-        private void SaveDeck(TextAsset textDeck)
+        private void SaveDeck(string textDeck)
         {
-            JsonDeck downloadDeck = JsonUtility.FromJson<JsonDeck>(textDeck.text);
+            DownloadDeck downloadDeck = JsonUtility.FromJson<DownloadDeck>(textDeck);
 
             if (downloadDeck == null) { return; }
 
@@ -151,6 +203,42 @@ namespace Karuta.Menu
             // Check deck validity
             if (!IsDeckValid(downloadDeck)) { return; }
 
+            // Create Cards Object
+            List<JsonCard> jsonCards = new();
+            bool isDeckDowloaded = true;
+
+            foreach (DownloadCard downloadCard in downloadDeck.cards)
+            {
+                bool isVisualDownloaded = IsCardVisualAlreadyDownloaded(downloadCard.visual);
+                bool isSoundDownloaded = IsCardAudioAlreadyDownloaded(downloadCard.audio);
+
+                jsonCards.Add(new JsonCard
+                {
+                    anime = downloadCard.anime,
+                    type = downloadCard.type,
+                    visual = downloadCard.visual,
+                    isVisualDownloaded = isVisualDownloaded,
+                    audio = downloadCard.audio,
+                    isAudioDownloaded = isSoundDownloaded
+                });
+
+                if (!isVisualDownloaded || !isSoundDownloaded)
+                {
+                    isDeckDowloaded = false;
+                }
+            }
+
+            JsonCards jsonCardS = new() { cards = jsonCards };
+
+            // Save Cards List
+            if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category)))
+            {
+                // If the category repertory for the deck does not exist, create it
+                Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category));
+            }
+
+            File.WriteAllText(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category, downloadDeck.name + ".json"), JsonUtility.ToJson(jsonCardS));
+
             // Create Deck Info Object
             var jsonDeckInfo = new JsonDeckInfo
             {
@@ -158,30 +246,20 @@ namespace Karuta.Menu
                 category = (int)(DeckInfo.DeckCategory)System.Enum.Parse(typeof(DeckInfo.DeckCategory), downloadDeck.category),
                 type = (int)(DeckInfo.DeckType)System.Enum.Parse(typeof(DeckInfo.DeckType), downloadDeck.type),
                 cover = downloadDeck.cover,
-                isDownloaded = IsDeckAlreadyDownloaded(downloadDeck.cards)
+                isDownloaded = isDeckDowloaded
             };
 
             // Add it to the deck list
             jsonDeckInfoList.deckInfoList.Add(jsonDeckInfo);
-
-            // Create Cards Object
-            JsonCards jsonCards = new() { cards = downloadDeck.cards };
-
-            // Save Cards List
-            if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category)))
-            {
-                Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category));
-            }
-
-            File.WriteAllText(Path.Combine(Application.persistentDataPath, "Decks", downloadDeck.category, downloadDeck.name + ".json"), JsonUtility.ToJson(jsonCards));
         }
 
+        #region Check Deck Validity
         /// <summary>
         /// Check if deck is valid (do not check the number of cards)
         /// </summary>
         /// <param name="downloadDeck"></param>
         /// <returns></returns>
-        private bool IsDeckValid(JsonDeck downloadDeck)
+        private bool IsDeckValid(DownloadDeck downloadDeck)
         {
             // Check Deck Information
             if (downloadDeck.name == null || downloadDeck.category == null || downloadDeck.type == null || downloadDeck.cover == null && downloadDeck.cards == null) // All attributes are not null
@@ -206,7 +284,7 @@ namespace Karuta.Menu
             }
 
             // Check Cards Information
-            foreach(JsonCard downloadCard in downloadDeck.cards)
+            foreach(DownloadCard downloadCard in downloadDeck.cards)
             {
                 if (downloadCard.anime == null || downloadCard.type == null || downloadCard.visual == null) 
                 {
@@ -247,35 +325,42 @@ namespace Karuta.Menu
             }
             return false;
         }
+        #endregion Check Deck Validity
 
         /// <summary>
-        /// Check if the decks cards are already downloaded in the system
+        /// Check if the visual file is already downloaded in the system
         /// </summary>
-        /// <param name="downloadCards"></param>
+        /// <param name="downloadCardVisual"></param>
         /// <returns></returns>
-        private bool IsDeckAlreadyDownloaded(List<JsonCard> downloadCards)
+        private bool IsCardVisualAlreadyDownloaded(string downloadCardVisual)
         {
-            foreach (JsonCard downloadCard in downloadCards)
+            if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCardVisual + ".png"))
+                    && !Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCardVisual + ".jpg")))
             {
-                if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".png"))
-                    && !Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(Application.persistentDataPath, "Visuals", downloadCard.visual + ".jpg")))
-                {
-                    Debug.Log("D_ Visual " + downloadCard.visual + " for " + downloadCard.anime + " does not exist");
-                    return false;
-                }
+                //Debug.Log("D_ Visual " + downloadCardVisual + " does not exist")
+                return false;
+            }
+            return true;
+        }
 
-                if (!Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCard.sound + ".mp3"))
-                    && !Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCard.sound + ".wav")))
-                {
-                    Debug.Log("D_ Sound for " + downloadCard.anime + " does not exist");
-                    return false;
-                }
+        /// <summary>
+        /// Check if the audio file is already downloaded in the system
+        /// </summary>
+        /// <param name="downloadCardSound"></param>
+        /// <returns></returns>
+        private bool IsCardAudioAlreadyDownloaded(string downloadCardSound)
+        {
+            if (!Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCardSound + ".mp3"))
+                    && !Array.Exists(soundFiles, soundFile => soundFile == Path.Combine(Application.persistentDataPath, "Sounds", downloadCardSound + ".wav")))
+            {
+                //Debug.Log("D_ Sound " + downloadCardSound + " does not exist")
+                return false;
             }
             return true;
         }
         #endregion Update Deck list
 
-        /* ======================================== Download Deck Content ======================================== */
+        /* ======================================== DOWNLOAD DECK CONTENT ======================================== */
 
         #region Download Deck
 
@@ -409,14 +494,5 @@ namespace Karuta.Menu
         #endregion Download
 
         #endregion Download Deck
-
-
-
-
-        public void TestAdd()
-        {
-            SaveDecks(new List<TextAsset>() { testDeck });
-            gameManager.UpdateDeckList();
-        }
     }
 }

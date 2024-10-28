@@ -1,28 +1,28 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+using UnityEditor;
+using Unity.VisualScripting;
 
 namespace Karuta.UIComponent
 {
-    public class VerticalCenteredGrid : MonoBehaviour
+    public class CenteredGridLayout : MonoBehaviour
     {
         [Header("Grid Values")]
-        [SerializeField] private Vector2 cellSize = new (100, 100);
-        [SerializeField] private Vector2 spacing;
-        [SerializeField] private TextAnchor childAlignment;
+        [SerializeField] protected Vector2 cellSize = new(100, 100);
+        [SerializeField] protected Vector2 spacing;
+        [SerializeField] protected TextAnchor childAlignment;
         [Min(1)]
-        [SerializeField] private int columnNumber;
+        [SerializeField] protected int constraintCount;
 
         [Header("Intern Objects")]
         [SerializeField] private VerticalLayoutGroup generalLayout;
-        [SerializeField] RectTransform generalLayoutRectTransform;
-        [SerializeField] private GridLayoutGroup fullGrid;
-        [SerializeField] private GridLayoutGroup nonFullGrid;
-        [SerializeField] private Transform nonActiveObjects;
+        [SerializeField] protected RectTransform generalLayoutRectTransform;
+        [SerializeField] protected GridLayoutGroup fullGrid;
+        [SerializeField] protected RectTransform fullGridRectTransform;
+        [SerializeField] protected GridLayoutGroup nonFullGrid;
+        [SerializeField] protected RectTransform nonFullGridRectTransform;
+        [SerializeField] protected Transform nonActiveObjects;
 
         #region Add Items
         /// <summary>
@@ -38,7 +38,7 @@ namespace Karuta.UIComponent
                 if (item.gameObject.activeSelf) { count++; }
             }
 
-            int nonFullCount = count % columnNumber;
+            int nonFullCount = count % constraintCount;
             int fullCount = count - nonFullCount;
 
             int i = 0;
@@ -48,6 +48,7 @@ namespace Karuta.UIComponent
                 if (items[i].gameObject.activeSelf)
                 {
                     items[i].transform.SetParent(fullGrid.transform);
+                    items[i].transform.SetAsLastSibling();
                     itemCount++;
                 }
                 else
@@ -62,6 +63,7 @@ namespace Karuta.UIComponent
                 if (items[j].gameObject.activeSelf)
                 {
                     items[j].transform.SetParent(nonFullGrid.transform);
+                    items[j].transform.SetAsLastSibling();
                 }
                 else
                 {
@@ -82,13 +84,14 @@ namespace Karuta.UIComponent
         {
             if (item.gameObject.activeSelf)
             {
-                if (nonFullGrid.transform.childCount == columnNumber - 1)
+                if (nonFullGrid.transform.childCount == constraintCount - 1)
                 {
                     while (nonFullGrid.transform.childCount > 0)
                     {
                         nonFullGrid.transform.GetChild(0).SetParent(fullGrid.transform);
                     }
                     item.transform.SetParent(fullGrid.transform);
+                    item.transform.SetAsLastSibling();
 
                     Resize();
                 }
@@ -96,6 +99,7 @@ namespace Karuta.UIComponent
                 else
                 {
                     item.transform.SetParent(nonFullGrid.transform);
+                    item.transform.SetAsLastSibling();
                 }
 
                 UpdateActive();
@@ -105,7 +109,28 @@ namespace Karuta.UIComponent
                 item.transform.SetParent(nonActiveObjects.transform);
             }
         }
-        #endregion Add Items
+
+        /// <summary>
+        /// Reposition the items in the grid if some of then became non active
+        /// </summary>
+        public void RepositionItems()
+        {
+            List<Transform> childs = new();
+            for (int i = 0; i < fullGrid.transform.childCount; i++)
+            {
+                childs.Add(fullGrid.transform.GetChild(i));
+            }
+            for (int i = 0; i < nonFullGrid.transform.childCount; i++)
+            {
+                childs.Add(nonFullGrid.transform.GetChild(i));
+            }
+            for (int i = 0; i < nonActiveObjects.childCount; i++)
+            {
+                childs.Add(nonActiveObjects.GetChild(i));
+            }
+            AddItems(childs);
+        }
+        #endregion Add sItems
 
         #region Size
         /// <summary>
@@ -113,28 +138,18 @@ namespace Karuta.UIComponent
         /// </summary>
         private void Resize()
         {
-            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, CalculateWidth());
-            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, CalculateHeight());
-        }
+            int fullNonEmpty = fullGrid.transform.childCount > 0 ? 1 : 0;
+            int nonFullNonEmpty = nonFullGrid.transform.childCount > 0 ? 1 : 0;
+            int nonEmpty = Mathf.Min(fullNonEmpty, nonFullNonEmpty);
+            
+            fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
+            fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (cellSize.y + spacing.y) * (fullGrid.transform.childCount / constraintCount) - spacing.y * fullNonEmpty);
+            
+            nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
+            nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cellSize.y * nonFullNonEmpty);
 
-        private float CalculateHeight()
-        {
-            int nonFull = 0;
-            if (nonFullGrid.transform.childCount > 0)
-            {
-                nonFull = 1;
-            }
-            return (cellSize.y + spacing.y) * ((fullGrid.transform.childCount / columnNumber) + nonFull) - spacing.y;
-        }
-
-        private float CalculateWidth()
-        {
-            return (cellSize.x + spacing.x) * columnNumber - spacing.x;
-        }
-
-        public Vector2 CalculateSize()
-        {
-            return new Vector2(CalculateWidth(), CalculateHeight());
+            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
+            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, fullGridRectTransform.sizeDelta.y + nonFullGridRectTransform.sizeDelta.y + spacing.y * nonEmpty);
         }
 
         public Vector2 GetSize()
@@ -146,21 +161,23 @@ namespace Karuta.UIComponent
         #region Setter
         public void SetCellSize(Vector2 size)
         {
-            cellSize = size;
+            this.cellSize = size;
             fullGrid.cellSize = cellSize;
             nonFullGrid.cellSize = cellSize;
 
             Resize();
         }
+
         public void SetSpacing(Vector2 spacing)
         {
             this.spacing = spacing;
-            generalLayout.spacing = spacing.y;
             fullGrid.spacing = spacing;
             nonFullGrid.spacing = spacing;
+            generalLayout.spacing = spacing.y;
 
             Resize();
         }
+
         public void SetChildAlignment(TextAnchor anchor)
         {
             childAlignment = anchor;
@@ -169,13 +186,35 @@ namespace Karuta.UIComponent
 
             Resize();
         }
+
         public void SetColumnNumber(int number)
         {
             if (number < 1) { number = 1; }
 
-            columnNumber = number;
+            constraintCount = number;
             fullGrid.constraintCount = number;
             nonFullGrid.constraintCount = number;
+
+            Resize();
+        }
+
+        public void SetAllParameters(Vector2 cellSize, Vector2 spacing, int columnNumber)
+        {
+            // Cell Size
+            this.cellSize = cellSize;
+            fullGrid.cellSize = cellSize;
+            nonFullGrid.cellSize = cellSize;
+
+            // Spacing
+            this.spacing = spacing;
+            fullGrid.spacing = spacing;
+            nonFullGrid.spacing = spacing;
+            generalLayout.spacing = spacing.y;
+
+            // Column Number
+            this.constraintCount = columnNumber;
+            fullGrid.constraintCount = columnNumber;
+            nonFullGrid.constraintCount = columnNumber;
 
             Resize();
         }
@@ -186,25 +225,26 @@ namespace Karuta.UIComponent
         {
             return cellSize;
         }
+
         public Vector2 GetSpacing()
         {
             return spacing;
         }
+
         public TextAnchor GetChildAlignment()
         {
             return childAlignment;
         }
+
         public int GetConstraintCount()
         {
-            return columnNumber;
+            return constraintCount;
         }
         #endregion Getter
 
         private void UpdateActive()
         {
             fullGrid.gameObject.SetActive(fullGrid.transform.childCount > 0);
-            Debug.Log(fullGrid.transform.childCount > 0);
-
             nonFullGrid.gameObject.SetActive(nonFullGrid.transform.childCount > 0);
         }
 
@@ -213,10 +253,21 @@ namespace Karuta.UIComponent
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
 
-            SetCellSize(cellSize);
-            SetSpacing(spacing);
-            SetChildAlignment(childAlignment);
-            SetColumnNumber(columnNumber);
+            fullGrid.cellSize = cellSize;
+            nonFullGrid.cellSize = cellSize;
+
+            fullGrid.spacing = spacing;
+            nonFullGrid.spacing = spacing;
+            generalLayout.spacing = spacing.y;
+
+            fullGrid.childAlignment = childAlignment;
+            nonFullGrid.childAlignment = childAlignment;
+
+            fullGrid.constraintCount = constraintCount;
+            nonFullGrid.constraintCount = constraintCount;
+
+            Resize();
+
             UpdateActive();
         }
     }

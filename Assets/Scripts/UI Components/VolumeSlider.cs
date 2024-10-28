@@ -1,73 +1,119 @@
-using Karuta;
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
-using TMPro;
-using System.Runtime.InteropServices;
 
 namespace Karuta.UIComponent
 {
     public class VolumeSlider : MonoBehaviour
     {
-        private SoundManager soundManager;
+        [Header("Audio")]
+        [SerializeField] private string sliderName;
+        [SerializeField] private string audioMixerParameter;
+        [SerializeField] private AudioMixer audioMixer;
 
-        [Header("Sound Icons")]
-        [SerializeField] private Sprite lowVolume;
-        [SerializeField] private Sprite mediumVolume;
-        [SerializeField] private Sprite highVolume;
-        [SerializeField] private Sprite noVolume;
+        [Header("Icons")]
+        [SerializeField] private Sprite highVolumeIcon;
+        [SerializeField] private Sprite mediumVolumeIcon;
+        [SerializeField] private Sprite lowVolumeIcon;
+        [SerializeField] private Sprite noVolumeIcon;
 
-        [Header("Intern Objects")]
-        [SerializeField] private Slider volumeSlider;
-        [SerializeField] private TextMeshProUGUI volumeValueTextMesh;
+        [Header("Intern Object")]
+        [SerializeField] private Slider slider;
+        [SerializeField] private Button button;
+        [SerializeField] private TextMeshProUGUI nameTextMesh;
+        [SerializeField] private TextMeshProUGUI valueTextMesh;
         [SerializeField] private Image volumeIcon;
-        
-        void Awake()
-        {
-            soundManager = SoundManager.Instance;
 
-            InitSlider();
-        }
+        private bool volumeActive = true;
 
-        private void InitSlider()
+        // Start is called before the first frame update
+        private void Start()
         {
-            volumeSlider.SetValueWithoutNotify(soundManager.GetGeneralVolumeValue());
-            volumeValueTextMesh.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
-            UpdateSoundIcon();
-        }
-
-        // Set the sound icon to its corresponding value
-        private void UpdateSoundIcon()
-        {
-            if (soundManager.IsGeneralVolumeOn())
+            if (!audioMixer.GetFloat(audioMixerParameter, out float mixerValue))
             {
-                float generalVolume = soundManager.GetGeneralVolumeValue();
+                Debug.LogError(audioMixerParameter + " is not a public parameter of the audioMixer " + audioMixer.ToString() + "; Value read: " + mixerValue);
+            }
 
-                if (generalVolume <= 0) { volumeIcon.sprite = noVolume; }
-                else if (generalVolume <= 0.33f) { volumeIcon.sprite = lowVolume; }
-                else if (generalVolume >= 0.66f) { volumeIcon.sprite = highVolume; }
-                else { volumeIcon.sprite = mediumVolume; }
+            nameTextMesh.text = sliderName;
+            UpdateSliderValue();
+        }
+
+        public void SliderUpdate()
+        {
+            volumeActive = true;
+
+            UpdateMixerValue();
+        }
+
+        private void UpdateMixerValue()
+        {
+            float sliderValue = slider.value;
+            if (!volumeActive)
+            {
+                sliderValue = slider.minValue;
+            }
+
+            audioMixer.SetFloat(audioMixerParameter, 20f * Mathf.Log10(sliderValue));
+            valueTextMesh.text = ((int)(100 * sliderValue)).ToString();
+
+            UpdateSliderIcon();
+        }
+
+        private void UpdateSliderValue()
+        {
+            audioMixer.GetFloat(audioMixerParameter, out float mixerValue);
+
+            mixerValue = Mathf.Pow(10, (mixerValue / 20f));
+
+            slider.SetValueWithoutNotify(mixerValue);
+            valueTextMesh.text = ((int)(100 * slider.value)).ToString();
+
+            UpdateSliderIcon();
+        }
+
+        private void UpdateSliderIcon()
+        {
+            if (volumeActive && slider.value > slider.minValue)
+            {
+                if (slider.value < 0.33)
+                {
+                    volumeIcon.sprite = lowVolumeIcon;
+                }
+                else if (slider.value > 0.66)
+                {
+                    volumeIcon.sprite = highVolumeIcon;
+                }
+                else
+                {
+                    volumeIcon.sprite = mediumVolumeIcon;
+                }
             }
             else
             {
-                volumeIcon.sprite = noVolume;
+                volumeIcon.sprite = noVolumeIcon;
             }
         }
 
-        public void UpdateVolumeValue()
+        public void SwitchVolume()
         {
-            soundManager.SetGeneralVolumeOn(true);
-            soundManager.SetVolume(volumeSlider.value);
-            volumeValueTextMesh.text = ((int)(soundManager.GetGeneralVolumeValue() * 100)).ToString();
-            UpdateSoundIcon();
+            volumeActive = !volumeActive;
+            UpdateSliderIcon();
         }
 
-        public void SwitchVolumeIsOn()
+        private void OnValidate()
         {
-            soundManager.SwitchIsGeneralVolumeOn();
-            UpdateSoundIcon();
+            if (Selection.activeGameObject != this.gameObject) { return; }
+
+            nameTextMesh.text = sliderName;
+
+            bool test = audioMixer.GetFloat(audioMixerParameter, out float mixerValue);
+            if (test)
+            {
+                Debug.Log("Parameter value : " + mixerValue);
+            }
+            UpdateSliderIcon();
         }
     }
 }

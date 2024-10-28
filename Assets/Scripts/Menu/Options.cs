@@ -17,7 +17,7 @@ namespace Karuta.Menu
         [SerializeField] private Toggle allowDifferentCategoriesToggle;
 
         [Header("Deck Category")]
-        [SerializeField] private ThreeLayerButton[] categoryButtons;
+        [SerializeField] private MultiLayerButton[] categoryButtons;
         [SerializeField] private Sprite[] categorySprites;
 
         // Start is called before the first frame update
@@ -34,21 +34,15 @@ namespace Karuta.Menu
         private void InitializeOptions()
         {
             autoPlayToggle.SetIsOnWithoutNotify(gameManager.GetAutoPlay());
-            playPauseToggle.SetIsOnWithoutNotify(gameManager.GetPlayPause());
             hideAnswerToggle.SetIsOnWithoutNotify(gameManager.GetHideAnswer());
-            allowMirrorMatchToggle.SetIsOnWithoutNotify(gameManager.GetMirrorMatches());
-            allowDifferentCategoriesToggle.SetIsOnWithoutNotify(gameManager.GetDifferentCategory());
+            allowMirrorMatchToggle.SetIsOnWithoutNotify(gameManager.AreMirrorMatchesAllowded());
+            allowDifferentCategoriesToggle.SetIsOnWithoutNotify(gameManager.AreDifferentCategoryAllowded());
             UpdateCategoryIcon();
         }
 
         public void UpdateAutoPlay()
         {
             gameManager.SetAutoPlay(autoPlayToggle.isOn);
-        }
-
-        public void UpdatePlayPause()
-        {
-            gameManager.SetPlayPause(playPauseToggle.isOn);
         }
 
         public void UpdateHideAnswer()
@@ -77,10 +71,10 @@ namespace Karuta.Menu
 
         private void UpdateCategoryIcon()
         {
-            foreach (ThreeLayerButton categoryButton in categoryButtons)
+            foreach (MultiLayerButton categoryButton in categoryButtons)
             {
-                categoryButton.gameObject.SetActive(!gameManager.GetDifferentCategory());
-                categoryButton.SetThirdLayerSprite(categorySprites[(int)gameManager.GetCurrentCategory()]);
+                categoryButton.gameObject.SetActive(!gameManager.AreDifferentCategoryAllowded());
+                categoryButton.SetIconSprite(categorySprites[(int)gameManager.GetCurrentCategory()]);
             }            
         }
         #endregion Decks Category
