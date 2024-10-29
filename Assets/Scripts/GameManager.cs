@@ -47,7 +47,15 @@ namespace Karuta
         private readonly List<DeckInfo> deckInfoList = new ();
         private readonly List<int> decksCount = new((int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB);
 
+        // Directory path
+        public static string decksDirectoryPath;
+        public static string coversDirectoryPath = Path.Combine(Application.persistentDataPath, "Covers");
+        public static string visualsDirectoryPath = Path.Combine(Application.persistentDataPath, "Visuals");
+        public static string audioDirectoryPath = Path.Combine(Application.persistentDataPath, "Audio");
+        public static string themesDirectoryPath = Path.Combine(Application.persistentDataPath, "Themes");
+
         // Events
+        public UnityEvent InitializePathesEvent{ get; } = new UnityEvent();
         public UnityEvent UpdateCategoryEvent { get; } = new UnityEvent();
         public UnityEvent InitializeDeckListEvent { get; } = new UnityEvent();
         public UnityEvent UpdateDeckListEvent { get; } = new UnityEvent();
@@ -69,7 +77,19 @@ namespace Karuta
 
         private void Start()
         {
+            InitializePathes();
             InitializeDeckList();
+        }
+
+        private static void InitializePathes()
+        {
+            decksDirectoryPath = Path.Combine(Application.persistentDataPath, "Decks");
+            coversDirectoryPath = Path.Combine(Application.persistentDataPath, "Covers");
+            visualsDirectoryPath = Path.Combine(Application.persistentDataPath, "Visuals");
+            audioDirectoryPath = Path.Combine(Application.persistentDataPath, "Audio");
+            themesDirectoryPath = Path.Combine(Application.persistentDataPath, "Themes");
+
+            InitializePathesEvent.Invoke();
         }
 
         #region Load Deck List
@@ -396,13 +416,9 @@ namespace Karuta
         public Sprite LoadSprite(string folder, string fileName)
         {
             string filePath;
-            if (File.Exists(Path.Combine(Application.persistentDataPath, folder, fileName + ".png"))) // .png
+            if (File.Exists(Path.Combine(folder, fileName)))
             {
-                filePath = Path.Combine(Application.persistentDataPath, folder, fileName + ".png");
-            }
-            else if (File.Exists(Path.Combine(Application.persistentDataPath, folder, fileName + ".jpg"))) // .jpg
-            {
-                filePath = Path.Combine(Application.persistentDataPath, folder, fileName + ".jpg");
+                filePath = Path.Combine(folder, fileName);
             }
             else
             {

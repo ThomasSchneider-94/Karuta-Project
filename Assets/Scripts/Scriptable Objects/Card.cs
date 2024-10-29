@@ -34,7 +34,7 @@ namespace Karuta.ScriptableObjects
             this.anime = jsonCard.anime;
             this.type = jsonCard.type;
 
-            this.visual = GameManager.Instance.LoadSprite("Visuals", jsonCard.visual);
+            this.visual = GameManager.Instance.LoadSprite(GameManager.visualsDirectoryPath, jsonCard.visual);
             this.isVisualDowloaded = jsonCard.isVisualDownloaded;
 
             this.audio = jsonCard.audio; // TODO
@@ -58,7 +58,7 @@ namespace Karuta.ScriptableObjects
             this.anime = jsonCard.anime;
             this.type = jsonCard.type;
 
-            this.visual = GameManager.Instance.LoadSprite("Visuals", jsonCard.visual);
+            this.visual = GameManager.Instance.LoadSprite(GameManager.visualsDirectoryPath, jsonCard.visual);
             this.isVisualDowloaded = jsonCard.isVisualDownloaded;
 
             this.audio = jsonCard.audio; // TODO

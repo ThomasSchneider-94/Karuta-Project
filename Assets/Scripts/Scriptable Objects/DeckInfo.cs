@@ -40,7 +40,7 @@ namespace Karuta.ScriptableObjects
             this.deckName = jsonDeckInfo.name;
             this.category = (DeckCategory)jsonDeckInfo.category;
             this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
-            this.cover = GameManager.Instance.LoadSprite("Covers", jsonDeckInfo.cover);
+            this.cover = GameManager.Instance.LoadSprite(GameManager.coversDirectoryPath, jsonDeckInfo.cover);
             this.isDownloaded = jsonDeckInfo.isDownloaded;
         }
 
@@ -58,7 +58,7 @@ namespace Karuta.ScriptableObjects
             this.deckName = jsonDeckInfo.name;
             this.category = (DeckCategory)jsonDeckInfo.category;
             this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
-            this.cover = GameManager.Instance.LoadSprite("Covers", jsonDeckInfo.cover);
+            this.cover = GameManager.Instance.LoadSprite(GameManager.coversDirectoryPath, jsonDeckInfo.cover);
             this.isDownloaded = jsonDeckInfo.isDownloaded;
         }
         #endregion Construtors
