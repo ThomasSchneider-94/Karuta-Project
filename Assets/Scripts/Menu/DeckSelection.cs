@@ -5,27 +5,32 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Linq;
+using Unity.VisualScripting;
 
 namespace Karuta.Menu
 {
     public class DeckSelection : MonoBehaviour
     {
-        private GameManager gameManager;
+        private DecksManager decksManager;
+        private OptionsManager optionsManager;
 
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private VerticalLayoutGroup allButtonsParent;
         [SerializeField] private float globalSpacing;
         [SerializeField] private Toggle downloadedOnlyToggle;
+        [SerializeField] private Button continueButton;
 
         [Header("Category Container Properties")]
         [SerializeField] protected float categoryNameScale;
         [SerializeField] private float categoryNameWidth;
+        [SerializeField] private float categoryNameSpacing;
         [SerializeField] private float categorySpacing;
 
         [Header("Type Container Properties")]
         [SerializeField] protected float typeNameScale;
         [SerializeField] private float typeNameWidth;
-        [SerializeField] private float typeSpacing;
+        [SerializeField] private float typeNameSpacing;
 
         [Header("Grid properties")]
         [Min(1)]
@@ -37,7 +42,11 @@ namespace Karuta.Menu
         [SerializeField] private Container categoryContainerPrefab;
         [SerializeField] private Container typeContainerPrefab;
         [SerializeField] private CenteredGridLayout gridPrefab;
-        [SerializeField] private SelectionButton selectionButtonPrefab;
+        [SerializeField] private SelectionButton deckSelectionButtonPrefab;
+
+        [Header("Select Deck Number")]
+        [SerializeField] private List<NumberButton> numberButtons;
+
 
         // Lists
         private readonly List<Container> categoryContainers = new ();
@@ -45,28 +54,50 @@ namespace Karuta.Menu
         private readonly List<CenteredGridLayout> grids = new ();
         private readonly List<SelectionButton> buttons = new ();
 
-        private void Awake()
+        private void OnEnable()
         {
-            gameManager = GameManager.Instance;
+            decksManager = DecksManager.Instance;
+            optionsManager = OptionsManager.Instance;
 
-            gameManager.InitializeDeckListEvent.AddListener(InitializeContainersAndButtons);
-            gameManager.UpdateDeckListEvent.AddListener(UpdateButtons);
-            gameManager.UpdateCategoryEvent.AddListener(UpdateActiveCategory);
-            gameManager.UpdateMirorMatchEvent.AddListener(RemoveSelectedDoubles);
-            //Debug.Log("Selection Subscription")
+            decksManager.UpdateDeckListEvent.AddListener(UpdateButtons);
+            optionsManager.UpdateCategoryEvent.AddListener(UpdateActiveCategory);
+            optionsManager.UpdateMirorMatchEvent.AddListener(RemoveSelectedDoubles);
 
             downloadedOnlyToggle.SetIsOnWithoutNotify(false);
+
+            continueButton.interactable = false;
+            SelectDeckNumber(2);
+
+            // Initialize
+            if (decksManager.IsInitialized())
+            {
+                InitializeContainersAndButtons();
+            }
+            else
+            {
+                decksManager.DeckListInitializedEvent.AddListener(InitializeContainersAndButtons);
+            }
+        }
+
+        public void SelectDeckNumber(int value)
+        {
+            foreach (NumberButton button in numberButtons)
+            {
+                button.DeselectButton();
+            }
+            numberButtons[value - 1].SelectButton();
+            decksManager.SetMaxSelectedDeck(value);
         }
 
         #region Get Buttons
         private List<SelectionButton> GetCategoryButtons(DeckInfo.DeckCategory category)
         {
-            return buttons.GetRange(gameManager.GetCategoryIndex(category), gameManager.GetCategoryCount(category));
+            return buttons.GetRange(decksManager.GetCategoryIndex(category), decksManager.GetCategoryCount(category));
         }
 
         private List<SelectionButton> GetTypeButtons(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
         {
-            return buttons.GetRange(gameManager.GetTypeIndex(category, type), gameManager.GetTypeCount(category, type));
+            return buttons.GetRange(decksManager.GetTypeIndex(category, type), decksManager.GetTypeCount(category, type));
         }
         #endregion Get Buttons
 
@@ -119,15 +150,15 @@ namespace Karuta.Menu
 
             // Add the category container to the list and to it's parent
             categoryContainers.Add(container);
-            container.transform.SetParent(allButtonsParent.transform);
 
-            // Set Parameters
-            container.SetAllParameters(category.ToString(), categoryNameScale, categoryNameWidth, categorySpacing);
+            container.transform.SetParent(allButtonsParent.transform);
+            container.transform.localScale = Vector2.one;
 
             // Create types containers
             CreateTypeContainers(category);
 
-            container.FindChildRectTransforms();
+            // Set Parameters
+            container.SetAllParameters(category.ToString(), categoryNameScale, categoryNameWidth, categoryNameSpacing, categorySpacing);
         }
 
         /// <summary>
@@ -153,14 +184,13 @@ namespace Karuta.Menu
 
             // Add the type container to the list and it's parent category
             typeContainers.Add(container);
-            container.transform.SetParent(categoryContainers[(int)category].transform);
-
-            // Set Parameters
-            container.SetAllParameters(type.ToString(), typeNameScale, typeNameWidth, typeSpacing);
+            container.transform.SetParent(categoryContainers[(int)category].GetSubContainer());
+            container.transform.localScale = Vector2.one;
 
             CreateGrid(category, type);
 
-            container.FindChildRectTransforms();
+            // Set Parameters
+            container.SetAllParameters(type.ToString(), typeNameScale, typeNameWidth, typeNameSpacing, typeNameSpacing);
         }
 
         /// <summary>
@@ -174,7 +204,8 @@ namespace Karuta.Menu
 
             // Add the type container to the list and it's parent category
             grids.Add(grid);
-            grid.transform.SetParent(typeContainers[(int)category * (int)DeckInfo.DeckType.TYPE_NB + (int)type].transform);
+            grid.transform.SetParent(typeContainers[(int)category * (int)DeckInfo.DeckType.TYPE_NB + (int)type].GetSubContainer());
+            grid.transform.localScale = Vector2.one;
 
             // Set Parameters
             grid.SetAllParameters(cellSize, gridSpacing, columnNumber);
@@ -187,7 +218,7 @@ namespace Karuta.Menu
         /// </summary>
         private void CreateButtons()
         {
-            List<DeckInfo> deckList = gameManager.GetDeckList();
+            List<DeckInfo> deckList = decksManager.GetDeckList();
             for (int i = 0; i < deckList.Count; i++)
             {
                 CreateButton(deckList[i], i);
@@ -200,7 +231,7 @@ namespace Karuta.Menu
         /// <param name="deck"></param>
         private void CreateButton(DeckInfo deck, int index)
         {
-            SelectionButton button = GameObject.Instantiate(selectionButtonPrefab);
+            SelectionButton button = GameObject.Instantiate(deckSelectionButtonPrefab);
 
             button.SetDeckName(deck.GetName());
             button.SetIconSprite(deck.GetCover());
@@ -220,8 +251,15 @@ namespace Karuta.Menu
             {
                 for (int j = 0; j < (int)DeckInfo.DeckType.TYPE_NB; j++)
                 {
-                    grids[i * (int)DeckInfo.DeckType.TYPE_NB + j].AddItems(GetTypeButtons((DeckInfo.DeckCategory)i, (DeckInfo.DeckType)j));
+                    List<SelectionButton> buttonsToAdd = GetTypeButtons((DeckInfo.DeckCategory)i, (DeckInfo.DeckType)j);
+
+                    grids[i * (int)DeckInfo.DeckType.TYPE_NB + j].AddItems(buttonsToAdd);
                     typeContainers[i * (int)DeckInfo.DeckType.TYPE_NB + j].ResizeContainer();
+
+                    foreach (SelectionButton button in buttonsToAdd)
+                    {
+                        button.transform.localScale = Vector2.one;
+                    }
                 }
 
                 categoryContainers[i].ResizeContainer();
@@ -237,7 +275,12 @@ namespace Karuta.Menu
         /// </summary>
         private void UpdateButtons()
         {
-            ClearButtons();
+            StartCoroutine(UpdateButtonsCouroutine());
+        }
+
+        private IEnumerator UpdateButtonsCouroutine()
+        {
+            yield return StartCoroutine(ClearButtons());
 
             CreateButtons();
 
@@ -257,7 +300,7 @@ namespace Karuta.Menu
         /// <summary>
         /// Destroy all buttons and clear button list
         /// </summary>
-        private void ClearButtons()
+        private IEnumerator ClearButtons()
         {
             for (int i = 0; i < buttons.Count; i++)
             {
@@ -265,6 +308,7 @@ namespace Karuta.Menu
             }
 
             buttons.Clear();
+            yield return null;
         }
 
         /// <summary>
@@ -272,7 +316,7 @@ namespace Karuta.Menu
         /// </summary>
         private void HideNonUsedButtonsAndContainers()
         {
-            List<DeckInfo> deckList = gameManager.GetDeckList();
+            List<DeckInfo> deckList = decksManager.GetDeckList();
 
             // Initialize 2 list of bool to false
             List<bool> activeCategories = new(new bool[(int)DeckInfo.DeckCategory.CATEGORY_NB]);
@@ -297,7 +341,7 @@ namespace Karuta.Menu
             // Set containers active
             for (int i = 0; i < (int)DeckInfo.DeckCategory.CATEGORY_NB; i++)
             {
-                categoryContainers[i].gameObject.SetActive(activeCategories[i] && gameManager.IsCategoryActive((DeckInfo.DeckCategory)i));
+                categoryContainers[i].gameObject.SetActive(activeCategories[i] && optionsManager.IsCategoryActive((DeckInfo.DeckCategory)i));
 
                 for (int j = 0; j < (int)DeckInfo.DeckType.TYPE_NB; j++)
                 {
@@ -354,20 +398,20 @@ namespace Karuta.Menu
                 }
 
                 // Set the category active if the deck has made it active and the category is active
-                categoryContainers[i].gameObject.SetActive(categoryContainers[i].gameObject.activeSelf && gameManager.IsCategoryActive((DeckInfo.DeckCategory)i));
+                categoryContainers[i].gameObject.SetActive(categoryContainers[i].gameObject.activeSelf && optionsManager.IsCategoryActive((DeckInfo.DeckCategory)i));
             }
             RemoveNonActiveSelectedDecks();
         }
 
         /// <summary>
-        /// If a button does not appear on screen, remove it from the selectioned decks list
+        /// If a button does not appear on screen, remove it from the selected decks list
         /// </summary>
         private void RemoveNonActiveSelectedDecks()
         {
             List<int> indexesToRemove = new();
-            foreach (int deckIndex in gameManager.GetSelectedDecks())
+            foreach (int deckIndex in decksManager.GetSelectedDecks())
             {
-                if (!buttons[deckIndex].gameObject.activeSelf || !gameManager.IsCategoryActive(gameManager.GetDeck(deckIndex).GetCategory()))
+                if (!buttons[deckIndex].gameObject.activeSelf || !optionsManager.IsCategoryActive(decksManager.GetDeck(deckIndex).GetCategory()))
                 {
                     indexesToRemove.Add(deckIndex);
                 }
@@ -384,15 +428,15 @@ namespace Karuta.Menu
         public void SelectDeck(int deckIndex)
         {
             // If mirror games are allowded, multiple click on the button will add the same deck
-            if (gameManager.AreMirrorMatchesAllowded())
+            if (optionsManager.AreMirrorMatchesAllowded())
             {
                 // If the list is full, remove all occurences
-                if (gameManager.IsSelectedDecksFull())
+                if (decksManager.IsSelectedDecksFull())
                 {
                     // If the deck was full, make the buttons interactable again
                     SetAllButtonsInteractable(true);
                     
-                    gameManager.RemoveSelectedDeck(deckIndex);
+                    decksManager.RemoveSelectedDeck(deckIndex);
                     buttons[deckIndex].DeselectButton();
                 }
                 else
@@ -405,7 +449,7 @@ namespace Karuta.Menu
             else
             {
                 // If index already in selected, remove it
-                if (gameManager.GetSelectedDecks().Contains(deckIndex))
+                if (decksManager.GetSelectedDecks().Contains(deckIndex))
                 {
                     RemoveSelectedDeck(deckIndex);
                 }
@@ -419,12 +463,12 @@ namespace Karuta.Menu
 
         private void AddSelectedDeck(int deckIndex)
         {
-            gameManager.AddSelectedDeck(deckIndex);
+            decksManager.AddSelectedDeck(deckIndex);
 
             buttons[deckIndex].SelectButton();
 
             // If the deck is full, make the buttons non interactable
-            if (gameManager.IsSelectedDecksFull())
+            if (decksManager.IsSelectedDecksFull())
             {
                 SetAllButtonsInteractable(false);
             }
@@ -433,21 +477,36 @@ namespace Karuta.Menu
         private void RemoveSelectedDeck(int deckIndex)
         {
             // If the deck was full, make the buttons interactable again
-            if (gameManager.IsSelectedDecksFull())
+            if (decksManager.IsSelectedDecksFull())
             {
                 SetAllButtonsInteractable(true);
             }
 
-            gameManager.RemoveSelectedDeck(deckIndex);
+            decksManager.RemoveSelectedDeck(deckIndex);
             buttons[deckIndex].DeselectButton();
+        }
+
+        public void RemoveAllSelectedDeck()
+        {
+            List<int> selected = new();
+            foreach(int deckIndex in decksManager.GetSelectedDecks())
+            {
+                selected.Add(deckIndex);
+            }
+
+            foreach (int deckIndex in selected) 
+            {
+                RemoveSelectedDeck(deckIndex);
+            }
         }
 
         private void SetAllButtonsInteractable(bool interactable)
         {
-            List<int> selectionnedIndexes = gameManager.GetSelectedDecks();
+            continueButton.interactable = !interactable;
+            List<int> selectedIndexes = decksManager.GetSelectedDecks();
             for (int i = 0; i < buttons.Count; i++)
             {
-                if (!selectionnedIndexes.Contains(i))
+                if (!selectedIndexes.Contains(i))
                 {
                     buttons[i].interactable = interactable;
                 }
@@ -457,7 +516,7 @@ namespace Karuta.Menu
         private void RemoveSelectedDoubles()
         {
             List<int> indexes = new();
-            foreach (int deckIndex in gameManager.GetSelectedDecks())
+            foreach (int deckIndex in decksManager.GetSelectedDecks())
             {
                 indexes.Add(deckIndex);
             }
@@ -492,13 +551,14 @@ namespace Karuta.Menu
             {
                 container.SetNameScale(typeNameScale);
                 container.SetNameWidth(typeNameWidth);
-                container.SetSpacing(typeSpacing);
+                container.SetNameSpacing(typeNameSpacing);
             }
 
             foreach (Container container in categoryContainers)
             {
                 container.SetNameScale(categoryNameScale);
                 container.SetNameWidth(categoryNameWidth);
+                container.SetNameSpacing(categoryNameSpacing);
                 container.SetSpacing(categorySpacing);
             }
         }

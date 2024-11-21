@@ -5,7 +5,7 @@ using Karuta.UIComponent;
 namespace Karuta.EditorLayout
 {
     [CustomEditor(typeof(SelectionButton))]
-    public class SelectionButtonEditor : MultiLayerButtonEditor
+    public class DeckSelectionButtonEditor : MultiLayerButtonEditor
     {
         [Header("Name")]
         SerializedProperty deckNameTextMesh;

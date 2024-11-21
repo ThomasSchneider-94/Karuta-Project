@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7293245431056162668
+--- !u!1 &6532226748591513060
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6120535372960674097}
-  - component: {fileID: 3993984528454971130}
+  - component: {fileID: 7250132207680843026}
+  - component: {fileID: 2172732764575286253}
+  - component: {fileID: 1832540871454595060}
+  - component: {fileID: 4119100899951645458}
+  - component: {fileID: 7015680740462773684}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -17,37 +20,124 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6120535372960674097
+--- !u!4 &7250132207680843026
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7293245431056162668}
+  m_GameObject: {fileID: 6532226748591513060}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 391.77945, y: 1188.4335, z: -5.0520267}
+  m_LocalPosition: {x: 556.408, y: 1151.9032, z: -18.93599}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3993984528454971130
+--- !u!114 &2172732764575286253
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7293245431056162668}
+  m_GameObject: {fileID: 6532226748591513060}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 221e571f9717e3747b1674b6b07bf07e, type: 3}
+  m_Script: {fileID: 11500000, guid: 0507f8484cac36047b63bf3a5cad7186, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedDecksMax: 2
+  selectedDecks: 000000000c000000
+--- !u!114 &1832540871454595060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6532226748591513060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd0ede04bc79cc24a838ad725224f21c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  downloadTimeout: 10
+  minDownloadedBytes: 2048
+  defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
+  defaultAudio: {fileID: 8300000, guid: 719ec2645c586c34cad3a25b7ca6998c, type: 3}
+--- !u!114 &4119100899951645458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6532226748591513060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9696b51d6ea66d245ae2422257b50ae1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   autoPlay: 1
-  playPause: 1
   hideAnswer: 0
   allowMirrorMatch: 0
-  allowDifferentCategory: 0
+  allowDifferentCategories: 0
   currentCategory: 0
-  defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
+--- !u!114 &7015680740462773684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6532226748591513060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 602f1a5b9487dfd48bb61cd46fd1331a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseTheme:
+    mainMenuBackground: {fileID: 0}
+    decksChoiceBackground: {fileID: 0}
+    gameBackground: {fileID: 0}
+    mainColor: {r: 0, g: 0, b: 0, a: 0}
+    mainTextColor: {r: 0, g: 0, b: 0, a: 0}
+    secondaryColor: {r: 0, g: 0, b: 0, a: 0}
+    backgroundColorMainMenu: {r: 0, g: 0, b: 0, a: 0}
+    backgroundColorDecksChoice: {r: 0, g: 0, b: 0, a: 0}
+    backgroundColorGame: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionButton: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionButtonText: {r: 0, g: 0, b: 0, a: 0}
+    colorQuitButton: {r: 0, g: 0, b: 0, a: 0}
+    colorPlayPause: {r: 0, g: 0, b: 0, a: 0}
+    colorCheckBox: {r: 0, g: 0, b: 0, a: 0}
+    colorTextNumberPlayersQuestion: {r: 0, g: 0, b: 0, a: 0}
+    colorPanelNumberPlayersQuestion: {r: 0, g: 0, b: 0, a: 0}
+    colorPanelNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
+    colorCentralPanelNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
+    colorTextNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionPanel: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionPanelBorder: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionsText: {r: 0, g: 0, b: 0, a: 0}
+    colorOptionsTextOutline: {r: 0, g: 0, b: 0, a: 0}
+    colorSliderHandle: {r: 0, g: 0, b: 0, a: 0}
+    colorSliderBackground: {r: 0, g: 0, b: 0, a: 0}
+    colorSliderFill: {r: 0, g: 0, b: 0, a: 0}
+    colorUpdateButton: {r: 0, g: 0, b: 0, a: 0}
+    colorUpdateButtonText: {r: 0, g: 0, b: 0, a: 0}
+    colorContinueArrow: {r: 0, g: 0, b: 0, a: 0}
+    colorBackArrow: {r: 0, g: 0, b: 0, a: 0}
+    colorPanelCurrentPlayer: {r: 0, g: 0, b: 0, a: 0}
+    colorTextCurrentPlayer: {r: 0, g: 0, b: 0, a: 0}
+    colorDeckArrow: {r: 0, g: 0, b: 0, a: 0}
+    colorDeckArrowText: {r: 0, g: 0, b: 0, a: 0}
+    colorNumberOfCardsLeft: {r: 0, g: 0, b: 0, a: 0}
+    colorAnimeTitle: {r: 0, g: 0, b: 0, a: 0}
+    colorCardFoundArrow: {r: 0, g: 0, b: 0, a: 0}
+    colorCardFoundText: {r: 0, g: 0, b: 0, a: 0}
+    colorCardNotFoundArrow: {r: 0, g: 0, b: 0, a: 0}
+    colorCardNotFoundText: {r: 0, g: 0, b: 0, a: 0}
+    colorThemesButton: {r: 0, g: 0, b: 0, a: 0}
+    colorThemesQuitButton: {r: 0, g: 0, b: 0, a: 0}
+    colorThemesPanel: {r: 0, g: 0, b: 0, a: 0}
+    colorThemesTitleText: {r: 0, g: 0, b: 0, a: 0}
+    colorThemeSelectedIndicator: {r: 0, g: 0, b: 0, a: 0}
+    colorThemeUnselectedIndicator: {r: 0, g: 0, b: 0, a: 0}

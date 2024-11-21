@@ -23,33 +23,27 @@ namespace Karuta.ScriptableObjects
         private DeckInfo.DeckCategory category;
         private DeckInfo.DeckType type;
         private Sprite cover;
+        private string coverName;
         private bool isDownloaded;
 
-        #region Construtors
-        public DeckInfo(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, bool isDownloaded)
+        #region Constructors
+        public DeckInfo(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, string coverName, bool isDownloaded)
         {
-            this.deckName = name;
-            this.category = category;
-            this.type = type;
-            this.cover = cover;
-            this.isDownloaded = isDownloaded;
+            Init(name, category, type, cover, coverName, isDownloaded);
         }
 
         public DeckInfo(JsonObjects.JsonDeckInfo jsonDeckInfo)
         {
-            this.deckName = jsonDeckInfo.name;
-            this.category = (DeckCategory)jsonDeckInfo.category;
-            this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
-            this.cover = GameManager.Instance.LoadSprite(GameManager.coversDirectoryPath, jsonDeckInfo.cover);
-            this.isDownloaded = jsonDeckInfo.isDownloaded;
+            Init(jsonDeckInfo);
         }
 
-        public void Init(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, bool isDownloaded)
+        public void Init(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, string coverName, bool isDownloaded)
         {
             this.deckName = name;
             this.category = category;
             this.type = type;
             this.cover = cover;
+            this.coverName = coverName;
             this.isDownloaded = isDownloaded;
         }
 
@@ -58,10 +52,11 @@ namespace Karuta.ScriptableObjects
             this.deckName = jsonDeckInfo.name;
             this.category = (DeckCategory)jsonDeckInfo.category;
             this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
-            this.cover = GameManager.Instance.LoadSprite(GameManager.coversDirectoryPath, jsonDeckInfo.cover);
+            this.cover = LoadManager.Instance.LoadCover(jsonDeckInfo.cover);
+            this.coverName = jsonDeckInfo.cover;
             this.isDownloaded = jsonDeckInfo.isDownloaded;
         }
-        #endregion Construtors
+        #endregion Constructors
         
         public string Dump()
         {
@@ -116,6 +111,10 @@ namespace Karuta.ScriptableObjects
         public Sprite GetCover()
         {
             return cover;
+        }
+        public string GetCoverName()
+        {
+            return coverName;
         }
         public bool IsDownloaded()
         {

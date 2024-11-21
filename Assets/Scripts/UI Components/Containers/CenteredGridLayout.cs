@@ -136,15 +136,15 @@ namespace Karuta.UIComponent
         /// <summary>
         /// Update the rectTransform size to match the elements of the grid
         /// </summary>
-        private void Resize()
+        public void Resize()
         {
             int fullNonEmpty = fullGrid.transform.childCount > 0 ? 1 : 0;
             int nonFullNonEmpty = nonFullGrid.transform.childCount > 0 ? 1 : 0;
             int nonEmpty = Mathf.Min(fullNonEmpty, nonFullNonEmpty);
-            
+
             fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
             fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (cellSize.y + spacing.y) * (fullGrid.transform.childCount / constraintCount) - spacing.y * fullNonEmpty);
-            
+
             nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
             nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cellSize.y * nonFullNonEmpty);
 
@@ -269,6 +269,11 @@ namespace Karuta.UIComponent
             Resize();
 
             UpdateActive();
+        }
+
+        public int GetNuberChild()
+        {
+            return fullGrid.transform.childCount;
         }
     }
 }

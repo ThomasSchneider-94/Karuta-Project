@@ -17,13 +17,16 @@ namespace Karuta.UIComponent
         [SerializeField] private float nameWidth;
 
         [Header("Spacing")]
+        [SerializeField] private float nameSpacing;
         [SerializeField] private float spacing;
 
         [Header("Container Elements")]
-        [SerializeField] protected VerticalLayoutGroup containerLayout;
-        [SerializeField] protected RectTransform containerRectTransform;
+        [SerializeField] protected VerticalLayoutGroup layout;
+        [SerializeField] protected RectTransform layoutRectTransform;
         [SerializeField] protected TextMeshProUGUI nameTextMesh;
         [SerializeField] protected RectTransform nameRectTransform;
+        [SerializeField] protected VerticalLayoutGroup subLayout;
+        [SerializeField] protected RectTransform subLayoutRectTransform;
 
         private readonly List<RectTransform> childRectTransforms = new();
 
@@ -31,9 +34,9 @@ namespace Karuta.UIComponent
         {
             childRectTransforms.Clear();
 
-            for (int i = 1; i < containerRectTransform.childCount; i++)
+            for (int i = 0; i < subLayout.transform.childCount; i++)
             {
-                childRectTransforms.Add(containerRectTransform.GetChild(i).GetComponent<RectTransform>());
+                childRectTransforms.Add(subLayout.transform.GetChild(i).GetComponent<RectTransform>());
             }
         }
 
@@ -44,16 +47,27 @@ namespace Karuta.UIComponent
                 FindChildRectTransforms();
             }
 
-            float width = nameRectTransform.sizeDelta.x * nameScale;
-            if (childRectTransforms.Count > 0)
+            int empty = childRectTransforms.Count == 0 ? 0 : 1;
+
+            float subWidth = 0;
+            float subHeight = -spacing * empty;
+            foreach (RectTransform rectTransform in childRectTransforms)
             {
-                width = Mathf.Max(width, childRectTransforms.Max(child => child.sizeDelta.x));
+                if (rectTransform.gameObject.activeSelf)
+                {
+                    subWidth = Mathf.Max(subWidth, rectTransform.sizeDelta.x);
+                    subHeight += rectTransform.sizeDelta.y + spacing;
+                }
             }
-            float height = nameRectTransform.sizeDelta.y * nameScale + childRectTransforms.Sum(child => child.sizeDelta.y) + spacing * (childRectTransforms.Count - 1);
 
+            subLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, subWidth);
+            subLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, subHeight);
 
-            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
-            containerRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            float width = Mathf.Max(subWidth, nameRectTransform.sizeDelta.x * nameScale);
+            float height = nameRectTransform.sizeDelta.y * nameScale + nameSpacing * empty + subHeight;
+
+            layoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            layoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
 
         #region Setter
@@ -82,12 +96,20 @@ namespace Karuta.UIComponent
         public void SetSpacing(float spacing)
         {
             this.spacing = spacing;
-            containerLayout.spacing = spacing;
+            subLayout.spacing = spacing;
 
             ResizeContainer();
         }
 
-        public void SetAllParameters(string name, float nameScale, float nameWidth, float spacing)
+        public void SetNameSpacing(float nameSpacing)
+        {
+            this.nameSpacing = nameSpacing;
+            layout.spacing = nameSpacing;
+
+            ResizeContainer();
+        }
+
+        public void SetAllParameters(string name, float nameScale, float nameWidth, float nameSpacing, float spacing)
         {
             // Name
             this.containerName = name;
@@ -101,13 +123,23 @@ namespace Karuta.UIComponent
             this.nameWidth = nameWidth;
             nameRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, nameWidth);
 
+            // Name Spacing
+            this.nameSpacing = nameSpacing;
+            layout.spacing = nameSpacing;
+
             // Spacing
             this.spacing = spacing;
-            containerLayout.spacing = spacing;
+            subLayout.spacing = spacing;
+
 
             ResizeContainer();
         }
         #endregion Setter
+
+        public Transform GetSubContainer()
+        {
+            return subLayout.transform;
+        }
 
         private void OnValidate()
         {
@@ -116,7 +148,8 @@ namespace Karuta.UIComponent
             nameTextMesh.text = containerName;
             nameRectTransform.localScale = new Vector3(nameScale, nameScale, nameScale);
             nameRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, nameWidth);
-            containerLayout.spacing = spacing;
+            subLayout.spacing = spacing;
+            layout.spacing = nameSpacing;
 
             ResizeContainer();
         }

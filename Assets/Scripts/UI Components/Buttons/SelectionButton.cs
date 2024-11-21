@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 namespace Karuta.UIComponent
 {
-    [RequireComponent(typeof(Button))]
     public class SelectionButton : MultiLayerButton
     {
         [Header("Name")]
@@ -109,9 +108,7 @@ namespace Karuta.UIComponent
         {
             base.OnRectTransformDimensionsChange();
 
-            deckNameTextMesh.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetGraphic.rectTransform.sizeDelta.x);
-            deckNameTextMesh.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetGraphic.rectTransform.sizeDelta.y * 0.75f);
-
+            deckNameTextMesh.transform.localScale = targetGraphic.rectTransform.sizeDelta / 100;
 
             deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
         }
