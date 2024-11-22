@@ -39,6 +39,7 @@ namespace Karuta.Menu
 
         /* TODO :
          *      - Download and check cover
+         *      - Download Categories
          */
 
         // Files 
@@ -88,43 +89,60 @@ namespace Karuta.Menu
             waitingPanel.SetActive(true);
             downloadingDeckTextMesh1.text = "Updating decks";
 
+            JsonDeckInfoList jsonDeckInfoList = new()
+            {
+                deckInfoList = new()
+            };
+
             // Download the list of decks name
             List<string> deckNames = new();
             if (!debugOn)
             {
                 yield return StartCoroutine(DownloadDeckList(deckNames));
+
+                if (deckNames.Count == 0) { yield return StartCoroutine(ExitOnDownloadFail("Downloading deck list failed")); }
+
+                // List Init 
+                visualFiles = Directory.GetFiles(LoadManager.VisualsDirectoryPath);
+                audioFiles = Directory.GetFiles(LoadManager.AudioDirectoryPath);
+                List<string> deckContents = new();
+
+                for (int i = 0; i < deckNames.Count; i++)
+                {
+                    downloadingDeckTextMesh1.text = "(" + (i + 1) + "/" + deckNames.Count + ")\n" + deckNames[i];
+
+                    yield return StartCoroutine(DownloadDeckInformation(deckNames[i], deckContents));
+
+                    if (deckContents[^1] != null)
+                    {
+                        JsonDeckInfo deckInfo = SaveDeck(deckContents[^1]);
+
+                        // Add it to the deck list
+                        if (deckInfo != null)
+                        {
+                            jsonDeckInfoList.deckInfoList.Add(deckInfo);
+                        }
+                    }
+                }
             }
             else
             {
                 deckNames = new(Directory.GetFiles(Path.Combine(Application.persistentDataPath, "Debug")));
-            }
 
-            if (deckNames.Count == 0) { yield return StartCoroutine(ExitOnDownloadFail("Downloading deck list failed")); }
+                // List Init 
+                visualFiles = Directory.GetFiles(LoadManager.VisualsDirectoryPath);
+                audioFiles = Directory.GetFiles(LoadManager.AudioDirectoryPath);
+                List<string> deckContents = new();
 
-            // List Init 
-            visualFiles = Directory.GetFiles(LoadManager.VisualsDirectoryPath);
-            audioFiles = Directory.GetFiles(LoadManager.AudioDirectoryPath);
-            JsonDeckInfoList jsonDeckInfoList = new()
-            {
-                deckInfoList = new()
-            };
-            List<string> deckContents = new();
-
-            for (int i = 0; i < deckNames.Count; i++)
-            {
-                downloadingDeckTextMesh1.text = "(" + (i + 1) + "/" + deckNames.Count + ")\n" + deckNames[i];
-
-                yield return StartCoroutine(DownloadDeckInformation(deckNames[i], deckContents));
-
-                if (deckContents[^1] != null)
+                for (int i = 0; i < deckNames.Count; i++)
                 {
+                    downloadingDeckTextMesh1.text = "(" + (i + 1) + "/" + deckNames.Count + ")\n" + deckNames[i];
+
+                    deckContents.Add(File.ReadAllText(deckNames[i]));
+
                     JsonDeckInfo deckInfo = SaveDeck(deckContents[^1]);
 
-                    // Add it to the deck list
-                    if (deckInfo != null)
-                    {
-                        jsonDeckInfoList.deckInfoList.Add(deckInfo);
-                    }
+                    jsonDeckInfoList.deckInfoList.Add(deckInfo);
                 }
             }
 

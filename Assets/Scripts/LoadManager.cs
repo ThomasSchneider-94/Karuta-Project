@@ -26,6 +26,7 @@ namespace Karuta
 
         // Directory paths
         public static string DecksFilePath { get; private set; }
+        public static string CategoriesDirectoryPath { get; private set; }
         public static string DecksDirectoryPath { get; private set; }
         public static string CoversDirectoryPath { get; private set; }
         public static string VisualsDirectoryPath { get; private set; }
@@ -70,6 +71,7 @@ namespace Karuta
         private void Initialize()
         {
             DecksFilePath = Path.Combine(Application.persistentDataPath, "DecksInfo.json");
+            CategoriesDirectoryPath = Path.Combine(Application.persistentDataPath, "Categories");
             DecksDirectoryPath = Path.Combine(Application.persistentDataPath, "Decks");
             CoversDirectoryPath = Path.Combine(Application.persistentDataPath, "Covers");
             VisualsDirectoryPath = Path.Combine(Application.persistentDataPath, "Visuals");
@@ -83,6 +85,10 @@ namespace Karuta
 
         private static void InitDirectories()
         {
+            if (!Directory.Exists(CategoriesDirectoryPath))
+            {
+                Directory.CreateDirectory(CategoriesDirectoryPath);
+            }
             if (!Directory.Exists(DecksDirectoryPath))
             {
                 Directory.CreateDirectory(DecksDirectoryPath);
