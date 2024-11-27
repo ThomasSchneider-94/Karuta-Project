@@ -12,6 +12,23 @@ namespace Karuta.ScriptableObjects
             public string serverIP;
         }
 
+        /* CATEGORIES AND TYPES */
+        #region Categories and Types
+        [Serializable]
+        public class CategoriesAndTypes
+        {
+            public List<Category> categories;
+            public List<string> types;
+        }
+
+        [Serializable]
+        public class Category
+        {
+            public string name;
+            public string icon;
+        }
+        #endregion Categories and Types
+
         /* DOWNLOAD */
         #region Download
         [Serializable]

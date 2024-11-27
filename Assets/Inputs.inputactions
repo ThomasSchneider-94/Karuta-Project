@@ -2,28 +2,28 @@
     "name": "Inputs",
     "maps": [
         {
-            "name": "Menu",
-            "id": "e9764525-8155-4348-899e-a939536f5c84",
+            "name": "Game",
+            "id": "7c7fc031-8380-4093-8d3f-4a29838d70d2",
             "actions": [
                 {
-                    "name": "Return",
-                    "type": "Button",
-                    "id": "be289e5b-7afa-488a-8682-ba309ac01fd0",
-                    "expectedControlType": "Button",
+                    "name": "Touch",
+                    "type": "PassThrough",
+                    "id": "e4613b50-8e90-4bef-ba02-5007d14d692e",
+                    "expectedControlType": "Touch",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "129cb92b-8377-43dc-8124-a89f2b63af54",
-                    "path": "<Keyboard>/escape",
+                    "id": "d71a9971-fa0b-46db-930f-112d143ac80a",
+                    "path": "<Touchscreen>/touch0",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Return",
+                    "action": "Touch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

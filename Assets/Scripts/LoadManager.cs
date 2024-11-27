@@ -26,6 +26,7 @@ namespace Karuta
 
         // Directory paths
         public static string DecksFilePath { get; private set; }
+        public static string CategoriesFilePath { get; private set; }
         public static string CategoriesDirectoryPath { get; private set; }
         public static string DecksDirectoryPath { get; private set; }
         public static string CoversDirectoryPath { get; private set; }
@@ -71,6 +72,7 @@ namespace Karuta
         private void Initialize()
         {
             DecksFilePath = Path.Combine(Application.persistentDataPath, "DecksInfo.json");
+            CategoriesFilePath = Path.Combine(Application.persistentDataPath, "Categories", "Categories.json");
             CategoriesDirectoryPath = Path.Combine(Application.persistentDataPath, "Categories");
             DecksDirectoryPath = Path.Combine(Application.persistentDataPath, "Decks");
             CoversDirectoryPath = Path.Combine(Application.persistentDataPath, "Covers");
@@ -129,6 +131,23 @@ namespace Karuta
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         }
 
+        public Sprite LoadCategoryVisual(string categoryVisual)
+        {
+            if (!File.Exists(Path.Combine(CategoriesDirectoryPath, categoryVisual)))
+            {
+                return defaultSprite;
+            }
+
+            string filePath = Path.Combine(CategoriesDirectoryPath, categoryVisual);
+
+            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+
+            Texture2D texture = new(1, 1);
+            texture.LoadImage(bytes);
+
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        }
+
         public static Sprite LoadThemeVisual(string visual)
         {
             if (!File.Exists(Path.Combine(ThemesDirectoryPath, visual)))
@@ -151,12 +170,12 @@ namespace Karuta
         {
             if (File.Exists(Path.Combine(VisualsDirectoryPath, visual)))
             {
-                Debug.Log("From visual file : " + visual);
+                //Debug.Log("From visual file : " + visual)
                 LoadSpriteFromFile(visual, onLoaded);
             }
             else
             {
-                Debug.Log("Download visual: " + visual);
+                //Debug.Log("Download visual: " + visual)
                 StartCoroutine(DownloadVisual(visual, onLoaded));
             }
         }
@@ -190,7 +209,7 @@ namespace Karuta
             }
             else
             {
-                Debug.LogError($"Failed to download visual: {webRequest.error}");
+                Debug.Log($"Failed to download visual: {webRequest.error}");
                 onLoaded?.Invoke(defaultSprite);
             }
         }
@@ -202,12 +221,12 @@ namespace Karuta
             StopAllCoroutines();
             if (File.Exists(Path.Combine(AudioDirectoryPath, audio)))
             {
-                Debug.Log("From audio file : " + audio);
+                //Debug.Log("From audio file : " + audio)
                 StartCoroutine(LoadAudioFromFile(audio, onLoaded));
             }
             else
             {
-                Debug.Log("Download audio : " + audio);
+                //Debug.Log("Download audio : " + audio)
                 StartCoroutine(DownloadAudio(audio, onLoaded));
             }
         }

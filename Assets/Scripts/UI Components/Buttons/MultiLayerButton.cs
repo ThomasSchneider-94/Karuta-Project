@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Karuta.UIComponent
 {
@@ -19,6 +20,10 @@ namespace Karuta.UIComponent
         [Header("Button Layers")]
         [SerializeField] protected List<ButtonLayer> buttonLayers;
 
+        [Header("Disabled")]
+        [SerializeField] protected bool useDisabledColor;
+
+
         public void AddButtonLayer(ButtonLayer buttonLayer)
         {
             buttonLayers.Add(buttonLayer);
@@ -35,8 +40,15 @@ namespace Karuta.UIComponent
 
         public void SetSprite(int i, Sprite sprite)
         {
-            buttonLayers[i].sprite = sprite;
-            buttonLayers[i].image.sprite = sprite;
+            if (i == 0)
+            {
+                image.sprite = sprite;
+            }
+            else
+            {
+                buttonLayers[i].sprite = sprite;
+                buttonLayers[i].image.sprite = sprite;
+            }
         }
 
         /// <summary>
@@ -57,41 +69,93 @@ namespace Karuta.UIComponent
 
         public void SetColor(int i, Color color)
         {
-            buttonLayers[i].color = color;
-            buttonLayers[i].image.color = color;
+            if (i == 0)
+            {
+                image.color = color;
+            }
+            else
+            {
+                buttonLayers[i].color = color;
+                buttonLayers[i].image.color = color;
+            }
         }
 
         public void SetScale(int i, Vector2 scale)
         {
-            buttonLayers[i].scale = scale;
-            buttonLayers[i].image.transform.localScale = scale;
+            if (i == 0)
+            {
+                transform.localScale = scale;
+            }
+            else
+            {
+                buttonLayers[i].scale = scale;
+                buttonLayers[i].image.transform.localScale = scale;
+            }
         }
         #endregion Setters
 
         #region Getter
-        public ButtonLayer GetButtonElement(int i)
+        public ButtonLayer GetButtonLayer(int i)
         {
-            return buttonLayers[i];
+            if (i == 0)
+            {
+                return new()
+                {
+                    image = image,
+                    sprite = image.sprite,
+                    color = image.color,
+                    scale = transform.localScale
+                };
+            }
+            return buttonLayers[i - 1];
         }
 
         public Image GetImage(int i)
         {
-            return buttonLayers[i].image;
+            if (i == 0)
+            {
+                return image;
+            }
+            return buttonLayers[i - 1].image;
         }
 
         public Sprite GetSprite(int i)
         {
-            return buttonLayers[i].sprite;
+            if (i == 0)
+            {
+                return image.sprite;
+            }
+            return buttonLayers[i - 1].sprite;
         }
 
         public Color GetColor(int i)
         {
-            return buttonLayers[i].color;
+            if (i == 0)
+            {
+                return image.color;
+            }
+            return buttonLayers[i - 1].color;
         }
 
         public Vector2 GetScale(int i)
         {
-            return buttonLayers[i].scale;
+            if (i == 0)
+            {
+                return transform.localScale;
+            }
+            return buttonLayers[i - 1].scale;
+        }
+
+        public List<Image> GetImages()
+        {
+            List<Image> images = new() { image };
+
+            foreach (ButtonLayer layer in buttonLayers)
+            {
+                images.Add(layer.image);
+            }
+
+            return images;
         }
         #endregion Getter
 
@@ -101,21 +165,38 @@ namespace Karuta.UIComponent
 
             if (transition == Transition.ColorTint)
             {
+                // Switch for a single variable
+                Color tintColor = state switch
+                {
+                    SelectionState.Normal => colors.normalColor,
+                    SelectionState.Highlighted => colors.highlightedColor,
+                    SelectionState.Pressed => colors.pressedColor,
+                    SelectionState.Selected => colors.selectedColor,
+                    SelectionState.Disabled => colors.disabledColor,
+                    _ => Color.black,
+                };
                 foreach (ButtonLayer layer in buttonLayers)
                 {
-                    // Switch for a single variable
-                    Color tintColor = state switch
-                    {
-                        SelectionState.Normal => colors.normalColor,
-                        SelectionState.Highlighted => colors.highlightedColor,
-                        SelectionState.Pressed => colors.pressedColor,
-                        SelectionState.Selected => colors.selectedColor,
-                        SelectionState.Disabled => colors.disabledColor,
-                        _ => Color.black,
-                    };
                     layer.image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
                 }
+            }
+            else
+            {
+                if (useDisabledColor)
+                {
+                    // Switch for a single variable
+                    Color tintColor = interactable switch
+                    {
+                        true => colors.normalColor,
+                        false => colors.disabledColor,
+                    };
+                    image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
+                    foreach (ButtonLayer layer in buttonLayers)
+                    {
 
+                        layer.image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
+                    }
+                }
             }
         }
 

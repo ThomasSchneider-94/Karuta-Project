@@ -22,12 +22,14 @@ namespace Karuta.Commons
 
         [SerializeField] private List<OptionToggle> toggles;
         [SerializeField] private List<MultiLayerButton> categoryButtons;
-        [SerializeField] private Sprite karutaIcon;
-        [SerializeField] private Sprite karutoIcon;
 
         private void OnEnable()
         {
             optionsManager = OptionsManager.Instance;
+
+            DecksManager.Instance.UpdateCategoriesEvent.AddListener(ShowCategoryButton);
+            DecksManager.Instance.UpdateDeckListEvent.AddListener(ShowCategoryButton);
+            optionsManager.UpdateCategoryEvent.AddListener(ShowCategoryButton);
 
             // Initialize
             if (optionsManager.IsInitialized())
@@ -62,21 +64,55 @@ namespace Karuta.Commons
                         break;
                 }
             }
+
+            ShowCategoryButton();
         }
 
         public void NextCurrentCategory()
         {
             optionsManager.NextCurrentCategory();
-            Sprite sprite = optionsManager.GetCurrentCategory() switch
-            {
-                DeckInfo.DeckCategory.KARUTA => karutaIcon,
-                DeckInfo.DeckCategory.KARUTO => karutoIcon,
-                _ => LoadManager.Instance.GetDefaultSprite(),
-            };
+            Sprite sprite = optionsManager.GetCurrentCategoryIcon();
 
             foreach (MultiLayerButton button in categoryButtons)
             {
                 button.SetIconSprite(sprite);
+            }
+        }
+
+        private void ShowCategoryButton()
+        {
+            bool showButton;
+            int categoryCount = DecksManager.Instance.GetCategoriesCount();
+            if (optionsManager.AreDifferentCategoriesAllowded())
+            {
+                // If all categories accepted, do not show the button
+                showButton = false;
+            }
+            else if (categoryCount <= 1)
+            {
+                showButton = false;
+            }
+            else
+            {
+                showButton = false;
+                int activeCategoryCount = 0;
+                for (int i = 0; i < categoryCount; i++)
+                {
+                    if (DecksManager.Instance.GetCategoryDecksCount(i) > 0)
+                    {
+                        activeCategoryCount++;
+                        if (activeCategoryCount >= 2)
+                        {
+                            showButton = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            foreach (MultiLayerButton button in categoryButtons)
+            {
+                button.gameObject.SetActive(showButton);
             }
         }
 

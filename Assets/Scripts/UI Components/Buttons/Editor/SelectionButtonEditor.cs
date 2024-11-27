@@ -10,6 +10,7 @@ namespace Karuta.EditorLayout
         [Header("Name")]
         SerializedProperty deckNameTextMesh;
         SerializedProperty deckName;
+        SerializedProperty nameWidth;
         SerializedProperty nameSpacing;
 
         [Header("Selected Color")]
@@ -27,6 +28,7 @@ namespace Karuta.EditorLayout
 
             deckNameTextMesh = serializedObject.FindProperty("deckNameTextMesh");
             deckName = serializedObject.FindProperty("deckName");
+            nameWidth = serializedObject.FindProperty("nameWidth");
             nameSpacing = serializedObject.FindProperty("nameSpacing");
 
             isSelected = serializedObject.FindProperty("isSelected");
@@ -48,6 +50,7 @@ namespace Karuta.EditorLayout
             // Afficher les propriétés personnalisées de VolumeSlider
             EditorGUILayout.PropertyField(deckNameTextMesh);
             EditorGUILayout.PropertyField(deckName);
+            EditorGUILayout.PropertyField(nameWidth);
             EditorGUILayout.PropertyField(nameSpacing);
 
             EditorGUILayout.PropertyField(isSelected);

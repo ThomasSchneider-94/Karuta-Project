@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.UI;
 
 namespace Karuta.UIComponent
@@ -10,6 +11,7 @@ namespace Karuta.UIComponent
         [Header("Name")]
         [SerializeField] private TextMeshProUGUI deckNameTextMesh;
         [SerializeField] private string deckName;
+        [SerializeField] private float nameWidth;
         [SerializeField] private float nameSpacing = 20;
 
         [Header("Selected Color")]
@@ -24,13 +26,19 @@ namespace Karuta.UIComponent
         #region Setter
         public void SetDeckName(string name)
         {
-            deckName = name;
+            this.deckName = name;
             deckNameTextMesh.text = name;
+        }
+
+        public void SetNameWidth(float width)
+        {
+            this.nameWidth = width;
+            deckNameTextMesh.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
         }
 
         public void SetNameSpacing(float spacing)
         {
-            nameSpacing = spacing;
+            this.nameSpacing = spacing;
             deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + spacing));
         }
         #endregion Setter
@@ -89,26 +97,26 @@ namespace Karuta.UIComponent
 
         protected override void DoStateTransition(Selectable.SelectionState state, bool instant)
         {
-            if (isSelected)
-            {
-                targetGraphic.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
+            base.DoStateTransition(state, instant);
 
-                foreach (ButtonLayer layer in buttonLayers)
-                {
-                    layer.image.CrossFadeColor(selectedColor * colors.colorMultiplier, 0f, true, true);
-                }
-            }
-            else
+            // Switch for a single variable
+            Color tintColor = isSelected switch
             {
-                base.DoStateTransition(state, instant);
+                true => selectedColor,
+                false => colors.normalColor,
+            };
+
+            targetGraphic.CrossFadeColor(tintColor * colors.colorMultiplier, 0f, true, true);
+
+            foreach (ButtonLayer layer in buttonLayers)
+            {
+                layer.image.CrossFadeColor(tintColor * colors.colorMultiplier, 0f, true, true);
             }
         }
 
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
-
-            deckNameTextMesh.transform.localScale = targetGraphic.rectTransform.sizeDelta / 100;
 
             deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
         }
@@ -120,6 +128,7 @@ namespace Karuta.UIComponent
             base.OnValidate();
 
             SetDeckName(deckName);
+            SetNameWidth(nameWidth);
             SetNameSpacing(nameSpacing);
             SetCounter(count);
         }

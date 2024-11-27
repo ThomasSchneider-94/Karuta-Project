@@ -11,11 +11,15 @@ namespace Karuta.EditorLayout
         [Header("Button Layers")]
         SerializedProperty buttonLayers;
 
+        [Header("Disabled")]
+        SerializedProperty useDisabledColor;
+
         protected override void OnEnable()
         {
             base.OnEnable();
 
             buttonLayers = serializedObject.FindProperty("buttonLayers");
+            useDisabledColor = serializedObject.FindProperty("useDisabledColor");
         }
 
         public override void OnInspectorGUI()
@@ -28,6 +32,7 @@ namespace Karuta.EditorLayout
 
             // Afficher les propriétés personnalisées de VolumeSlider
             EditorGUILayout.PropertyField(buttonLayers);
+            EditorGUILayout.PropertyField(useDisabledColor);
 
             // Appliquer les changements
             serializedObject.ApplyModifiedProperties();

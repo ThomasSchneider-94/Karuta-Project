@@ -5,39 +5,15 @@ namespace Karuta.ScriptableObjects
 {
     public class DeckInfo : ScriptableObject
     {
-        public enum DeckCategory
-        {
-            KARUTA,
-            KARUTO,
-            CATEGORY_NB
-        }
-        public enum DeckType
-        {
-            CASUAL,
-            NORMAL,
-            FREESTYLE,
-            TYPE_NB
-        }
-
         private string deckName;
-        private DeckInfo.DeckCategory category;
-        private DeckInfo.DeckType type;
+        private int category;
+        private int type;
         private Sprite cover;
         private string coverName;
         private bool isDownloaded;
 
         #region Constructors
-        public DeckInfo(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, string coverName, bool isDownloaded)
-        {
-            Init(name, category, type, cover, coverName, isDownloaded);
-        }
-
-        public DeckInfo(JsonObjects.JsonDeckInfo jsonDeckInfo)
-        {
-            Init(jsonDeckInfo);
-        }
-
-        public void Init(string name, DeckInfo.DeckCategory category, DeckType type, Sprite cover, string coverName, bool isDownloaded)
+        public void Init(string name, int category, int type, Sprite cover, string coverName, bool isDownloaded)
         {
             this.deckName = name;
             this.category = category;
@@ -50,8 +26,8 @@ namespace Karuta.ScriptableObjects
         public void Init(JsonObjects.JsonDeckInfo jsonDeckInfo)
         {
             this.deckName = jsonDeckInfo.name;
-            this.category = (DeckCategory)jsonDeckInfo.category;
-            this.type = (DeckInfo.DeckType)jsonDeckInfo.type;
+            this.category = jsonDeckInfo.category;
+            this.type = jsonDeckInfo.type;
             this.cover = LoadManager.Instance.LoadCover(jsonDeckInfo.cover);
             this.coverName = jsonDeckInfo.cover;
             this.isDownloaded = jsonDeckInfo.isDownloaded;
@@ -60,7 +36,7 @@ namespace Karuta.ScriptableObjects
         
         public string Dump()
         {
-            return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", deckName, category.ToString(), type.ToString(), cover.name, isDownloaded);
+            return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", deckName, category, type, coverName, isDownloaded);
         }
 
         /// <summary>
@@ -70,21 +46,21 @@ namespace Karuta.ScriptableObjects
         /// <returns></returns>
         public bool IsGreaterThan(DeckInfo deck)
         {
-            if ((int)category < (int)deck.category)
+            if (category < deck.category)
             {
                 return false;
             }
-            else if ((int)category > (int)deck.category)
+            else if (category > deck.category)
             {
                 return true;
             }
             else
             {
-                if ((int)type < (int)deck.type)
+                if (type < deck.type)
                 {
                     return false;
                 }
-                else if ((int)type > (int)deck.type)
+                else if (type > deck.type)
                 {
                     return true;
                 }
@@ -100,22 +76,27 @@ namespace Karuta.ScriptableObjects
         {
             return deckName;
         }
-        public DeckCategory GetCategory()
+
+        public int GetCategory()
         {
             return category;
         }
-        public DeckType GetDeckType()
+
+        public int GetDeckType()
         {
             return type;
         }
+
         public Sprite GetCover()
         {
             return cover;
         }
+
         public string GetCoverName()
         {
             return coverName;
         }
+
         public bool IsDownloaded()
         {
             return isDownloaded;

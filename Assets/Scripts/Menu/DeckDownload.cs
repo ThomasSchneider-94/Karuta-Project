@@ -231,14 +231,13 @@ namespace Karuta.Menu
             return new JsonDeckInfo
             {
                 name = downloadDeck.name,
-                category = (int)(DeckInfo.DeckCategory)System.Enum.Parse(typeof(DeckInfo.DeckCategory), downloadDeck.category),
-                type = (int)(DeckInfo.DeckType)System.Enum.Parse(typeof(DeckInfo.DeckType), downloadDeck.type),
+                category = DecksManager.Instance.GetCategories().IndexOf(downloadDeck.category),
+                type = DecksManager.Instance.GetTypes().IndexOf(downloadDeck.type),
                 cover = downloadDeck.cover,
                 isDownloaded = IsDeckDownloaded(downloadDeck),
             };
         }
         
-        #region Check Deck Validity
         /// <summary>
         /// Check if deck is valid (do not check the number of jsonCards)
         /// </summary>
@@ -252,12 +251,12 @@ namespace Karuta.Menu
                 Debug.Log("D_ " + string.Format("Deck {0} has null attributes: category: {1}; type: {2}; cover {3}", downloadDeck.name, downloadDeck.category, downloadDeck.type, downloadDeck.cover));
                 return false;
             }
-            if (!IsEnumValue<DeckInfo.DeckCategory>(downloadDeck.category) || downloadDeck.category == DeckInfo.DeckCategory.CATEGORY_NB.ToString()) // Category
+            if (!DecksManager.Instance.GetCategories().Contains(downloadDeck.category)) // Category
             {
                 Debug.Log("D_ " + string.Format("Deck {0} category do not match Enum: {1}", downloadDeck.name, downloadDeck.category));
                 return false; 
             }
-            if (!IsEnumValue<DeckInfo.DeckType>(downloadDeck.type) || downloadDeck.type == DeckInfo.DeckType.TYPE_NB.ToString()) // Type
+            if (!DecksManager.Instance.GetTypes().Contains(downloadDeck.type)) // Type
             {
                 Debug.Log("D_ " + string.Format("Deck {0} type do not match Enum: {1}", downloadDeck.name, downloadDeck.type));
                 return false; 
@@ -275,19 +274,6 @@ namespace Karuta.Menu
 
             return true;
         }
-
-        /// <summary>
-        /// Check if the string is part of a given Enum
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static bool IsEnumValue<T>(string value) where T : struct
-        {
-            return Enum.IsDefined(typeof(T), value);
-        }
-        #endregion Check Deck Validity
-
         #endregion Update Deck list
 
         #region Toggles
@@ -316,7 +302,7 @@ namespace Karuta.Menu
         {
             //Debug.Log("!D Create Deck Toggles")
             togglesParent.spacing = toggleSpacing;
-
+            togglesParent.transform.localScale = toggleScale;
 
             foreach (DeckInfo deck in DecksManager.Instance.GetDeckList())
             {
@@ -334,11 +320,11 @@ namespace Karuta.Menu
             LabeledToggle toggle = GameObject.Instantiate(togglePrefab);
 
             toggle.transform.SetParent(togglesParent.transform); // setting parent
-            toggle.transform.localScale = toggleScale;
 
             // Set Toggle Values
             toggle.SetLabel(deckName);
             toggle.SetIsOnWithoutNotify(false);
+            toggle.transform.localScale = Vector2.one;
 
             toggle.onValueChanged.AddListener(delegate { CheckIfAllToggleSelected(); });
             toggle.onValueChanged.AddListener(delegate { CheckIfOneToggleSelected(); });
@@ -482,8 +468,8 @@ namespace Karuta.Menu
                     jsonDeckInfoList.deckInfoList.Add(new JsonDeckInfo()
                     {
                         name = deckList[i].GetName(),
-                        category = (int)deckList[i].GetCategory(),
-                        type = (int)deckList[i].GetDeckType(),
+                        category = deckList[i].GetCategory(),
+                        type = deckList[i].GetDeckType(),
                         cover = deckList[i].GetCoverName(),
                         isDownloaded = deckList[i].IsDownloaded() || IsDeckDownloaded(deckList[i])
                     });
@@ -506,13 +492,13 @@ namespace Karuta.Menu
         private IEnumerator DownloadDeckContent(DeckInfo deckInfo, List<bool> isDeckDownloaded)
         {
             // If the deck file does not exist, do not try to download it
-            if (!File.Exists(Path.Combine(LoadManager.DecksDirectoryPath, deckInfo.GetCategory().ToString(), deckInfo.GetName() + ".json"))) 
+            if (!File.Exists(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deckInfo.GetCategory()), deckInfo.GetName() + ".json"))) 
             {
                 isDeckDownloaded[0] = true;
                 yield break; 
             }
 
-            JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, deckInfo.GetCategory().ToString(), deckInfo.GetName() + ".json")));
+            JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deckInfo.GetCategory()), deckInfo.GetName() + ".json")));
             List<bool> isCardDownloaded = new() { false };
 
             for (int i = 0; i < jsonCards.cards.Count; i++)
@@ -617,7 +603,7 @@ namespace Karuta.Menu
         /// <returns></returns>
         private bool IsDeckDownloaded(DeckInfo deck)
         {
-            JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, deck.GetCategory().ToString(), deck.GetName() + ".json")));
+            JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deck.GetCategory()), deck.GetName() + ".json")));
 
             foreach (JsonCard jsonCard in jsonCards.cards)
             {
@@ -636,9 +622,7 @@ namespace Karuta.Menu
         /// <returns></returns>
         private bool IsDeckDownloaded(DownloadDeck deck)
         {
-            JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, deck.category, deck.name + ".json")));
-
-            foreach (JsonCard jsonCard in jsonCards.cards)
+            foreach (JsonCard jsonCard in deck.cards)
             {
                 if (!IsCardDownloaded(jsonCard))
                 {
@@ -667,7 +651,7 @@ namespace Karuta.Menu
         {
             if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(LoadManager.VisualsDirectoryPath, downloadCardVisual)))
             {
-                //Debug.Log("D_ Visual " + downloadCardVisual + " does not exist")
+                Debug.Log("D_ Visual " + downloadCardVisual + " does not exist");
                 return false;
             }
             return true;
@@ -682,7 +666,7 @@ namespace Karuta.Menu
         {
             if (!Array.Exists(audioFiles, audioFile => audioFile == Path.Combine(LoadManager.AudioDirectoryPath, downloadCardAudio)))
             {
-                //Debug.Log("D_ Audio " + downloadCardAudio + " does not exist")
+                Debug.Log("D_ Audio " + downloadCardAudio + " does not exist");
                 return false;
             }
             return true;
@@ -701,11 +685,7 @@ namespace Karuta.Menu
         private void OnValidate()
         {
             togglesParent.spacing = toggleSpacing;
-
-            foreach(Toggle toggle in toggles)
-            {
-                toggle.transform.localScale = toggleScale;
-            }
+            togglesParent.transform.localScale = toggleScale;
         }
     }
 }

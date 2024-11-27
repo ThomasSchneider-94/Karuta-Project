@@ -5,16 +5,16 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.IO;
 using static Karuta.ScriptableObjects.JsonObjects;
+using System.Xml.Linq;
+using UnityEngine.Rendering;
 
 namespace Karuta
 {
     /* TODO : 
-     * - Add arrow buttons to UI
-     * - Add the selection for the number of deck
      * - The download (with loading screen)
-     * - THE GAME
      * - Changer la police des boutons des decks
      * - Themes
+     * - Video Background
      */
 
 
@@ -23,8 +23,6 @@ namespace Karuta
          *      - Manage disconnexion
          *      - Manage if wrong informations
          */
-
-
 
     public class DecksManager : MonoBehaviour
     {
@@ -45,9 +43,13 @@ namespace Karuta
          *   The list decksNumbers is the count deck for each category / type couple.
          */
         private readonly List<DeckInfo> deckInfoList = new();
-        private readonly List<int> decksCount = new((int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB);
+        private readonly List<int> decksCount = new();
+
+        private readonly List<string> categories = new();
+        private List<string> types = new();
 
         public UnityEvent DeckListInitializedEvent { get; } = new UnityEvent();
+        public UnityEvent UpdateCategoriesEvent { get; } = new UnityEvent();
         public UnityEvent UpdateDeckListEvent { get; } = new UnityEvent();
 
         private bool initialized = false;
@@ -78,7 +80,19 @@ namespace Karuta
 
         private void Initialize()
         {
-            for (int i = 0; i < (int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB; i++)
+            // Read the deck categories and deck types
+            if (File.Exists(LoadManager.CategoriesFilePath))
+            {
+                CategoriesAndTypes categoriesAndTypes = JsonUtility.FromJson<CategoriesAndTypes>(File.ReadAllText(LoadManager.CategoriesFilePath));
+
+                foreach (Category category in categoriesAndTypes.categories)
+                {
+                    categories.Add(category.name);
+                }
+                types = categoriesAndTypes.types;
+            }
+
+            for (int i = 0; i < categories.Count * types.Count; i++)
             {
                 decksCount.Add(0);
             }
@@ -100,14 +114,71 @@ namespace Karuta
             deckInfoList.Clear();
             decksCount.Clear();
 
-            for (int i = 0; i < (int)DeckInfo.DeckCategory.CATEGORY_NB * (int)DeckInfo.DeckType.TYPE_NB; i++)
+            List<string> categoriesTMP = new(categories);
+            List<string> typesTMP = new(types);
+
+            categories.Clear();
+            types.Clear();
+
+            // Read the deck categories and deck types
+            if (File.Exists(LoadManager.CategoriesFilePath))
+            {
+                CategoriesAndTypes categoriesAndTypes = JsonUtility.FromJson<CategoriesAndTypes>(File.ReadAllText(LoadManager.CategoriesFilePath));
+
+                foreach (Category category in categoriesAndTypes.categories)
+                {
+                    categories.Add(category.name);
+                }
+                types = categoriesAndTypes.types;
+            }
+
+            // Check if the new categories and types are different from the previous ones
+            bool different = false;
+            if (categories.Count != categoriesTMP.Count || types.Count != typesTMP.Count)
+            {
+                Debug.Log("Differnts sizes");
+                different = true;
+            }
+            else
+            {
+                for (int i = 0; i < categories.Count; i++)
+                {
+                    if (categories[i] != categoriesTMP[i])
+                    {
+                        Debug.Log("Old category: " + typesTMP[i] + "; New category: " + types[i]);
+                        different = true; 
+                        break;
+                    }
+                }
+                for (int i = 0; i < types.Count; i++)
+                {
+                    if (types[i] != typesTMP[i])
+                    {
+                        Debug.Log("Old type: " + typesTMP[i] + "; New type: " + types[i]);
+                        different = true;
+                        break;
+                    }
+                }
+            }
+
+            for (int i = 0; i < categories.Count * types.Count; i++)
             {
                 decksCount.Add(0);
             }
 
             LoadDecksInformations();
 
-            UpdateDeckListEvent.Invoke();
+            // If the categories are the same, only update the deck list. If not update the categories
+            if (different)
+            {
+                Debug.Log("Different");
+                UpdateCategoriesEvent.Invoke();
+            }
+            else
+            {
+                Debug.Log("Same");
+                UpdateDeckListEvent.Invoke();
+            }
         }
 
         /// <summary>
@@ -124,7 +195,7 @@ namespace Karuta
                     DeckInfo deckInfo = ScriptableObject.CreateInstance<DeckInfo>();
                     deckInfo.Init(jsonDeckInfo);
                     deckInfoList.Add(deckInfo);
-                    decksCount[(int)deckInfo.GetCategory() * (int)DeckInfo.DeckType.TYPE_NB + (int)deckInfo.GetDeckType()]++;
+                    decksCount[deckInfo.GetCategory() * types.Count + deckInfo.GetDeckType()]++;
                 }
             }
             else
@@ -204,12 +275,12 @@ namespace Karuta
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public int GetCategoryCount(DeckInfo.DeckCategory category)
+        public int GetCategoryDecksCount(int category)
         {
             int totalCount = 0;
-            for (int i = 0; i < (int)DeckInfo.DeckType.TYPE_NB; i++)
+            for (int i = 0; i < types.Count; i++)
             {
-                totalCount += GetTypeCount(category, (DeckInfo.DeckType)i);
+                totalCount += GetTypeDecksCount(category, i);
             }
             return totalCount;
         }
@@ -220,9 +291,9 @@ namespace Karuta
         /// <param name="category"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public int GetTypeCount(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
+        public int GetTypeDecksCount(int category, int type)
         {
-            return decksCount[(int)category * (int)DeckInfo.DeckType.TYPE_NB + (int)type];
+            return decksCount[category * types.Count + type];
         }
         #endregion Count
 
@@ -232,10 +303,10 @@ namespace Karuta
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public int GetCategoryIndex(DeckInfo.DeckCategory category)
+        public int GetCategoryIndex(int category)
         {
             int start = 0;
-            for (int i = 0; i < (int)category * (int)DeckInfo.DeckType.TYPE_NB; i++)
+            for (int i = 0; i < category * types.Count; i++)
             {
                 start += decksCount[i];
             }
@@ -248,12 +319,12 @@ namespace Karuta
         /// <param name="category"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public int GetTypeIndex(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
+        public int GetTypeIndex(int category, int type)
         {
             int start = GetCategoryIndex(category);
-            for (int i = 0; i < (int)type; i++)
+            for (int i = 0; i < type; i++)
             {
-                start += decksCount[(int)category * (int)DeckInfo.DeckType.TYPE_NB + i];
+                start += decksCount[category * types.Count + i];
             }
             return start;
         }
@@ -269,13 +340,13 @@ namespace Karuta
             return deckInfoList[i];
         }
 
-        public List<DeckInfo> GetCategoryDeckList(DeckInfo.DeckCategory category)
+        public List<DeckInfo> GetCategoryDeckList(int category)
         {
-            return deckInfoList.GetRange(GetCategoryIndex(category), GetCategoryCount(category));
+            return deckInfoList.GetRange(GetCategoryIndex(category), GetCategoryDecksCount(category));
         }
-        public List<DeckInfo> GetTypeDeckList(DeckInfo.DeckCategory category, DeckInfo.DeckType type)
+        public List<DeckInfo> GetTypeDeckList(int category, int type)
         {
-            return deckInfoList.GetRange(GetTypeIndex(category, type), GetTypeCount(category, type));
+            return deckInfoList.GetRange(GetTypeIndex(category, type), GetTypeDecksCount(category, type));
         }
         #endregion Deck List Getter
 
@@ -316,5 +387,37 @@ namespace Karuta
             selectedDecks.Clear();
         }
         #endregion Selected Decks
+
+        #region Categories and Types
+        public int GetCategoriesCount()
+        {
+            return categories.Count;
+        }
+
+        public List<string> GetCategories()
+        {
+            return categories;
+        }
+
+        public string GetCategory(int i)
+        {
+            return categories[i];
+        }
+
+        public int GetTypesCount()
+        {
+            return types.Count;
+        }
+
+        public List<string> GetTypes()
+        {
+            return types;
+        }
+
+        public string GetType(int i)
+        {
+            return types[i];
+        }
+        #endregion Categories and Types
     }
 }

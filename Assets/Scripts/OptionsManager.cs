@@ -1,6 +1,9 @@
-using Karuta.ScriptableObjects;
+using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 using UnityEngine.Events;
+using static Karuta.ScriptableObjects.JsonObjects;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Karuta
 {
@@ -20,13 +23,14 @@ namespace Karuta
         [SerializeField] private bool hideAnswer = false;
         [SerializeField] private bool allowMirrorMatch = false;
         [SerializeField] private bool allowDifferentCategories = false;
-        [SerializeField] private DeckInfo.DeckCategory currentCategory = DeckInfo.DeckCategory.KARUTA;
+        [SerializeField] private int currentCategory = 0;
+
+        private readonly List<Sprite> categoriesIcons = new();
 
         public UnityEvent OptionsInitializedEvent { get; } = new UnityEvent();
         public UnityEvent UpdateCategoryEvent { get; } = new UnityEvent();
         public UnityEvent UpdateMirorMatchEvent { get; } = new UnityEvent();
         public UnityEvent UpdateHidenAnswerEvent { get; } = new UnityEvent();
-
 
         private bool initialized;
 
@@ -38,6 +42,7 @@ namespace Karuta
                 Instance = this;
 
                 Initialize();
+                DecksManager.Instance.UpdateCategoriesEvent.AddListener(UpdateCategoryIcons);
 
                 initialized = true;
             }
@@ -54,6 +59,29 @@ namespace Karuta
             hideAnswer = PlayerPrefs.GetInt("HIDE_ANSWER", 0) == 1;
             allowMirrorMatch = PlayerPrefs.GetInt("ALLOW_MIRROR_MATCH", 0) == 1;
             allowDifferentCategories = PlayerPrefs.GetInt("ALLOW_DIFFERENT_CATEGORIES", 0) == 1;
+
+            UpdateCategoryIcons();
+        }
+
+        private void UpdateCategoryIcons()
+        {
+            categoriesIcons.Clear();
+
+            // Read the deck categories and deck types
+            if (File.Exists(LoadManager.CategoriesFilePath))
+            {
+                CategoriesAndTypes categoriesAndTypes = JsonUtility.FromJson<CategoriesAndTypes>(File.ReadAllText(LoadManager.CategoriesFilePath));
+
+                foreach (Category category in categoriesAndTypes.categories)
+                {
+                    categoriesIcons.Add(LoadManager.Instance.LoadCategoryVisual(category.icon));
+                }
+            }
+
+            if (currentCategory != Mathf.Min(currentCategory, categoriesIcons.Count - 1))
+            {
+                SetCurrentCategory(0);
+            }
         }
 
         public bool IsInitialized()
@@ -104,20 +132,26 @@ namespace Karuta
         #endregion Switch
 
         #region Current Category
-        public void SetCurrentCategory(DeckInfo.DeckCategory category)
+        public void SetCurrentCategory(int category)
         {
+            if (category >= categoriesIcons.Count)
+            {
+                Debug.LogError("Category " + category + " is greater than " +  categoriesIcons.Count);
+                return;
+            }
+
             this.currentCategory = category;
             UpdateCategoryEvent.Invoke();
         }
 
         public void NextCurrentCategory()
         {
-            DeckInfo.DeckCategory currentCategoryTmp = this.currentCategory;
+            int currentCategoryTmp = this.currentCategory;
 
-            this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
-            while (this.currentCategory != currentCategoryTmp && DecksManager.Instance.GetCategoryCount(this.currentCategory) == 0)
+            this.currentCategory = ((currentCategory + 1) % DecksManager.Instance.GetCategoriesCount());
+            while (this.currentCategory != currentCategoryTmp && DecksManager.Instance.GetCategoryDecksCount(this.currentCategory) == 0)
             {
-                this.currentCategory = (DeckInfo.DeckCategory)(((int)currentCategory + 1) % (int)DeckInfo.DeckCategory.CATEGORY_NB);
+                this.currentCategory = ((currentCategory + 1) % DecksManager.Instance.GetCategoriesCount());
             }
 
             if (this.currentCategory != currentCategoryTmp)
@@ -148,7 +182,7 @@ namespace Karuta
             return allowDifferentCategories;
         }
 
-        public DeckInfo.DeckCategory GetCurrentCategory()
+        public int GetCurrentCategory()
         {
             return currentCategory;
         }
@@ -158,10 +192,21 @@ namespace Karuta
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public bool IsCategoryActive(DeckInfo.DeckCategory category)
+        public bool IsCategoryActive(int category)
         {
             return allowDifferentCategories || category == currentCategory;
         }
         #endregion Getter
+
+        public Sprite GetCategoryIcon(int category)
+        {
+            return categoriesIcons[category];
+        }
+
+        public Sprite GetCurrentCategoryIcon()
+        {
+            return categoriesIcons[currentCategory];
+        }
+
     }
 }

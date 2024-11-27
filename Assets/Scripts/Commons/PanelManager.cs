@@ -1,6 +1,7 @@
 using Karuta;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -12,10 +13,9 @@ namespace Karuta.Commons
     {
         [SerializeField] private GameObject startPanel;
 
-
         [Header("Panels")]
         [SerializeField] private List<GameObject> panels = new();
-        
+
         private readonly Stack<GameObject> currentPanels = new();
 
         private void Start()
