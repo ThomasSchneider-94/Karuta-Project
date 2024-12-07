@@ -1,15 +1,14 @@
-using Karuta.ScriptableObjects;
 using Karuta.UIComponent;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using static Karuta.ScriptableObjects.JsonObjects;
+using Karuta.Objects;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using System.Collections;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Unity.VisualScripting;
 
 namespace Karuta.Game
 {
@@ -34,6 +33,7 @@ namespace Karuta.Game
         private bool pause = false;
 
         [Header("Hide Answers")]
+        [SerializeField] private float sensitivity;
         [SerializeField] private Button cardButton;
         [SerializeField] private Sprite hidingSprite;
         private bool cardHiden;
@@ -48,9 +48,9 @@ namespace Karuta.Game
         [SerializeField] private float rotationDivisor;
         [SerializeField] private float returnToPositionTime;
         [SerializeField] private float angleThreshold;
+        private float distanceTreshold;
 
         [Header("Indications")]
-        [SerializeField] private float indicationsFadeDivisor;
         [SerializeField] private Image foundImage;
         [SerializeField] private TextMeshProUGUI foundText;
         [SerializeField] private Image notFoundImage;
@@ -62,6 +62,10 @@ namespace Karuta.Game
         private Card currentCard;
         private Vector2 cardBasePosition;
         private bool cardMoving = false;
+        private bool cardPressed = false;
+
+        private bool visualLoaded = false;
+        private bool audioLoaded = false;
 
         private void OnEnable()
         {
@@ -83,6 +87,8 @@ namespace Karuta.Game
             notFoundColor = tempNotFoundColor;
 
             ApplyIndicationColors();
+
+            distanceTreshold = rotationDivisor * (angleThreshold / maxRotation);
 
             // Initialize
             if (DecksManager.Instance.IsInitialized())
@@ -121,9 +127,7 @@ namespace Karuta.Game
 
                 foreach (JsonCard jsonCard in jsonCards.cards)
                 {
-                    Card card = ScriptableObject.CreateInstance<Card>();
-                    card.Init(deck.GetName(), jsonCard);
-                    cards.Add(card);
+                    cards.Add(new(deck.GetName(), jsonCard));
                 }
             }
 
@@ -154,17 +158,19 @@ namespace Karuta.Game
 
             cardButton.interactable = false;
             cardHiden = optionsManager.AreAnswersHiden();
+            
+            audioLoaded = false;
 
             // Load visual and audio
             loadManager.LoadAudio(currentCard.GetAudioName(), OnAudioLoaded);
             if (currentCard.GetVisual() == null)
             {
+                visualLoaded = false;
                 loadManager.LoadVisual(currentCard.GetVisualName(), OnVisualLoaded);
             }
             else
             {
-                SetCardVisualAndInformation();
-                StartCoroutine(CardAppear());
+                visualLoaded = true;
             }
         }
 
@@ -177,13 +183,20 @@ namespace Karuta.Game
             if (sprite != null)
             {
                 currentCard.InitVisual(sprite);
-                SetCardVisualAndInformation();
-
-                StartCoroutine(CardAppear());
             }
             else
             {
-                Debug.LogError("Failed to load visual");
+                Debug.LogWarning("Failed to load visual");
+                currentCard.InitVisual(loadManager.GetDefaultSprite());
+            }
+
+            if (audioLoaded)
+            {
+                CardLoaded();
+            }
+            else
+            {
+                visualLoaded = true;
             }
         }
 
@@ -225,25 +238,56 @@ namespace Karuta.Game
             if (audioClip != null)
             {
                 audioSource.clip = audioClip;
-                
-                if (optionsManager.GetAutoPlay())
-                {
-                    pauseButton.SetIconSprite(pauseSprite);
-                    audioSource.Play();
-                    pause = false;
-                }
-                else
-                {
-                    pauseButton.SetIconSprite(playSprite);
-                    audioSource.Pause();
-                    pause = true;
-                }
             }
             else
             {
-                Debug.LogError("Failed to load audio clip");
+                Debug.LogWarning("Failed to load audio clip");
+                audioSource.clip = loadManager.GetDefaultAudio();
+            }
+
+            if (visualLoaded)
+            {
+                CardLoaded();
+            }
+            else
+            {
+                audioLoaded = true;
             }
         }
+        
+        /// <summary>
+        /// Called when all the card informations are loaded
+        /// </summary>
+        private void CardLoaded()
+        {
+            // Visual
+            SetCardVisualAndInformation();
+            StartCoroutine(CardAppear());
+
+            // Audio
+            if (optionsManager.GetAutoPlay())
+            {
+                pauseButton.SetIconSprite(pauseSprite);
+                audioSource.Play();
+                pause = false;
+            }
+            else
+            {
+                pauseButton.SetIconSprite(playSprite);
+                audioSource.Pause();
+                pause = true;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
 
         /// <summary>
         /// Play next card. Remove current if found == true
@@ -304,81 +348,133 @@ namespace Karuta.Game
 
         #region Card Movement
         /// <summary>
-        /// Move the card following the position on touchscreen
+        /// Move the card following the currentPosition on touchscreen or hide it
         /// </summary>
         /// <param name="context"></param>
-        public void MoveCard(InputAction.CallbackContext context)
+        public void CardInteraction(InputAction.CallbackContext context)
         {
-            if (optionsManager.AreAnswersHiden() && cardHiden) { return; }
+            if (!gamePanel.activeSelf) { return; }
 
             TouchState state = context.ReadValue<TouchState>();
 
             if (state.isInProgress)
             {
-                if (!cardMoving && gamePanel.activeSelf)
+                if (cardMoving)
                 {
-                    // If the card is not moving, check if the card is touched
-                    Vector3 visualCardPosition = (Vector2)cardImage.rectTransform.position - cardImage.rectTransform.pivot * cardImage.rectTransform.sizeDelta * cardImage.rectTransform.lossyScale;
-
-                    if (state.position.x < visualCardPosition.x ||
-                        state.position.x > visualCardPosition.x + cardImage.rectTransform.lossyScale.x * cardImage.rectTransform.sizeDelta.x ||
-                        state.position.y < visualCardPosition.y ||
-                        state.position.y > visualCardPosition.y + cardImage.rectTransform.lossyScale.y * cardImage.rectTransform.sizeDelta.y)
-                    {
-                        return;
-                    }
-
-                    // If true
-                    cardMoving = true;
+                    Debug.Log("Card Moving");
+                    MoveCard(state.startPosition, state.position);
                 }
-                // Make the card follow verticaly the position on touchscreen
-                cardImage.transform.localPosition = cardBasePosition + new Vector2(0, state.position.y - state.startPosition.y);
+                else if (cardPressed)
+                {
+                    Debug.Log("Card Pressed");
 
-                int sign = state.position.x - state.startPosition.x < 0 ? 1 : -1;
-                cardImage.transform.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(0, sign * maxRotation, (Mathf.Abs(state.position.x - state.startPosition.x)) / rotationDivisor));
+                    // Check if card need to be moved
+                    if ((!optionsManager.AreAnswersHiden() || !cardHiden) && Mathf.Abs(state.startPosition.x - state.position.x) > sensitivity)
+                    {
+                        cardMoving = true;
+                    }
+                }
+                else
+                {
+                    Debug.Log("Check");
 
-                // Set indication color
-                Color tempFoundColor = foundColor;
-                tempFoundColor.a = Mathf.Lerp(0, 1, (state.position.x - state.startPosition.x) / indicationsFadeDivisor);
-                foundColor = tempFoundColor;
-
-                Color tempNotFoundColor = notFoundColor;
-                tempNotFoundColor.a = Mathf.Lerp(0, 1, -(state.position.x - state.startPosition.x) / indicationsFadeDivisor);
-                notFoundColor = tempNotFoundColor;
-
-                ApplyIndicationColors();
+                    // Check if the touch is in the card
+                    cardPressed = CheckInsideCard(state.startPosition);
+                }
             }
             else
             {
                 if (cardMoving)
                 {
-                    // If validate
-                    if (Mathf.Abs(cardImage.transform.localEulerAngles.z - (cardImage.transform.localEulerAngles.z > 90 ? 360 : 0)) > angleThreshold)
-                    {
-                        // Set indication color to transparent
-                        Color tempColor = foundColor;
-                        tempColor.a = 0;
-                        foundColor = tempColor;
-
-                        tempColor = notFoundColor;
-                        tempColor.a = 0;
-                        notFoundColor = tempColor;
-
-                        ApplyIndicationColors();
-
-                        cardImage.rectTransform.localPosition = cardBasePosition;
-                        cardImage.transform.localEulerAngles = Vector3.zero;
-
-                        cardMoving = false;
-
-                        NextCard(state.position.x - state.startPosition.x > 0);
-                    }
-                    else
-                    {
-                        StartCoroutine(ReturnToPosition());
-                    }
+                    // If the card has moved
+                    OnMoveRelease(state.startPosition, state.position);
                 }
+                else if (cardPressed && CheckInsideCard(state.position))
+                {
+                    Debug.Log("Hide");
+                    ChangeCardState();
+                }
+
+                cardPressed = false;
+                cardMoving = false;
             }
+        }
+
+        /// <summary>
+        /// Chech if the position is inside the visual card
+        /// </summary>
+        /// <param name="currentPosition"></param>
+        /// <returns></returns>
+        private bool CheckInsideCard(Vector2 currentPosition)
+        {
+            // If the card is not moving, check if the card is touched
+            Vector3 visualCardPosition = (Vector2)cardImage.rectTransform.position - cardImage.rectTransform.pivot * cardImage.rectTransform.sizeDelta * cardImage.rectTransform.lossyScale;
+
+            return  currentPosition.x > visualCardPosition.x &&
+                    currentPosition.x < visualCardPosition.x + cardImage.rectTransform.lossyScale.x * cardImage.rectTransform.sizeDelta.x &&
+                    currentPosition.y > visualCardPosition.y &&
+                    currentPosition.y < visualCardPosition.y + cardImage.rectTransform.lossyScale.y * cardImage.rectTransform.sizeDelta.y;
+        }
+
+        /// <summary>
+        /// Move the card so it follows the finger
+        /// </summary>
+        /// <param name="startPosition"></param>
+        /// <param name="currentPosition"></param>
+        private void MoveCard(Vector2 startPosition, Vector2 currentPosition)
+        {
+            // Make the card follow verticaly the currentPosition on touchscreen
+            cardImage.transform.localPosition = cardBasePosition + new Vector2(0, currentPosition.y - startPosition.y);
+
+            int sign = currentPosition.x - startPosition.x < 0 ? 1 : -1;
+            cardImage.transform.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(0, sign * maxRotation, (Mathf.Abs(currentPosition.x - startPosition.x)) / rotationDivisor));
+
+            Color tempColor = foundColor;
+            tempColor.a = Mathf.Lerp(0, 1, (currentPosition.x - startPosition.x) / distanceTreshold);
+            foundColor = tempColor;
+
+            tempColor = notFoundColor;
+            tempColor.a = Mathf.Lerp(0, 1, -(currentPosition.x - startPosition.x) / distanceTreshold);
+            notFoundColor = tempColor;
+
+            ApplyIndicationColors();
+        }
+
+        /// <summary>
+        /// Do an action when the touch is released
+        /// </summary>
+        /// <param name="startPosition"></param>
+        /// <param name="currentPosition"></param>
+        private void OnMoveRelease(Vector2 startPosition, Vector2 currentPosition)
+        {
+            // If the answer validate, we play the next card
+            if (Mathf.Abs(cardImage.transform.localEulerAngles.z - (cardImage.transform.localEulerAngles.z > 90 ? 360 : 0)) > angleThreshold)
+            {
+                // Set indication color to transparent
+                Color tempColor = foundColor;
+                tempColor.a = 0;
+                foundColor = tempColor;
+
+                tempColor = notFoundColor;
+                tempColor.a = 0;
+                notFoundColor = tempColor;
+
+                ApplyIndicationColors();
+
+                cardImage.rectTransform.localPosition = cardBasePosition;
+                cardImage.transform.localEulerAngles = Vector3.zero;
+
+                cardMoving = false;
+
+                NextCard(currentPosition.x - startPosition.x > 0);
+            }
+            else
+            {
+                // Else we return to the starting position
+                StartCoroutine(ReturnToPosition());
+            }
+
+
         }
 
         /// <summary>
@@ -393,7 +489,7 @@ namespace Karuta.Game
         }
 
         /// <summary>
-        /// Return card to base position
+        /// Return card to base currentPosition
         /// </summary>
         /// <returns></returns>
         private IEnumerator ReturnToPosition()
@@ -404,8 +500,8 @@ namespace Karuta.Game
             currentEuler.z -= (currentEuler.z > 90 ? 360 : 0);
 
             Color tempColor;
-            float current_a = foundColor.a;
-            float current_not_a = notFoundColor.a;
+            float initFoundColorA = foundColor.a;
+            float initNotFoundColorA = notFoundColor.a;
 
             while (t < returnToPositionTime)
             {
@@ -413,11 +509,11 @@ namespace Karuta.Game
                 cardImage.rectTransform.localEulerAngles = Vector3.LerpUnclamped(currentEuler, Vector3.zero, t / returnToPositionTime);
 
                 tempColor = foundColor;
-                tempColor.a = Mathf.Lerp(current_a, 0, t / returnToPositionTime);
+                tempColor.a = Mathf.Lerp(initFoundColorA, 0, t / returnToPositionTime);
                 foundColor = tempColor;
 
                 tempColor = notFoundColor;
-                tempColor.a = Mathf.Lerp(current_not_a, 0, t / returnToPositionTime);
+                tempColor.a = Mathf.Lerp(initNotFoundColorA, 0, -t / returnToPositionTime);
                 notFoundColor = tempColor;
 
                 ApplyIndicationColors();
@@ -474,9 +570,12 @@ namespace Karuta.Game
             SetCardVisualAndInformation();
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
             ApplyIndicationColors();
+            distanceTreshold = rotationDivisor * (angleThreshold / maxRotation);
         }
+#endif
     }
 }

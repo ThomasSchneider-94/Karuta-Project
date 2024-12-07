@@ -1,12 +1,9 @@
-using Karuta.ScriptableObjects;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using System.IO;
-using static Karuta.ScriptableObjects.JsonObjects;
-using System.Xml.Linq;
-using UnityEngine.Rendering;
+using Karuta.Objects;
 
 namespace Karuta
 {
@@ -22,6 +19,7 @@ namespace Karuta
          *      - Download and check cover
          *      - Manage disconnexion
          *      - Manage if wrong informations
+         *      - Upgrade the print for download
          */
 
     public class DecksManager : MonoBehaviour
@@ -192,8 +190,7 @@ namespace Karuta
                 // Read the content of the file
                 foreach (JsonDeckInfo jsonDeckInfo in JsonUtility.FromJson<JsonDeckInfoList>(File.ReadAllText(LoadManager.DecksFilePath)).deckInfoList)
                 {
-                    DeckInfo deckInfo = ScriptableObject.CreateInstance<DeckInfo>();
-                    deckInfo.Init(jsonDeckInfo);
+                    DeckInfo deckInfo = new(jsonDeckInfo);
                     deckInfoList.Add(deckInfo);
                     decksCount[deckInfo.GetCategory() * types.Count + deckInfo.GetDeckType()]++;
                 }

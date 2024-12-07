@@ -936,6 +936,7 @@ MonoBehaviour:
   pauseButton: {fileID: 60170264}
   playSprite: {fileID: 21300000, guid: f49fb864baf8e4845bdc5b8f446a0731, type: 3}
   pauseSprite: {fileID: 21300000, guid: 91c514c00e865ca4591a2d22a7614618, type: 3}
+  sensitivity: 10
   cardButton: {fileID: 979568104}
   hidingSprite: {fileID: 21300000, guid: 2088e6e80481c16409e4e4f18f624e7e, type: 3}
   verticalOffset: -100
@@ -943,8 +944,7 @@ MonoBehaviour:
   maxRotation: 60
   rotationDivisor: 500
   returnToPositionTime: 0.5
-  angleThreshold: 20
-  indicationsFadeDivisor: 90
+  angleThreshold: 15
   foundImage: {fileID: 1713821601}
   foundText: {fileID: 2054270171}
   notFoundImage: {fileID: 1481271562}
@@ -980,7 +980,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 691175412}
         m_TargetAssemblyTypeName: Karuta.Game.MainGame, Assembly-CSharp
-        m_MethodName: MoveCard
+        m_MethodName: CardInteraction
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1347,19 +1347,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 979568105}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 691175412}
-        m_TargetAssemblyTypeName: Karuta.Game.MainGame, Assembly-CSharp
-        m_MethodName: ChangeCardState
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &979568105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3035,7 +3023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2172732764575286253, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: selectedDecks.Array.data[0]
-      value: 14
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2172732764575286253, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: selectedDecks.Array.data[1]

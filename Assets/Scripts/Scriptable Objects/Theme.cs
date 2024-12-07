@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Karuta.ScriptableObjects
+namespace Karuta.Objects
 {
     [System.Serializable]
     public class Theme 
@@ -58,12 +58,12 @@ namespace Karuta.ScriptableObjects
         public Color colorThemeUnselectedIndicator;
 
         #region Constructors
-        public Theme(JsonObjects.JsonTheme theme)
+        public Theme(JsonTheme theme)
         {
             Init(theme);
         }
 
-        public void Init(JsonObjects.JsonTheme theme)
+        public void Init(JsonTheme theme)
         {
             this.mainMenuBackground = LoadManager.LoadThemeVisual(theme.mainMenuBackground);
             this.decksChoiceBackground = LoadManager.LoadThemeVisual(theme.decksChoiceBackground);

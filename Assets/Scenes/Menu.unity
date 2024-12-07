@@ -509,13 +509,14 @@ GameObject:
   - component: {fileID: 190659842}
   - component: {fileID: 190659844}
   - component: {fileID: 190659843}
+  - component: {fileID: 190659845}
   m_Layer: 5
   m_Name: Backgroud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &190659842
 RectTransform:
   m_ObjectHideFlags: 0
@@ -573,6 +574,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 190659841}
   m_CullTransparentMesh: 1
+--- !u!328 &190659845
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190659841}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 0}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 2
+  m_DataSource: 1
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 1
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 00
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 1
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
 --- !u!1001 &365102056
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1950,7 +1987,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 538443d57989dd44fa8e9fc480a18214, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  downloadTimeout: 60
+  downloadTimeout: 30
   downloadDeckButton: {fileID: 1380085941}
   selectAllToggle: {fileID: 1333570422}
   togglePrefab: {fileID: 7753829917687140986, guid: 673e37685ec4cff49965c818e92c5b88, type: 3}
@@ -1960,7 +1997,7 @@ MonoBehaviour:
   waitingPanel: {fileID: 1975605193}
   downloadingDeckTextMesh1: {fileID: 1097810700}
   downloadingDeckTextMesh2: {fileID: 453594872}
-  debugOn: 1
+  debugOn: 0
 --- !u!114 &691175408
 MonoBehaviour:
   m_ObjectHideFlags: 0

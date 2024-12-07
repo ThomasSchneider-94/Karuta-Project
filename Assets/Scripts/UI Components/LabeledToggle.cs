@@ -17,11 +17,13 @@ namespace Karuta.UIComponent
             labelText.text = label;
         }
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
 
             SetLabel(label);
         }
+#endif
     }
 }

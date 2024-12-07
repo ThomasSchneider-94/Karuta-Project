@@ -248,6 +248,12 @@ namespace Karuta.UIComponent
             nonFullGrid.gameObject.SetActive(nonFullGrid.transform.childCount > 0);
         }
 
+        public int GetNuberChild()
+        {
+            return fullGrid.transform.childCount;
+        }
+
+#if UNITY_EDITOR
         // Called if changes in code or editor (not called at runtime)
         private void OnValidate()
         {
@@ -270,10 +276,6 @@ namespace Karuta.UIComponent
 
             UpdateActive();
         }
-
-        public int GetNuberChild()
-        {
-            return fullGrid.transform.childCount;
-        }
+#endif
     }
 }

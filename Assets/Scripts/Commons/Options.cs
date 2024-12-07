@@ -1,8 +1,5 @@
-using Karuta.ScriptableObjects;
 using Karuta.UIComponent;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using static Karuta.OptionsManager;

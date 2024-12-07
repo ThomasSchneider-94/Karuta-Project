@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.Events;
-using static Karuta.ScriptableObjects.JsonObjects;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Karuta.Objects;
 
 namespace Karuta
 {
@@ -207,6 +206,5 @@ namespace Karuta
         {
             return categoriesIcons[currentCategory];
         }
-
     }
 }

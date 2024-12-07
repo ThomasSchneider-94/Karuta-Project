@@ -212,6 +212,7 @@ namespace Karuta.UIComponent
             }
         }
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
@@ -225,5 +226,6 @@ namespace Karuta.UIComponent
                 buttonLayer.image.transform.localScale = buttonLayer.scale;
             }
         }
+#endif
     }
 }

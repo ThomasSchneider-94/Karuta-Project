@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
-using Karuta.ScriptableObjects;
 using System.Collections;
 using UnityEngine.Networking;
 using TMPro;
 using Karuta.UIComponent;
-using System.Threading.Tasks;
-using static Karuta.ScriptableObjects.JsonObjects;
-using Unity.VisualScripting;
+using Karuta.Objects;
 
 namespace Karuta.Menu
 {
@@ -45,6 +42,8 @@ namespace Karuta.Menu
         // Files 
         string[] visualFiles;
         string[] audioFiles;
+
+        private bool connexionError = false;
 
         private void OnEnable()
         {
@@ -88,6 +87,7 @@ namespace Karuta.Menu
         {
             waitingPanel.SetActive(true);
             downloadingDeckTextMesh1.text = "Updating decks";
+            connexionError = false;
 
             JsonDeckInfoList jsonDeckInfoList = new()
             {
@@ -100,18 +100,22 @@ namespace Karuta.Menu
             {
                 yield return StartCoroutine(DownloadDeckList(deckNames));
 
-                if (deckNames.Count == 0) { yield return StartCoroutine(ExitOnDownloadFail("Downloading deck list failed")); }
+                // If fail to get deck list, break
+                if (connexionError) { yield break; }
 
                 // List Init 
                 visualFiles = Directory.GetFiles(LoadManager.VisualsDirectoryPath);
                 audioFiles = Directory.GetFiles(LoadManager.AudioDirectoryPath);
                 List<string> deckContents = new();
-
+                                
                 for (int i = 0; i < deckNames.Count; i++)
                 {
                     downloadingDeckTextMesh1.text = "(" + (i + 1) + "/" + deckNames.Count + ")\n" + deckNames[i];
 
                     yield return StartCoroutine(DownloadDeckInformation(deckNames[i], deckContents));
+
+                    // Break on connexion error
+                    if (connexionError) { yield break; }
 
                     if (deckContents[^1] != null)
                     {
@@ -176,6 +180,16 @@ namespace Karuta.Menu
                     deckNames.Add(names[i]);
                 }
             }
+            else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                Debug.LogWarning("Connexion Error");
+                yield return StartCoroutine(ExitOnDownloadFail("Connexion Error"));
+            }
+            else
+            {
+                Debug.LogWarning("Downloading deck list failed");
+                yield return StartCoroutine(ExitOnDownloadFail("Downloading deck list failed"));
+            }
         }
 
         /// <summary>
@@ -197,8 +211,15 @@ namespace Karuta.Menu
             {
                 deckContents.Add(webRequest.downloadHandler.text);
             }
+            else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                // If there is a connexion error, it is useless to try to download other decks
+                Debug.LogWarning("Connexion Error");
+                yield return StartCoroutine(ExitOnDownloadFail("Connexion Error"));
+            }
             else
             {
+                Debug.LogWarning("Downloading deck " + deckName + " content failed");
                 deckContents.Add(null);
             }
         }
@@ -431,7 +452,7 @@ namespace Karuta.Menu
             if (downloadTotal > 0)
             {
                 waitingPanel.SetActive(true);
-                List<bool> downloadDeckSucced = new() { false };
+                connexionError = false;
 
                 List<DeckInfo> deckList = DecksManager.Instance.GetDeckList();
                 JsonDeckInfoList jsonDeckInfoList = new()
@@ -449,9 +470,10 @@ namespace Karuta.Menu
                     {
                         downloadingDeckTextMesh1.text = "(" + (downloadCount + 1) + "/" + downloadTotal + ") " + deckList[i].GetName();
 
-                        yield return DownloadDeckContent(deckList[i], downloadDeckSucced);
+                        yield return DownloadDeckContent(deckList[i]);
 
-                        if (!downloadDeckSucced[0]) { break; }
+                        // If connexion error, do not try to download other deck, but check if others has been downloaded
+                        if (connexionError) { break; }
 
                         downloadCount++;
                     }
@@ -487,19 +509,16 @@ namespace Karuta.Menu
         /// Download the visuals and audio of a deck
         /// </summary>
         /// <param name="deckInfo"></param>
-        /// <param name="isDeckDownloaded"></param>
         /// <returns></returns>
-        private IEnumerator DownloadDeckContent(DeckInfo deckInfo, List<bool> isDeckDownloaded)
+        private IEnumerator DownloadDeckContent(DeckInfo deckInfo)
         {
             // If the deck file does not exist, do not try to download it
             if (!File.Exists(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deckInfo.GetCategory()), deckInfo.GetName() + ".json"))) 
             {
-                isDeckDownloaded[0] = true;
                 yield break; 
             }
 
             JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deckInfo.GetCategory()), deckInfo.GetName() + ".json")));
-            List<bool> isCardDownloaded = new() { false };
 
             for (int i = 0; i < jsonCards.cards.Count; i++)
             {
@@ -508,41 +527,29 @@ namespace Karuta.Menu
                 // Check if visual is downloaded and download if not
                 if (!IsCardVisualDownloaded(jsonCards.cards[i].visual))
                 {
-                    yield return StartCoroutine(DownloadCardVisual(jsonCards.cards[i].visual, isCardDownloaded));
+                    yield return StartCoroutine(DownloadCardVisual(jsonCards.cards[i].visual));
 
-                    // If download fail, stop the download of the rest of the deck
-                    if (!isCardDownloaded[0])
-                    {
-                        yield return ExitOnDownloadFail("Failed to download visual " + jsonCards.cards[i].visual);
-                        isDeckDownloaded[0] = false;
-                        yield break;
-                    }
+                    // If connexion error, do not try to download other deck content
+                    if (connexionError) { yield break; }
                 }
 
                 // Check if audio is downloaded and download if not
                 if (!IsCardAudioDownloaded(jsonCards.cards[i].audio))
                 {
-                    yield return StartCoroutine(DownloadCardAudio(jsonCards.cards[i].audio, isCardDownloaded));
+                    yield return StartCoroutine(DownloadCardAudio(jsonCards.cards[i].audio));
 
-                    // If download fail, stop the download of the rest of the deck
-                    if (!isCardDownloaded[0])
-                    {
-                        yield return ExitOnDownloadFail("Failed to download audio " + jsonCards.cards[i].audio);
-                        isDeckDownloaded[0] = false;
-                        yield break;
-                    }
+                    // If connexion error, do not try to download other deck content
+                    if (connexionError) { yield break; }
                 }
             }
-            isDeckDownloaded[0] = true;
         }
 
         /// <summary>
         /// Download a card visual
         /// </summary>
         /// <param name="visual"></param>
-        /// <param name="isDownloaded"></param>
         /// <returns></returns>
-        private IEnumerator DownloadCardVisual(string visual, List<bool> isDownloaded)
+        private IEnumerator DownloadCardVisual(string visual)
         {
             // Initiate the request
             using UnityWebRequest webRequest = UnityWebRequest.Get(loadManager.GetServerIP() + "visual/" + visual);
@@ -551,17 +558,17 @@ namespace Karuta.Menu
 
             yield return webRequest.SendWebRequest();
 
-            if (webRequest.result == UnityWebRequest.Result.Success)
+            if (webRequest.result != UnityWebRequest.Result.Success && IsCardVisualDownloaded(visual))
             {
-                isDownloaded[0] = true;
+                File.Delete(Path.Combine(LoadManager.VisualsDirectoryPath, visual));
             }
-            else
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError)
             {
-                if (IsCardVisualDownloaded(visual))
-                {
-                    File.Delete(Path.Combine(LoadManager.VisualsDirectoryPath, visual));
-                }
-                isDownloaded[0] = false;
+                yield return ExitOnDownloadFail("Connexion Error");
+            }
+            else if (webRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogWarning(visual + " file does not exist");
             }
         }
 
@@ -569,9 +576,8 @@ namespace Karuta.Menu
         /// Download a card audio
         /// </summary>
         /// <param name="audio"></param>
-        /// <param name="isDownloaded"></param>
         /// <returns></returns>
-        private IEnumerator DownloadCardAudio(string audio, List<bool> isDownloaded)
+        private IEnumerator DownloadCardAudio(string audio)
         {
             // Initiate the request
             using UnityWebRequest webRequest = UnityWebRequest.Get(loadManager.GetServerIP() + "sound/" + audio);
@@ -580,17 +586,17 @@ namespace Karuta.Menu
 
             yield return webRequest.SendWebRequest();
 
-            if (webRequest.result == UnityWebRequest.Result.Success)
+            if (webRequest.result != UnityWebRequest.Result.Success && IsCardAudioDownloaded(audio))
             {
-                isDownloaded[0] = true;
+                File.Delete(Path.Combine(LoadManager.AudioDirectoryPath, audio));
             }
-            else
+            if (webRequest.result == UnityWebRequest.Result.ConnectionError)
             {
-                if (IsCardAudioDownloaded(audio))
-                {
-                    File.Delete(Path.Combine(LoadManager.AudioDirectoryPath, audio));
-                }
-                isDownloaded[0] = false;
+                yield return ExitOnDownloadFail("Connexion Error");
+            }
+            else if (webRequest.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogWarning(audio + " file does not exist");
             }
         }
         #endregion Download Deck Content
@@ -651,7 +657,6 @@ namespace Karuta.Menu
         {
             if (!Array.Exists(visualFiles, visualFile => visualFile == Path.Combine(LoadManager.VisualsDirectoryPath, downloadCardVisual)))
             {
-                Debug.Log("D_ Visual " + downloadCardVisual + " does not exist");
                 return false;
             }
             return true;
@@ -666,7 +671,6 @@ namespace Karuta.Menu
         {
             if (!Array.Exists(audioFiles, audioFile => audioFile == Path.Combine(LoadManager.AudioDirectoryPath, downloadCardAudio)))
             {
-                Debug.Log("D_ Audio " + downloadCardAudio + " does not exist");
                 return false;
             }
             return true;
@@ -675,6 +679,7 @@ namespace Karuta.Menu
 
         private IEnumerator ExitOnDownloadFail(string error)
         {
+            connexionError = true;
             downloadingDeckTextMesh1.text = error;
 
             yield return new WaitForSeconds(2);
@@ -682,10 +687,12 @@ namespace Karuta.Menu
             waitingPanel.SetActive(false);
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
             togglesParent.spacing = toggleSpacing;
             togglesParent.transform.localScale = toggleScale;
         }
+#endif
     }
 }

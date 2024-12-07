@@ -1,13 +1,10 @@
-using Karuta.ScriptableObjects;
 using System.Collections.Generic;
 using Karuta.UIComponent;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System.Linq;
-using Unity.VisualScripting;
-using System.Diagnostics.Contracts;
+using Karuta.Objects;
 
 namespace Karuta.Menu
 {
@@ -232,7 +229,7 @@ namespace Karuta.Menu
         /// <param name="deck"></param>
         private void CreateButton(DeckInfo deck, int index)
         {
-            SelectionButton button = GameObject.Instantiate(deckSelectionButtonPrefab);
+            SelectionButton button = GameObject.Instantiate<SelectionButton>(deckSelectionButtonPrefab);
 
             button.SetDeckName(deck.GetName());
             button.SetNameSpacing(nameSpacing);
@@ -574,7 +571,8 @@ namespace Karuta.Menu
             yield return null;  // Wait one frame
             scrollRect.verticalNormalizedPosition = 1;
         }
-        
+
+#if UNITY_EDITOR
         // Called if changes in code or editor (not called at runtime)
         virtual protected void OnValidate()
         {
@@ -608,5 +606,6 @@ namespace Karuta.Menu
                 container.SetSpacing(categorySpacing);
             }
         }
+#endif
     }
 }

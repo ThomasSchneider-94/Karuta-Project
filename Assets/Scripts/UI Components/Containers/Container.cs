@@ -141,6 +141,7 @@ namespace Karuta.UIComponent
             return subLayout.transform;
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
@@ -153,5 +154,6 @@ namespace Karuta.UIComponent
 
             ResizeContainer();
         }
+#endif
     }
 }

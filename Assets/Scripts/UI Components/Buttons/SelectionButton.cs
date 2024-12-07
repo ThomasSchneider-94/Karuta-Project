@@ -121,6 +121,7 @@ namespace Karuta.UIComponent
             deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
         }
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
@@ -132,5 +133,6 @@ namespace Karuta.UIComponent
             SetNameSpacing(nameSpacing);
             SetCounter(count);
         }
+#endif
     }
 }

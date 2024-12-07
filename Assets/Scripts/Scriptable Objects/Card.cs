@@ -1,33 +1,28 @@
 using UnityEngine;
-using System.Threading.Tasks;
-using static Karuta.ScriptableObjects.JsonObjects;
-using UnityEngine.Rendering;
 
-namespace Karuta.ScriptableObjects
+namespace Karuta.Objects
 {
-    public class Card : ScriptableObject
+    public class Card
     {
-        private string deck;
-        private string anime;
-        private string type;
-        private string visualName;
+        private readonly string deck;
+        private readonly string anime;
+        private readonly string type;
+        private readonly string visualName;
         private Sprite visual;
-        private string audioName;
+        private readonly string audioName;
 
-        #region Init
-        public void Init(string deck, string anime, string type, string visualName, Sprite visual, string audioName)
+        #region Constructors
+        public Card(string deck, string anime, string type, string visualName, Sprite visual, string audioName)
         {
             this.deck = deck;
             this.anime = anime;
             this.type = type;
-
             this.visualName = visualName;
             this.visual = visual;
-
             this.audioName = audioName;
         }
 
-        public void Init(string deck, JsonObjects.JsonCard jsonCard)
+        public Card(string deck, JsonCard jsonCard)
         {
             this.deck = deck;
             this.anime = jsonCard.anime;
@@ -38,12 +33,17 @@ namespace Karuta.ScriptableObjects
 
             this.audioName = jsonCard.audio;
         }
+        #endregion Constructors
 
         public void InitVisual(Sprite visual)
         {
             this.visual = visual;
         }
-        #endregion Init
+
+        public string Dump()
+        {
+            return string.Format("Deck {0}: {1} - {2}", deck, anime, type);
+        }
 
         #region Getter
         public string GetDeck()

@@ -1,21 +1,21 @@
 using System;
 using UnityEngine;
 
-namespace Karuta.ScriptableObjects
+namespace Karuta.Objects
 {
-    public class DeckInfo : ScriptableObject
+    public class DeckInfo
     {
-        private string deckName;
-        private int category;
-        private int type;
-        private Sprite cover;
-        private string coverName;
-        private bool isDownloaded;
-
+        private readonly string deckName;
+        private readonly int category;
+        private readonly int type;
+        private readonly Sprite cover;
+        private readonly string coverName;
+        private readonly bool isDownloaded;
+        
         #region Constructors
-        public void Init(string name, int category, int type, Sprite cover, string coverName, bool isDownloaded)
+        public DeckInfo(string deckName, int category, int type, Sprite cover, string coverName, bool isDownloaded)
         {
-            this.deckName = name;
+            this.deckName = deckName;
             this.category = category;
             this.type = type;
             this.cover = cover;
@@ -23,7 +23,7 @@ namespace Karuta.ScriptableObjects
             this.isDownloaded = isDownloaded;
         }
 
-        public void Init(JsonObjects.JsonDeckInfo jsonDeckInfo)
+        public DeckInfo(JsonDeckInfo jsonDeckInfo)
         {
             this.deckName = jsonDeckInfo.name;
             this.category = jsonDeckInfo.category;
