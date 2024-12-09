@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Karuta.Objects;
+using UnityEngine.Video;
+using System.Net;
+using System;
 
 
 namespace Karuta.Commons
@@ -8,13 +11,13 @@ namespace Karuta.Commons
     public class ThemeApplier : MonoBehaviour
     {
         ThemeManager themeManager;
+        LoadManager loadManager;
 
         [SerializeField] private bool inGame;
 
         [Header("Backgrounds")]
-        [SerializeField] private Image mainMenuBackground;
-        [SerializeField] private Image decksChoiceBackground;
-        [SerializeField] private Image gameBackground;
+        [SerializeField] private Image imageBackGround;
+        [SerializeField] private VideoPlayer videoBackGround;
 
 
         private int previousTheme;
@@ -25,6 +28,7 @@ namespace Karuta.Commons
         private void OnEnable()
         {
             themeManager = ThemeManager.Instance;
+            loadManager = LoadManager.Instance;
 
             themeManager.UpdateThemeEvent.AddListener(SoftApplyTheme);
 
@@ -55,23 +59,54 @@ namespace Karuta.Commons
 
         public void ApplyTheme()
         {
-            JsonTheme currentTheme = themeManager.GetCurrentTheme();
+            Debug.Log("Apply");
+
+            Theme currentTheme = themeManager.GetCurrentTheme();
 
             ApplyBackgrounds(currentTheme);
 
-            Debug.Log("Apply");
+            Debug.Log("Applied");
         }
 
-        private void ApplyBackgrounds(JsonTheme theme)
+
+
+
+        private void ApplyBackgrounds(Theme theme)
         {
             if (inGame)
             {
+                if (theme.GetGameBackground().Split(".")[^1] == "png")
+                {
+                    loadManager.Load
+                }
+
+
+
 
             }
-            else
-            {
 
-            }
+
+
+
+
+
+            string[] names = theme.GetMainMenuBackground().Split(".");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
 

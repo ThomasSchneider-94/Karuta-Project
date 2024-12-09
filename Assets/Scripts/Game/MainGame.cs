@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using System.Collections;
 using Unity.VisualScripting;
+using System.Security;
 
 namespace Karuta.Game
 {
@@ -162,33 +163,27 @@ namespace Karuta.Game
             audioLoaded = false;
 
             // Load visual and audio
-            loadManager.LoadAudio(currentCard.GetAudioName(), OnAudioLoaded);
-            if (currentCard.GetVisual() == null)
+            Debug.Log("Visual already initialized: " + currentCard.IsVisualInitialized().ToString());
+            if (currentCard.IsVisualInitialized())
+            {
+                visualLoaded = true;
+            }
+            else
             {
                 visualLoaded = false;
                 loadManager.LoadVisual(currentCard.GetVisualName(), OnVisualLoaded);
             }
-            else
-            {
-                visualLoaded = true;
-            }
+
+            loadManager.LoadAudio(currentCard.GetAudioName(), OnAudioLoaded);
         }
 
         /// <summary>
         /// Called when visual loaded
         /// </summary>
         /// <param name="sprite"></param>
-        private void OnVisualLoaded(Sprite sprite)
+        private void OnVisualLoaded(Sprite sprite, bool success)
         {
-            if (sprite != null)
-            {
-                currentCard.InitVisual(sprite);
-            }
-            else
-            {
-                Debug.LogWarning("Failed to load visual");
-                currentCard.InitVisual(loadManager.GetDefaultSprite());
-            }
+            currentCard.InitVisual(sprite, success);
 
             if (audioLoaded)
             {
@@ -235,15 +230,7 @@ namespace Karuta.Game
         /// <param name="audioClip"></param>
         private void OnAudioLoaded(AudioClip audioClip)
         {
-            if (audioClip != null)
-            {
-                audioSource.clip = audioClip;
-            }
-            else
-            {
-                Debug.LogWarning("Failed to load audio clip");
-                audioSource.clip = loadManager.GetDefaultAudio();
-            }
+            audioSource.clip = audioClip;
 
             if (visualLoaded)
             {
@@ -279,16 +266,6 @@ namespace Karuta.Game
             }
         }
 
-
-
-
-
-
-
-
-
-
-
         /// <summary>
         /// Play next card. Remove current if found == true
         /// </summary>
@@ -301,7 +278,7 @@ namespace Karuta.Game
 
                 if (cards.Count == 0)
                 {
-                    cardImage.sprite = loadManager.GetDefaultSprite();
+                    cardImage.gameObject.SetActive(false);
                     audioSource.Stop();
                     cardCounter.text = "Cartes restantes: 0";
                     informationTextMesh.text = "";
@@ -339,7 +316,7 @@ namespace Karuta.Game
         /// </summary>
         public void ChangeCardState()
         {
-            if (cardMoving) { return; }
+            if (!optionsManager.AreAnswersHiden()) { return; }
 
             cardHiden = !cardHiden;
             SetCardVisualAndInformation();
@@ -361,12 +338,10 @@ namespace Karuta.Game
             {
                 if (cardMoving)
                 {
-                    Debug.Log("Card Moving");
                     MoveCard(state.startPosition, state.position);
                 }
                 else if (cardPressed)
                 {
-                    Debug.Log("Card Pressed");
 
                     // Check if card need to be moved
                     if ((!optionsManager.AreAnswersHiden() || !cardHiden) && Mathf.Abs(state.startPosition.x - state.position.x) > sensitivity)
@@ -376,8 +351,6 @@ namespace Karuta.Game
                 }
                 else
                 {
-                    Debug.Log("Check");
-
                     // Check if the touch is in the card
                     cardPressed = CheckInsideCard(state.startPosition);
                 }
@@ -535,10 +508,6 @@ namespace Karuta.Game
             notFoundColor = tempColor;
 
             ApplyIndicationColors();
-
-            Debug.Log("Return to position");
-
-            cardMoving = false;
         }
         #endregion Card Movement
 

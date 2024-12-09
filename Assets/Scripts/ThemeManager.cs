@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using Karuta.Objects;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Karuta
 {
@@ -13,15 +14,10 @@ namespace Karuta
         [SerializeField] private Theme baseTheme;
         [SerializeField] private string baseThemeName;
 
-
         private readonly List<LightJsonTheme> lightThemes = new();
         private readonly List<string> lightThemesNames = new();
         private int currentLightTheme;
-        private JsonTheme currentTheme;
-
-
-
-
+        private Theme currentTheme;
 
         public UnityEvent InitializeThemeEvent { get; } = new UnityEvent();
         public UnityEvent UpdateThemeEvent { get; } = new UnityEvent();
@@ -72,7 +68,12 @@ namespace Karuta
         {
             lightThemes.Clear();
             lightThemesNames.Clear();
-            lightThemes.Add(JsonUtility.FromJson<LightJsonTheme>(Resources.Load<TextAsset>("BaseTheme").text));
+
+            lightThemes.Add(new()
+            {
+                mainMenuBackground = baseTheme.GetMainMenuBackground(),
+                decksChoiceBackground = baseTheme.GetDecksChoiceBackground()
+            });
             lightThemesNames.Add(baseThemeName);
 
             string[] themeFiles = Directory.GetFiles(LoadManager.ThemesDirectoryPath);
@@ -91,10 +92,17 @@ namespace Karuta
 
         public void LoadTheme()
         {
-            //currentTheme = JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentLightTheme])));
+            if (currentLightTheme == 0)
+            {
+                currentTheme = baseTheme;
+            }
+            else
+            {
+                currentTheme = new(JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentLightTheme]))));
+            }
         }
 
-        #region Getter
+        #region Theme Getter
         public LightJsonTheme GetCurrentLightTheme()
         {
             return lightThemes[currentLightTheme];
@@ -105,10 +113,54 @@ namespace Karuta
             return currentLightTheme;
         }
 
-        public JsonTheme GetCurrentTheme()
+        public Theme GetCurrentTheme()
         {
             return currentTheme;
         }
-        #endregion Getter
+        #endregion Theme Getter
+
+        #region Theme Component Getter
+
+        #region Backgrounds
+        public string GetMainMenuBackground()
+        {
+            if (currentTheme.GetMainMenuBackground() == null)
+            {
+                baseTheme.GetMainMenuBackground();
+            }
+            return currentTheme.GetMainMenuBackground();
+        }
+
+        public string GetDecksChoiceBackground()
+        {
+            if (currentTheme.GetDecksChoiceBackground() == null)
+            {
+                baseTheme.GetDecksChoiceBackground();
+            }
+            return currentTheme.GetDecksChoiceBackground();
+        }
+
+        public string GetGameBackground()
+        {
+            if (currentTheme.GetGameBackground() == null)
+            {
+                baseTheme.GetGameBackground();
+            }
+            return currentTheme.GetGameBackground();
+        }
+        #endregion Backgrounds
+
+
+
+
+
+
+
+
+
+
+
+
+        #endregion Theme Component Getter
     }
 }

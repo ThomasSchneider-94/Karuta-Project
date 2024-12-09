@@ -6,6 +6,8 @@ using System;
 using System.Collections;
 using Karuta.Objects;
 using System.Net;
+using Unity.VisualScripting;
+using System.Collections.Generic;
 
 namespace Karuta
 {
@@ -15,13 +17,13 @@ namespace Karuta
 
         [Header("General")]
         [SerializeField] private int downloadTimeout;
+        [SerializeField] private int connexionCheckTimeout;
 
         [Header("Streaming Parameters")]
         [SerializeField] private int minDownloadedBytes = 2048;
 
         [Header("Default")]
         [SerializeField] private Sprite defaultSprite;
-        [SerializeField] private AudioClip defaultAudio;
 
         // Directory paths
         public static string DecksFilePath { get; private set; }
@@ -40,6 +42,8 @@ namespace Karuta
         private bool initialized;
 
         private bool connexionError = false;
+
+        private Coroutine audioCoroutine;
 
         private void Awake()
         {
@@ -115,6 +119,11 @@ namespace Karuta
         }
 
         #region Loader
+        /// <summary>
+        /// Load the cover visual file from files
+        /// </summary>
+        /// <param name="coverName"></param>
+        /// <returns></returns>
         public Sprite LoadCover(string coverName)
         {
             if (!File.Exists(Path.Combine(CoversDirectoryPath, coverName)))
@@ -132,6 +141,11 @@ namespace Karuta
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         }
 
+        /// <summary>
+        /// Load the category visual from file
+        /// </summary>
+        /// <param name="categoryVisual"></param>
+        /// <returns></returns>
         public Sprite LoadCategoryVisual(string categoryVisual)
         {
             if (!File.Exists(Path.Combine(CategoriesDirectoryPath, categoryVisual)))
@@ -170,7 +184,12 @@ namespace Karuta
         #endregion Theme
 
         #region Visual
-        public void LoadVisual(string visual, Action<Sprite> onLoaded)
+        /// <summary>
+        /// Load a visual by its name, from files or download. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="visual"></param>
+        /// <param name="onLoaded"></param>
+        public void LoadVisual(string visual, Action<Sprite, bool> onLoaded)
         {
             if (File.Exists(Path.Combine(VisualsDirectoryPath, visual)))
             {
@@ -184,21 +203,32 @@ namespace Karuta
             }
             else
             {
-                onLoaded.Invoke(defaultSprite);
+                onLoaded.Invoke(defaultSprite, false);
             }
         }
 
-        public static void LoadSpriteFromFile(string visual, Action<Sprite> onLoaded)
+        /// <summary>
+        /// Load a visual by its name from files. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="visual"></param>
+        /// <param name="onLoaded"></param>
+        public static void LoadSpriteFromFile(string visual, Action<Sprite, bool> onLoaded)
         {
             byte[] bytes = System.IO.File.ReadAllBytes(Path.Combine(VisualsDirectoryPath, visual));
 
             Texture2D texture = new(1, 1);
             texture.LoadImage(bytes);
 
-            onLoaded.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
+            onLoaded.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)), true);
         }
 
-        public IEnumerator DownloadVisual(string visual, Action<Sprite> onLoaded)
+        /// <summary>
+        /// Load a visual by its name from download. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="visual"></param>
+        /// <param name="onLoaded"></param>
+        /// <returns></returns>
+        public IEnumerator DownloadVisual(string visual, Action<Sprite, bool> onLoaded)
         {
             // Initiate the webRequest
             using UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(serverIP + "visual/" + visual);
@@ -213,41 +243,56 @@ namespace Karuta
                 Texture2D texture = DownloadHandlerTexture.GetContent(webRequest);
 
                 // Create a new Sprite from the downloaded texture
-                onLoaded?.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
+                onLoaded?.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)), true);
             }
             else
             {
                 if (webRequest.result == UnityWebRequest.Result.ConnectionError)
                 {
-                    connexionError = true;
+                    EnableConnexionError();
                     Debug.LogWarning("Connexion Error");
                 }
                 Debug.LogWarning("Failed to download visual: " + webRequest.error);
-                onLoaded?.Invoke(defaultSprite);
+                onLoaded?.Invoke(defaultSprite, false);
             }
         }
         #endregion Visual
 
         #region Audio
+        /// <summary>
+        /// Stream an audio by its name, from files or download. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="audio"></param>
+        /// <param name="onLoaded"></param>
         public void LoadAudio(string audio, Action<AudioClip> onLoaded)
         {
-            StopAllCoroutines();
+            if (audioCoroutine != null)
+            {
+                StopCoroutine(audioCoroutine);
+            }
+            
             if (File.Exists(Path.Combine(AudioDirectoryPath, audio)))
             {
-                //Debug.Log("From audio file : " + audio)
-                StartCoroutine(LoadAudioFromFile(audio, onLoaded));
+                Debug.Log("From audio file : " + audio);
+                audioCoroutine = StartCoroutine(LoadAudioFromFile(audio, onLoaded));
             }
             else if (!connexionError)
             {
-                //Debug.Log("Download audio : " + audio)
-                StartCoroutine(DownloadAudio(audio, onLoaded));
+                Debug.Log("Download audio : " + audio);
+                audioCoroutine = StartCoroutine(DownloadAudio(audio, onLoaded));
             }
             else
             {
-                onLoaded.Invoke(defaultAudio);
+                onLoaded.Invoke(CreateSilentAudioClip());
             }
         }
 
+        /// <summary>
+        /// Stream an audio by its name from files. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="audio"></param>
+        /// <param name="onLoaded"></param>
+        /// <returns></returns>
         public IEnumerator LoadAudioFromFile(string audio, Action<AudioClip> onLoaded)
         {
             // Initiate the webRequest
@@ -268,7 +313,7 @@ namespace Karuta
             }
             else
             {
-                onLoaded?.Invoke(defaultAudio);
+                onLoaded?.Invoke(CreateSilentAudioClip());
             }
 
             // Continue downloading the rest of the audio
@@ -278,6 +323,12 @@ namespace Karuta
             }
         }
 
+        /// <summary>
+        /// Load an audio by its name from *download. Call onLoaded at the end.
+        /// </summary>
+        /// <param name="audio"></param>
+        /// <param name="onLoaded"></param>
+        /// <returns></returns>
         public IEnumerator DownloadAudio(string audio, Action<AudioClip> onLoaded)
         {
             // Initiate the webRequest
@@ -287,52 +338,110 @@ namespace Karuta
 
             webRequest.SendWebRequest();
 
-            while (webRequest.downloadedBytes < (ulong)minDownloadedBytes * 10)
+            float t = 0f;
+            while (webRequest.downloadedBytes < (ulong)minDownloadedBytes * 10 && t < downloadTimeout)
             {
+                t += Time.deltaTime;
                 yield return null;
             }
 
-            if (((DownloadHandlerAudioClip)webRequest.downloadHandler).audioClip != null)
+            if (t < downloadTimeout)
             {
-                onLoaded?.Invoke(((DownloadHandlerAudioClip)webRequest.downloadHandler).audioClip);
+                if (((DownloadHandlerAudioClip)webRequest.downloadHandler).audioClip != null)
+                {
+                    onLoaded?.Invoke(((DownloadHandlerAudioClip)webRequest.downloadHandler).audioClip);
+
+                    // Continue downloading the rest of the audio
+                    while (!webRequest.isDone)
+                    {
+                        yield return null;
+                    }
+
+                    if (webRequest.result != UnityWebRequest.Result.Success)
+                    {
+                        if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+                        {
+                            EnableConnexionError();
+                        }
+                        Debug.LogWarning("Error streaming audio: " + webRequest.error);
+                    }
+                }
+                else
+                {
+                    onLoaded?.Invoke(CreateSilentAudioClip());
+                }
             }
             else
             {
-                onLoaded?.Invoke(defaultAudio);
+                Debug.LogWarning("Connexion Error: Failed to load audio");
+                onLoaded?.Invoke(CreateSilentAudioClip());
+                EnableConnexionError();
             }
+        }
 
-            // Continue downloading the rest of the audio
-            while (!webRequest.isDone)
-            {
-                yield return null;
-            }
+        /// <summary>
+        /// Create a silent audioClip
+        /// </summary>
+        /// <param name="duration"></param>
+        /// <returns></returns>
+        private static AudioClip CreateSilentAudioClip(float duration = 90f)
+        {
+            int sampleRate = 44100; // Standard audio sample rate
+            int sampleCount = (int)(sampleRate * duration);
+            float[] samples = new float[sampleCount]; // All zeroes for silence
 
-            if (webRequest.result != UnityWebRequest.Result.Success)
-            {
-                if (webRequest.result == UnityWebRequest.Result.ConnectionError)
-                {
-                    connexionError = true;
-                }
-                Debug.LogWarning("Error streaming audio: " + webRequest.error);
-            }
+            AudioClip silentClip = AudioClip.Create("SilentClip", sampleCount, 1, sampleRate, false);
+            silentClip.SetData(samples, 0);
+
+            return silentClip;
         }
         #endregion Audio
 
         #endregion Loader
 
-        public void SetConnexionError(bool connexionError)
+        #region Connexion Error
+        /// <summary>
+        /// Enable the check for connexion error
+        /// </summary>
+        private void EnableConnexionError()
         {
-            this.connexionError = connexionError;
+            Debug.LogWarning("Enable Connexion Error");
+            if (!connexionError)
+            {
+                connexionError = true;
+                StartCoroutine(ConnectionCheck());
+            }
         }
+
+        /// <summary>
+        /// Check regularly if the connexion if now up
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator ConnectionCheck()
+        {
+            // Initiate the request
+            using UnityWebRequest webRequest = UnityWebRequest.Get(serverIP + "deck_names");
+            webRequest.timeout = connexionCheckTimeout;
+
+            yield return webRequest.SendWebRequest();
+
+            // Check for errors
+            if (webRequest.result == UnityWebRequest.Result.Success)
+            {
+                connexionError = false;
+                Debug.LogWarning("End Connexion Error");
+            }
+            else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
+            {
+                Debug.LogWarning("Connexion Error Again");
+                StartCoroutine(ConnectionCheck());
+            }
+        }
+        #endregion Connexion Error
 
         public Sprite GetDefaultSprite()
         {
             return defaultSprite;
-        }
-
-        public AudioClip GetDefaultAudio()
-        {
-            return defaultAudio;
         }
 
         public string GetServerIP()

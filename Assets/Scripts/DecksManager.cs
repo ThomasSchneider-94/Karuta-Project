@@ -8,19 +8,16 @@ using Karuta.Objects;
 namespace Karuta
 {
     /* TODO : 
-     * - The download (with loading screen)
      * - Changer la police des boutons des decks
      * - Themes
      * - Video Background
+     * - Download and check cover
+     * - Upgrade the print for download
      */
 
-
-    /* TODO :
-         *      - Download and check cover
-         *      - Manage disconnexion
-         *      - Manage if wrong informations
-         *      - Upgrade the print for download
-         */
+    /* BUGS : 
+     * - KARUTO - Problème d'alignement quand on active le téléchargement
+     */
 
     public class DecksManager : MonoBehaviour
     {
