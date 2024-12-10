@@ -71,8 +71,8 @@ namespace Karuta
 
             lightThemes.Add(new()
             {
-                mainMenuBackground = baseTheme.GetMainMenuBackground(),
-                decksChoiceBackground = baseTheme.GetDecksChoiceBackground()
+                mainMenuBackground = baseTheme.GetMainMenuBackgroundPath(),
+                decksChoiceBackground = baseTheme.GetDecksChoiceBackgroundPath()
             });
             lightThemesNames.Add(baseThemeName);
 
@@ -119,47 +119,43 @@ namespace Karuta
         }
         #endregion Theme Getter
 
+
+
+
+
+
+
+
         #region Theme Component Getter
 
         #region Backgrounds
-        public string GetMainMenuBackground()
+        public string GetMainMenuBackgroundPath()
         {
-            if (currentTheme.GetMainMenuBackground() == null)
+            if (currentTheme.GetMainMenuBackgroundPath() == null)
             {
-                baseTheme.GetMainMenuBackground();
+                baseTheme.GetMainMenuBackgroundPath();
             }
-            return currentTheme.GetMainMenuBackground();
+            return currentTheme.GetMainMenuBackgroundPath();
         }
 
-        public string GetDecksChoiceBackground()
+        public string GetDecksChoiceBackgroundPath()
         {
-            if (currentTheme.GetDecksChoiceBackground() == null)
+            if (currentTheme.GetDecksChoiceBackgroundPath() == null)
             {
-                baseTheme.GetDecksChoiceBackground();
+                baseTheme.GetDecksChoiceBackgroundPath();
             }
-            return currentTheme.GetDecksChoiceBackground();
+            return currentTheme.GetDecksChoiceBackgroundPath();
         }
 
-        public string GetGameBackground()
+        public string GetGameBackgroundPath()
         {
-            if (currentTheme.GetGameBackground() == null)
+            if (currentTheme.GetGameBackgroundPath() == null)
             {
-                baseTheme.GetGameBackground();
+                baseTheme.GetGameBackgroundPath();
             }
-            return currentTheme.GetGameBackground();
+            return currentTheme.GetGameBackgroundPath();
         }
         #endregion Backgrounds
-
-
-
-
-
-
-
-
-
-
-
 
         #endregion Theme Component Getter
     }

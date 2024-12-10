@@ -8,22 +8,12 @@ using System;
 
 namespace Karuta.Commons
 {
-    public class ThemeApplier : MonoBehaviour
+    public abstract class ThemeApplier : MonoBehaviour
     {
-        ThemeManager themeManager;
-        LoadManager loadManager;
+        protected ThemeManager themeManager;
+        protected LoadManager loadManager;        
 
-        [SerializeField] private bool inGame;
-
-        [Header("Backgrounds")]
-        [SerializeField] private Image imageBackGround;
-        [SerializeField] private VideoPlayer videoBackGround;
-
-
-        private int previousTheme;
-
-
-
+        protected int previousTheme;
 
         private void OnEnable()
         {
@@ -57,68 +47,22 @@ namespace Karuta.Commons
             }*/
         }
 
-        public void ApplyTheme()
-        {
-            Debug.Log("Apply");
-
-            Theme currentTheme = themeManager.GetCurrentTheme();
-
-            ApplyBackgrounds(currentTheme);
-
-            Debug.Log("Applied");
-        }
-
-
-
-
-        private void ApplyBackgrounds(Theme theme)
-        {
-            if (inGame)
-            {
-                if (theme.GetGameBackground().Split(".")[^1] == "png")
-                {
-                    loadManager.Load
-                }
-
-
-
-
-            }
-
-
-
-
-
-
-            string[] names = theme.GetMainMenuBackground().Split(".");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
         private void SoftApplyTheme()
         {
 
         }
+
+        public void ApplyTheme()
+        {
+            Debug.Log("Apply");
+
+            ApplyBackgrounds();
+
+            Debug.Log("Applied");
+        }
+
+        protected abstract void ApplyBackgrounds();
+
+        
     }
 }

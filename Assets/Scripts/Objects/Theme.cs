@@ -8,17 +8,9 @@ namespace Karuta.Objects
     public class Theme 
     {
         // Backgrounds
-        private readonly bool isMainMenuBackgroundSprite;
-        private readonly Sprite mainMenuBackgroundSprite;
-        private readonly string mainMenuBackgroundVideoPath;
-
-        private readonly bool isDecksChoiceBackgroundSprite;
-        private readonly Sprite decksChoiceBackgroundSprite;
-        private readonly string decksChoiceBackgroundVideoPath;
-
-        private readonly bool isGameBackgroundSprite;
-        private readonly Sprite gameBackgroundSprite;
-        private readonly string gameBackgroundVideoPath;
+        private readonly string mainMenuBackgroundPath;
+        private readonly string decksChoiceBackgroundPath;
+        private readonly string gameBackgroundPath;
 
         #region Colors
         private Color mainColor;
@@ -70,50 +62,9 @@ namespace Karuta.Objects
         #region Constructors
         public Theme(JsonTheme theme)
         {
-            if (theme.mainMenuBackground.Split(".")[^1] == "png")
-            {
-                isMainMenuBackgroundSprite = true;
-                mainMenuBackgroundSprite = LoadManager.LoadThemeVisual(theme.mainMenuBackground);
-                mainMenuBackgroundVideoPath = null;
-            }
-            else
-            {
-                isMainMenuBackgroundSprite = false;
-                mainMenuBackgroundSprite = null;
-                mainMenuBackgroundVideoPath = theme.mainMenuBackground;
-            }
-
-            if (theme.decksChoiceBackground.Split(".")[^1] == "png")
-            {
-                isDecksChoiceBackgroundSprite = true;
-                decksChoiceBackgroundSprite = LoadManager.LoadThemeVisual(theme.decksChoiceBackground);
-                decksChoiceBackgroundVideoPath = null;
-            }
-            else
-            {
-                isDecksChoiceBackgroundSprite = false;
-                decksChoiceBackgroundSprite = null;
-                decksChoiceBackgroundVideoPath = theme.decksChoiceBackground;
-            }
-
-            if (theme.decksChoiceBackground.Split(".")[^1] == "png")
-            {
-                isDecksChoiceBackgroundSprite = true;
-                decksChoiceBackgroundSprite = LoadManager.LoadThemeVisual(theme.decksChoiceBackground);
-                decksChoiceBackgroundVideoPath = null;
-            }
-            else
-            {
-                isDecksChoiceBackgroundSprite = false;
-                decksChoiceBackgroundSprite = null;
-                decksChoiceBackgroundVideoPath = theme.decksChoiceBackground;
-            }
-
-
-
-            this.mainMenuBackground = theme.mainMenuBackground;
-            this.decksChoiceBackground = theme.decksChoiceBackground;
-            this.gameBackground = theme.gameBackground;
+            this.mainMenuBackgroundPath = theme.mainMenuBackground;
+            this.decksChoiceBackgroundPath = theme.decksChoiceBackground;
+            this.gameBackgroundPath = theme.gameBackground;
 
             ColorUtility.TryParseHtmlString(theme.mainColor, out this.mainColor);
             ColorUtility.TryParseHtmlString(theme.mainTextColor, out this.mainTextColor);
@@ -165,54 +116,27 @@ namespace Karuta.Objects
         #region Getter
 
         #region Backgrounds
-        public bool IsMainMenuBackgroundSprite()
+        public string GetMainMenuBackgroundPath()
         {
-            return isMainMenuBackgroundSprite;
+            return this.mainMenuBackgroundPath;
         }
 
-        public Sprite GetMainMenuBackgroundSprite()
+        public string GetDecksChoiceBackgroundPath()
         {
-            return mainMenuBackgroundSprite;
-        }
-
-        public string GetMainMenuBackgroundVideo()
-        {
-            return mainMenuBackgroundVideo;
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-        public string GetMainMenuBackground()
-        {
-            return this.mainMenuBackground;
-        }
-
-        public string GetDecksChoiceBackground()
-        {
-            if (this.decksChoiceBackground == null)
+            if (this.decksChoiceBackgroundPath == null)
             {
-                return this.mainMenuBackground;
+                return this.mainMenuBackgroundPath;
             }
-            return this.decksChoiceBackground;
+            return this.decksChoiceBackgroundPath;
         }
 
-        public string GetGameBackground()
+        public string GetGameBackgroundPath()
         {
-            if (this.gameBackground == null)
+            if (this.gameBackgroundPath == null)
             {
-                return this.mainMenuBackground;
+                return this.mainMenuBackgroundPath;
             }
-            return this.gameBackground;
+            return this.gameBackgroundPath;
         }
         #endregion Backgrounds
 
