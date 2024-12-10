@@ -1,70 +1,100 @@
 using System.Net;
 using System;
 using UnityEngine;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 namespace Karuta.Objects
 {
     [System.Serializable]
-    public class Theme 
+    public class Background
     {
-        // Backgrounds
-        private readonly string mainMenuBackgroundPath;
-        private readonly string decksChoiceBackgroundPath;
-        private readonly string gameBackgroundPath;
+        public bool isVideo;
+        public Texture texture;
+        public string videoPath;
+    }
 
-        #region Colors
-        private Color mainColor;
-        private Color mainTextColor;
-        private Color secondaryColor;
-        private Color backgroundColorMainMenu;
-        private Color backgroundColorDecksChoice;
-        private Color backgroundColorGame;
-        private Color colorOptionButton;
-        private Color colorOptionButtonText;
-        private Color colorQuitButton;
-        private Color colorPlayPause;
-        private Color colorCheckBox;
-        private Color colorTextNumberPlayersQuestion;
-        private Color colorPanelNumberPlayersQuestion;
-        private Color colorPanelNumberPlayers;
-        private Color colorCentralPanelNumberPlayers;
-        private Color colorTextNumberPlayers;
-        private Color colorOptionPanel;
-        private Color colorOptionPanelBorder;
-        private Color colorOptionsText;
-        private Color colorOptionsTextOutline;
-        private Color colorSliderHandle;
-        private Color colorSliderBackground;
-        private Color colorSliderFill;
-        private Color colorUpdateButton;
-        private Color colorUpdateButtonText;
-        private Color colorContinueArrow;
-        private Color colorBackArrow;
-        private Color colorPanelCurrentPlayer;
-        private Color colorTextCurrentPlayer;
-        private Color colorDeckArrow;
-        private Color colorDeckArrowText;
-        private Color colorNumberOfCardsLeft;
-        private Color colorAnimeTitle;
-        private Color colorCardFoundArrow;
-        private Color colorCardFoundText;
-        private Color colorCardNotFoundArrow;
-        private Color colorCardNotFoundText;
+    [System.Serializable]
+    public class Theme
+    {
+        [Header("Backgrounds")]
+        [SerializeField] private Background mainMenuBackground;
+        [SerializeField] private Background decksChoiceBackground;
+        [SerializeField] private Background gameBackground;
 
-        private Color colorThemesButton;
-        private Color colorThemesQuitButton;
-        private Color colorThemesPanel;
-        private Color colorThemesTitleText;
-        private Color colorThemeSelectedIndicator;
-        private Color colorThemeUnselectedIndicator;
-        #endregion Colors
+        [Header("Colors")]
+        [SerializeField] private Color mainColor;
+        [SerializeField] private Color mainTextColor;
+        [SerializeField] private Color secondaryColor;
+        [SerializeField] private Color backgroundColorMainMenu;
+        [SerializeField] private Color backgroundColorDecksChoice;
+        [SerializeField] private Color backgroundColorGame;
+        [SerializeField] private Color colorOptionButton;
+        [SerializeField] private Color colorOptionButtonText;
+        [SerializeField] private Color colorQuitButton;
+        [SerializeField] private Color colorPlayPause;
+        [SerializeField] private Color colorCheckBox;
+        [SerializeField] private Color colorTextNumberPlayersQuestion;
+        [SerializeField] private Color colorPanelNumberPlayersQuestion;
+        [SerializeField] private Color colorPanelNumberPlayers;
+        [SerializeField] private Color colorCentralPanelNumberPlayers;
+        [SerializeField] private Color colorTextNumberPlayers;
+        [SerializeField] private Color colorOptionPanel;
+        [SerializeField] private Color colorOptionPanelBorder;
+        [SerializeField] private Color colorOptionsText;
+        [SerializeField] private Color colorOptionsTextOutline;
+        [SerializeField] private Color colorSliderHandle;
+        [SerializeField] private Color colorSliderBackground;
+        [SerializeField] private Color colorSliderFill;
+        [SerializeField] private Color colorUpdateButton;
+        [SerializeField] private Color colorUpdateButtonText;
+        [SerializeField] private Color colorContinueArrow;
+        [SerializeField] private Color colorBackArrow;
+        [SerializeField] private Color colorPanelCurrentPlayer;
+        [SerializeField] private Color colorTextCurrentPlayer;
+        [SerializeField] private Color colorDeckArrow;
+        [SerializeField] private Color colorDeckArrowText;
+        [SerializeField] private Color colorNumberOfCardsLeft;
+        [SerializeField] private Color colorAnimeTitle;
+        [SerializeField] private Color colorCardFoundArrow;
+        [SerializeField] private Color colorCardFoundText;
+        [SerializeField] private Color colorCardNotFoundArrow;
+        [SerializeField] private Color colorCardNotFoundText;
+        
+        [SerializeField] private Color colorThemesButton;
+        [SerializeField] private Color colorThemesQuitButton;
+        [SerializeField] private Color colorThemesPanel;
+        [SerializeField] private Color colorThemesTitleText;
+        [SerializeField] private Color colorThemeSelectedIndicator;
+        [SerializeField] private Color colorThemeUnselectedIndicator;
 
         #region Constructors
         public Theme(JsonTheme theme)
         {
-            this.mainMenuBackgroundPath = theme.mainMenuBackground;
-            this.decksChoiceBackgroundPath = theme.decksChoiceBackground;
-            this.gameBackgroundPath = theme.gameBackground;
+            this.mainMenuBackground.isVideo = theme.mainMenuBackground.Split(".")[^1] == "mp4";
+            this.mainMenuBackground.texture = mainMenuBackground.isVideo ? null : LoadManager.LoadThemeVisual(theme.mainMenuBackground);
+            this.mainMenuBackground.videoPath = mainMenuBackground.isVideo ? theme.mainMenuBackground : null;
+
+            if (theme.decksChoiceBackground != "")
+            {
+                this.decksChoiceBackground.isVideo = theme.decksChoiceBackground.Split(".")[^1] == "mp4";
+                this.decksChoiceBackground.texture = decksChoiceBackground.isVideo ? null : LoadManager.LoadThemeVisual(theme.decksChoiceBackground);
+                this.decksChoiceBackground.videoPath = decksChoiceBackground.isVideo ? theme.decksChoiceBackground : null;
+            }
+            else
+            {
+                decksChoiceBackground = null;
+            }
+
+            if (theme.gameBackground != "")
+            {
+                this.gameBackground.isVideo = theme.gameBackground.Split(".")[^1] == "mp4";
+                this.gameBackground.texture = gameBackground.isVideo ? null : LoadManager.LoadThemeVisual(theme.gameBackground);
+                this.gameBackground.videoPath = gameBackground.isVideo ? theme.gameBackground : null;
+            }
+            else
+            {
+                gameBackground = null;
+            }
 
             ColorUtility.TryParseHtmlString(theme.mainColor, out this.mainColor);
             ColorUtility.TryParseHtmlString(theme.mainTextColor, out this.mainTextColor);
@@ -111,32 +141,48 @@ namespace Karuta.Objects
             ColorUtility.TryParseHtmlString(theme.colorThemeSelectedIndicator, out this.colorThemeSelectedIndicator);
             ColorUtility.TryParseHtmlString(theme.colorThemeUnselectedIndicator, out this.colorThemeUnselectedIndicator);
         }
+
+        public void Init()
+        {
+            if (this.mainMenuBackground.texture == null && this.mainMenuBackground.videoPath == "")
+            {
+                this.mainMenuBackground = null;
+            }
+            if (this.decksChoiceBackground.texture == null && this.decksChoiceBackground.videoPath == "")
+            {
+                this.decksChoiceBackground = null;
+            }
+            if (this.gameBackground.texture == null && this.gameBackground.videoPath == "")
+            {
+                this.gameBackground = null;
+            }
+        }
         #endregion Constructors
 
         #region Getter
 
         #region Backgrounds
-        public string GetMainMenuBackgroundPath()
+        public Background GetMainMenuBackground()
         {
-            return this.mainMenuBackgroundPath;
+            return this.mainMenuBackground;
         }
 
-        public string GetDecksChoiceBackgroundPath()
+        public Background GetDecksChoiceBackground()
         {
-            if (this.decksChoiceBackgroundPath == null)
+            if (this.decksChoiceBackground == null)
             {
-                return this.mainMenuBackgroundPath;
+                return this.mainMenuBackground;
             }
-            return this.decksChoiceBackgroundPath;
+            return this.decksChoiceBackground;
         }
 
-        public string GetGameBackgroundPath()
+        public Background GetGameBackground()
         {
-            if (this.gameBackgroundPath == null)
+            if (this.gameBackground == null)
             {
-                return this.mainMenuBackgroundPath;
+                return this.mainMenuBackground;
             }
-            return this.gameBackgroundPath;
+            return this.gameBackground;
         }
         #endregion Backgrounds
 

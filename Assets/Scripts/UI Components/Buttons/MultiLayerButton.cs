@@ -52,7 +52,7 @@ namespace Karuta.UIComponent
         }
 
         /// <summary>
-        /// Set the sprite of the icon. The Icon is the last layer in buttonLayers
+        /// Set the texture of the icon. The Icon is the last layer in buttonLayers
         /// </summary>
         /// <param name="sprite"></param>
         public void SetIconSprite(Sprite sprite)

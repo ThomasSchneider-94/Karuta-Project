@@ -164,7 +164,7 @@ namespace Karuta
         }
 
         #region Theme
-        public static Sprite LoadThemeVisual(string visual)
+        public static Texture LoadThemeVisual(string visual)
         {
             if (!File.Exists(Path.Combine(ThemesDirectoryPath, visual)))
             {
@@ -178,7 +178,7 @@ namespace Karuta
             Texture2D texture = new(1, 1);
             texture.LoadImage(bytes);
 
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            return texture;
         }
 
         #endregion Theme

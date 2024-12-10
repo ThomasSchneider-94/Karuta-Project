@@ -4,32 +4,57 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace Karuta.Commons
 {
+    public enum PanelType
+    {
+        None,
+        MainMenu,
+        DeckSelection,
+        Game
+    }
+
+    [System.Serializable]
+    public class Panel
+    {
+        public GameObject panel;
+        public PanelType type;
+    }
+
     public class PanelManager : MonoBehaviour
     {
-        [SerializeField] private GameObject startPanel;
+        [SerializeField] private Panel startPanel;
 
         [Header("Panels")]
-        [SerializeField] private List<GameObject> panels = new();
+        [SerializeField] private List<Panel> panels = new();
 
-        private readonly Stack<GameObject> currentPanels = new();
+        public UnityEvent<PanelType> PanelUpdateEvent { get; } = new();
+
+        private readonly Stack<Panel> currentPanels = new();
 
         private void Start()
         {
-            TogglePanel(startPanel);
+            TogglePanel(startPanel.panel);
         }
 
         public void TogglePanel(GameObject panelToToggle)
         {
-            currentPanels.Push(panelToToggle);
-
-            foreach (GameObject panel in panels)
+            foreach (Panel panel in panels)
             {
-                panel.SetActive(panel == panelToToggle);
+                if (panel.panel == panelToToggle)
+                {
+                    currentPanels.Push(panel);
+                    panel.panel.SetActive(true);
+                    PanelUpdateEvent.Invoke(panel.type);
+                }
+                else
+                {
+                    panel.panel.SetActive(false);
+                }
             }
         }
 
@@ -39,17 +64,17 @@ namespace Karuta.Commons
 
             currentPanels.Pop();
 
-            foreach (GameObject panel in panels)
+            foreach (Panel panel in panels)
             {
-                panel.SetActive(panel == currentPanels.Peek());
-            }
-        }
-
-        public void ReturnToPreviousPanel(InputAction.CallbackContext context)
-        {
-            if (context.phase == InputActionPhase.Started)
-            {
-                ReturnToPreviousPanel();
+                if (panel == currentPanels.Peek())
+                {
+                    panel.panel.SetActive(true);
+                    PanelUpdateEvent.Invoke(panel.type);
+                }
+                else
+                {
+                    panel.panel.SetActive(false);
+                }
             }
         }
 

@@ -305,7 +305,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.a
-      value: 0.5019608
+      value: 0.7490196
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.b
@@ -498,118 +498,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7635173863356903429, guid: 6d53fbc0631d89e42a61cdad357899c9, type: 3}
   m_PrefabInstance: {fileID: 88208227}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &190659841
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 190659842}
-  - component: {fileID: 190659844}
-  - component: {fileID: 190659843}
-  - component: {fileID: 190659845}
-  m_Layer: 5
-  m_Name: Backgroud
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &190659842
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190659841}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 945690743}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 640, y: 1351.11}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &190659843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190659841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &190659844
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190659841}
-  m_CullTransparentMesh: 1
---- !u!328 &190659845
-VideoPlayer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190659841}
-  m_Enabled: 1
-  m_VideoClip: {fileID: 0}
-  m_TargetCameraAlpha: 1
-  m_TargetCamera3DLayout: 0
-  m_TargetCamera: {fileID: 0}
-  m_TargetTexture: {fileID: 0}
-  m_TimeReference: 0
-  m_TargetMaterialRenderer: {fileID: 0}
-  m_TargetMaterialProperty: <noninit>
-  m_RenderMode: 2
-  m_AspectRatio: 2
-  m_DataSource: 1
-  m_TimeUpdateMode: 2
-  m_PlaybackSpeed: 1
-  m_AudioOutputMode: 2
-  m_TargetAudioSources:
-  - {fileID: 0}
-  m_DirectAudioVolumes:
-  - 1
-  m_Url: 
-  m_EnabledAudioTracks: 01
-  m_DirectAudioMutes: 00
-  m_ControlledAudioTrackCount: 1
-  m_PlayOnAwake: 1
-  m_SkipOnDrop: 1
-  m_Looping: 1
-  m_WaitForFirstFrame: 1
-  m_FrameReadyEventEnabled: 0
-  m_VideoShaders: []
 --- !u!1001 &365102056
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1938,6 +1826,7 @@ GameObject:
   - component: {fileID: 691175411}
   - component: {fileID: 691175408}
   - component: {fileID: 691175407}
+  - component: {fileID: 691175412}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -2034,13 +1923,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b979abee4ad26a349a60bbb60dde1ce3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPanel: {fileID: 381289218}
+  startPanel:
+    panel: {fileID: 381289218}
+    type: 1
   panels:
-  - {fileID: 381289218}
-  - {fileID: 412485193}
-  - {fileID: 1240720208}
-  - {fileID: 948950871}
-  - {fileID: 734879319}
+  - panel: {fileID: 381289218}
+    type: 1
+  - panel: {fileID: 412485193}
+    type: 2
+  - panel: {fileID: 1240720208}
+    type: 0
+  - panel: {fileID: 948950871}
+    type: 0
+  - panel: {fileID: 734879319}
+    type: 0
 --- !u!114 &691175410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2109,6 +2005,28 @@ MonoBehaviour:
   - {fileID: 19337529}
   downloadedOnlyToggle: {fileID: 713957185}
   continueButton: {fileID: 912128693}
+--- !u!114 &691175412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691175403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95efe06208da9ef499ba506b9a8a72c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panelManager: {fileID: 691175409}
+  backgroundRawImage: {fileID: 967568868}
+  videoPlayer: {fileID: 967568869}
+  renderTexture: {fileID: 8400000, guid: df64543c9f70a8d48bde24e470a9d3f7, type: 2}
+  mainMenuBackgroundRawImage: {fileID: 0}
+  mainMenuBackgroundVideoPlayer: {fileID: 0}
+  mainMenuBackgroundRenderTexture: {fileID: 8400000, guid: df64543c9f70a8d48bde24e470a9d3f7, type: 2}
+  decksChoiceBackgroundRawImage: {fileID: 0}
+  decksChoiceBackgroundVideoPlayer: {fileID: 0}
+  decksChoiceBackgroundRenderTexture: {fileID: 8400000, guid: edab9cb863ef223498a346cf880de506, type: 2}
 --- !u!114 &713957185 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7753829917687140986, guid: 673e37685ec4cff49965c818e92c5b88, type: 3}
@@ -2865,7 +2783,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 190659842}
+  - {fileID: 967568866}
   - {fileID: 381289219}
   - {fileID: 412485194}
   - {fileID: 1240720209}
@@ -3200,6 +3118,115 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986bcb16f526a6f4c9b58f21ab95e942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &967568865
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 967568866}
+  - component: {fileID: 967568868}
+  - component: {fileID: 967568867}
+  - component: {fileID: 967568869}
+  m_Layer: 5
+  m_Name: BackGround
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &967568866
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967568865}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 945690743}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &967568867
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967568865}
+  m_CullTransparentMesh: 1
+--- !u!114 &967568868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967568865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!328 &967568869
+VideoPlayer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 967568865}
+  m_Enabled: 1
+  m_VideoClip: {fileID: 0}
+  m_TargetCameraAlpha: 1
+  m_TargetCamera3DLayout: 0
+  m_TargetCamera: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: df64543c9f70a8d48bde24e470a9d3f7, type: 2}
+  m_TimeReference: 0
+  m_TargetMaterialRenderer: {fileID: 0}
+  m_TargetMaterialProperty: <noninit>
+  m_RenderMode: 2
+  m_AspectRatio: 5
+  m_DataSource: 1
+  m_TimeUpdateMode: 2
+  m_PlaybackSpeed: 1
+  m_AudioOutputMode: 2
+  m_TargetAudioSources:
+  - {fileID: 0}
+  m_DirectAudioVolumes:
+  - 0
+  m_Url: 
+  m_EnabledAudioTracks: 01
+  m_DirectAudioMutes: 01
+  m_ControlledAudioTrackCount: 1
+  m_PlayOnAwake: 1
+  m_SkipOnDrop: 1
+  m_Looping: 1
+  m_WaitForFirstFrame: 1
+  m_FrameReadyEventEnabled: 0
+  m_VideoShaders: []
 --- !u!1001 &991999786
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3382,7 +3409,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.a
-      value: 0.5019608
+      value: 0.7490196
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.b
@@ -3997,7 +4024,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.7490196}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6055,7 +6082,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.a
-      value: 0.5019608
+      value: 0.7490196
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.b
@@ -6925,7 +6952,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.a
-      value: 0.5019608
+      value: 0.7490196
       objectReference: {fileID: 0}
     - target: {fileID: 5431240159279388068, guid: 5f5b7236a47fba74bbc5b8712b7fa806, type: 3}
       propertyPath: m_Color.b
@@ -7218,6 +7245,10 @@ PrefabInstance:
       value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseThemeName
+      value: Classic
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: baseTheme.mainColor.a
       value: 1
       objectReference: {fileID: 0}
@@ -7270,8 +7301,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseTheme.mainMenuBackground.sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c2a379f244796954ea348f1644e812cd, type: 3}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseTheme.mainMenuBackground.isVideo
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: baseTheme.backgroundColorDecksChoice.a
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseTheme.mainMenuBackground.videoPath
+      value: Sakura-Train.mp4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseTheme.decksChoiceBackground.isVideo
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7015680740462773684, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
+      propertyPath: baseTheme.decksChoiceBackground.texture
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7250132207680843026, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: m_LocalPosition.x

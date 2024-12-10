@@ -14,8 +14,11 @@ namespace Karuta
         [SerializeField] private Theme baseTheme;
         [SerializeField] private string baseThemeName;
 
+
+
+        /*
         private readonly List<LightJsonTheme> lightThemes = new();
-        private readonly List<string> lightThemesNames = new();
+        private readonly List<string> lightThemesNames = new();*/
         private int currentLightTheme;
         private Theme currentTheme;
 
@@ -52,6 +55,8 @@ namespace Karuta
         {
             InitLightThemes();
 
+            baseTheme.Init();
+            
             currentLightTheme = PlayerPrefs.GetInt("theme", 0);
 
             LoadTheme();
@@ -66,6 +71,7 @@ namespace Karuta
 
         private void InitLightThemes()
         {
+            /*
             lightThemes.Clear();
             lightThemesNames.Clear();
 
@@ -87,7 +93,7 @@ namespace Karuta
             foreach (LightJsonTheme theme in lightThemes)
             {
                 Debug.Log(theme.mainMenuBackground);
-            }
+            }*/
         }
 
         public void LoadTheme()
@@ -98,28 +104,22 @@ namespace Karuta
             }
             else
             {
-                currentTheme = new(JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentLightTheme]))));
+                //currentTheme = new(JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentLightTheme]))));
             }
         }
 
         #region Theme Getter
+        /*
         public LightJsonTheme GetCurrentLightTheme()
         {
             return lightThemes[currentLightTheme];
-        }
+        }*/
 
         public int GetCurrentLightThemeInt()
         {
             return currentLightTheme;
         }
-
-        public Theme GetCurrentTheme()
-        {
-            return currentTheme;
-        }
         #endregion Theme Getter
-
-
 
 
 
@@ -129,31 +129,31 @@ namespace Karuta
         #region Theme Component Getter
 
         #region Backgrounds
-        public string GetMainMenuBackgroundPath()
+        public Background GetMainMenuBackground()
         {
-            if (currentTheme.GetMainMenuBackgroundPath() == null)
+            if (currentTheme.GetMainMenuBackground() == null)
             {
-                baseTheme.GetMainMenuBackgroundPath();
+                return baseTheme.GetMainMenuBackground();
             }
-            return currentTheme.GetMainMenuBackgroundPath();
+            return currentTheme.GetMainMenuBackground();
         }
 
-        public string GetDecksChoiceBackgroundPath()
+        public Background GetDecksChoiceBackground()
         {
-            if (currentTheme.GetDecksChoiceBackgroundPath() == null)
+            if (currentTheme.GetDecksChoiceBackground() == null)
             {
-                baseTheme.GetDecksChoiceBackgroundPath();
+                return baseTheme.GetMainMenuBackground();
             }
-            return currentTheme.GetDecksChoiceBackgroundPath();
+            return currentTheme.GetDecksChoiceBackground();
         }
 
-        public string GetGameBackgroundPath()
+        public Background GetGameBackground()
         {
-            if (currentTheme.GetGameBackgroundPath() == null)
+            if (currentTheme.GetGameBackground() == null)
             {
-                baseTheme.GetGameBackgroundPath();
+                return baseTheme.GetMainMenuBackground();
             }
-            return currentTheme.GetGameBackgroundPath();
+            return currentTheme.GetGameBackground();
         }
         #endregion Backgrounds
 

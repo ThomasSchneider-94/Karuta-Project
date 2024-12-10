@@ -13,9 +13,10 @@ namespace Karuta.Commons
         protected ThemeManager themeManager;
         protected LoadManager loadManager;        
 
+        [SerializeField] protected PanelManager panelManager;
         protected int previousTheme;
 
-        private void OnEnable()
+        virtual protected void OnEnable()
         {
             themeManager = ThemeManager.Instance;
             loadManager = LoadManager.Instance;
@@ -56,13 +57,9 @@ namespace Karuta.Commons
         {
             Debug.Log("Apply");
 
-            ApplyBackgrounds();
-
             Debug.Log("Applied");
         }
 
-        protected abstract void ApplyBackgrounds();
-
-        
+        protected abstract void ApplyBackground(PanelType panelType);
     }
 }

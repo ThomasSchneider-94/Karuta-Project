@@ -1,6 +1,9 @@
 using Karuta.Commons;
 using Karuta.Objects;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
@@ -8,26 +11,45 @@ namespace Karuta.Menu
 {
     public class MenuThemeApplier : ThemeApplier
     {
-        [Header("Backgrounds")]
-        [SerializeField] private Image mainMenuBackgroundImage;
-        [SerializeField] private VideoPlayer mainMenuBackgroundVideo;
-        [SerializeField] private Image decksChoiceBackgroundImage;
-        [SerializeField] private VideoPlayer decksChoiceBackgroundVideo;
+        [Header("Background")]
+        [SerializeField] private RawImage backgroundRawImage;
+        [SerializeField] private VideoPlayer videoPlayer;
+        [SerializeField] private RenderTexture renderTexture;
 
-        protected override void ApplyBackgrounds()
+        override protected void OnEnable()
         {
-            string mainMenuPath = themeManager.GetMainMenuBackgroundPath();
+            panelManager.PanelUpdateEvent.AddListener(ApplyBackground);
 
-            if (mainMenuPath.Split(".")[^1] == "png")
+            base.OnEnable();
+        }
+
+        protected override void ApplyBackground(PanelType panelType)
+        {
+            if (panelType == PanelType.None) { return; }
+
+            Debug.Log(panelType);
+
+            // Switch for a single variable
+            Background background = panelType switch
             {
-                mainMenuBackgroundImage.sprite = LoadManager.LoadThemeVisual(mainMenuPath);
+                PanelType.MainMenu => themeManager.GetMainMenuBackground(),
+                PanelType.DeckSelection => themeManager.GetDecksChoiceBackground(),
+                PanelType.Game => themeManager.GetGameBackground(),
+                _ => themeManager.GetMainMenuBackground(),
+            };
+
+            if (background.isVideo)
+            {
+                long currentFrame = videoPlayer.frame;
+                backgroundRawImage.texture = renderTexture;
+                videoPlayer.url = Path.Combine("file://" + LoadManager.ThemesDirectoryPath, background.videoPath);
+                videoPlayer.frame = currentFrame;
+                videoPlayer.Play();
             }
-
-            string deckSelectionMenuPath = themeManager.GetMainMenuBackgroundPath();
-
-            if (deckSelectionMenuPath.Split(".")[^1] == "png")
+            else
             {
-                mainMenuBackgroundImage.sprite = LoadManager.LoadThemeVisual(deckSelectionMenuPath);
+                backgroundRawImage.texture = background.texture;
+                videoPlayer.Stop();
             }
         }
     }
