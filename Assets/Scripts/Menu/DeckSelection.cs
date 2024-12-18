@@ -156,7 +156,7 @@ namespace Karuta.Menu
             CreateTypeContainers(category);
 
             // Set Parameters
-            container.SetAllParameters(decksManager.GetCategory(category), categoryNameScale, categoryNameWidth, categoryNameSpacing, categorySpacing);
+            container.SetAllParameters(decksManager.GetCategoryName(category), categoryNameScale, categoryNameWidth, categoryNameSpacing, categorySpacing);
         }
 
         /// <summary>
@@ -539,6 +539,7 @@ namespace Karuta.Menu
 
         private void SetAllButtonsInteractable(bool interactable)
         {
+            Debug.Log("Set all interactable " + interactable);
             continueButton.interactable = !interactable;
             List<int> selectedIndexes = decksManager.GetSelectedDecks();
             for (int i = 0; i < buttons.Count; i++)
@@ -571,6 +572,16 @@ namespace Karuta.Menu
             yield return null;  // Wait one frame
             scrollRect.verticalNormalizedPosition = 1;
         }
+
+
+
+        #region Getter
+        public List<SelectionButton> GetSelectionButtons()
+        {
+            return buttons;
+        }
+        #endregion Getter
+
 
 #if UNITY_EDITOR
         // Called if changes in code or editor (not called at runtime)

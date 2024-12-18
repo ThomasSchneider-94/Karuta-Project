@@ -65,10 +65,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Themes
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3025aaf5d5fdb914eb93ba4496415523, type: 2}
+  m_sharedMaterial: {fileID: -6772991938756124065, guid: 3025aaf5d5fdb914eb93ba4496415523, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.85
+  m_fontSize: 27.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -258,10 +258,11 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+  textMesh: {fileID: 6684672104317802236}
   buttonLayers:
   - image: {fileID: 1101812703547515451}
     sprite: {fileID: 21300000, guid: 9e4f9f00405cfab44be7bab04b4af6bf, type: 3}
-    color: {r: 0, g: 0, b: 0, a: 1}
+    color: {r: 1, g: 0, b: 0, a: 1}
     scale: {x: 0.98125, y: 0.9}
   useDisabledColor: 0
 --- !u!95 &3972655487316602558
@@ -344,7 +345,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

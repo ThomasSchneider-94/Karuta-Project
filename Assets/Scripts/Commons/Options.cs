@@ -63,6 +63,13 @@ namespace Karuta.Commons
             }
 
             ShowCategoryButton();
+
+            Sprite sprite = optionsManager.GetCurrentCategoryIcon();
+
+            foreach (MultiLayerButton button in categoryButtons)
+            {
+                button.SetIconSprite(sprite);
+            }
         }
 
         public void NextCurrentCategory()

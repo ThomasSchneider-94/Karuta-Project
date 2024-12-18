@@ -5,9 +5,6 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using Karuta.Objects;
-using System.Net;
-using Unity.VisualScripting;
-using System.Collections.Generic;
 
 namespace Karuta
 {

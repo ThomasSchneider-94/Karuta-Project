@@ -8,6 +8,8 @@ namespace Karuta.EditorLayout
     [CustomEditor(typeof(MultiLayerButton))]
     public class MultiLayerButtonEditor : ButtonEditor
     {
+        SerializedProperty textMesh;
+
         [Header("Button Layers")]
         SerializedProperty buttonLayers;
 
@@ -18,6 +20,7 @@ namespace Karuta.EditorLayout
         {
             base.OnEnable();
 
+            textMesh = serializedObject.FindProperty("textMesh");
             buttonLayers = serializedObject.FindProperty("buttonLayers");
             useDisabledColor = serializedObject.FindProperty("useDisabledColor");
         }
@@ -31,6 +34,7 @@ namespace Karuta.EditorLayout
             serializedObject.Update();
 
             // Afficher les propriétés personnalisées de VolumeSlider
+            EditorGUILayout.PropertyField(textMesh);
             EditorGUILayout.PropertyField(buttonLayers);
             EditorGUILayout.PropertyField(useDisabledColor);
 

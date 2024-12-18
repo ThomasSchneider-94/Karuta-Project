@@ -135,7 +135,7 @@ namespace Karuta
         {
             if (category >= categoriesIcons.Count)
             {
-                Debug.LogError("Category " + category + " is greater than " +  categoriesIcons.Count);
+                Debug.LogWarning("Category " + category + " is greater than " + categoriesIcons.Count);
                 return;
             }
 
@@ -199,11 +199,19 @@ namespace Karuta
 
         public Sprite GetCategoryIcon(int category)
         {
+            if (categoriesIcons.Count == 0)
+            {
+                return LoadManager.Instance.GetDefaultSprite();
+            }
             return categoriesIcons[category];
         }
 
         public Sprite GetCurrentCategoryIcon()
         {
+            if (categoriesIcons.Count == 0)
+            {
+                return LoadManager.Instance.GetDefaultSprite();
+            }
             return categoriesIcons[currentCategory];
         }
     }

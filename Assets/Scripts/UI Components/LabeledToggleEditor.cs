@@ -14,6 +14,11 @@ namespace Karuta.EditorLayout
         [Header("Toggle Label")]
         SerializedProperty labelText;
         SerializedProperty label;
+        SerializedProperty outline;
+
+        [Header("Check Mark Background")]
+        SerializedProperty backgroundOutline;
+        SerializedProperty background;
 
         protected override void OnEnable()
         {
@@ -21,6 +26,9 @@ namespace Karuta.EditorLayout
 
             labelText = serializedObject.FindProperty("labelText");
             label = serializedObject.FindProperty("label");
+            outline = serializedObject.FindProperty("outline");
+            backgroundOutline = serializedObject.FindProperty("backgroundOutline");
+            background = serializedObject.FindProperty("background");
         }
 
         public override void OnInspectorGUI()
@@ -34,6 +42,9 @@ namespace Karuta.EditorLayout
             // Afficher les propriétés personnalisées de VolumeSlider
             EditorGUILayout.PropertyField(labelText);
             EditorGUILayout.PropertyField(label);
+            EditorGUILayout.PropertyField(outline);
+            EditorGUILayout.PropertyField(backgroundOutline);
+            EditorGUILayout.PropertyField(background);
 
             // Appliquer les changements
             serializedObject.ApplyModifiedProperties();

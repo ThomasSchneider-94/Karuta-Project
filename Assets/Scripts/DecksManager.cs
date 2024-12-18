@@ -7,16 +7,18 @@ using Karuta.Objects;
 
 namespace Karuta
 {
-    /* TODO : 
-     * - Changer la police des boutons des decks
+    /* TODO :
      * - Themes
-     * - Video Background
      * - Download and check cover
      * - Upgrade the print for download
+     * - Refactor pour sécuriser quand aucune data
+     * - Gérer quand même nom mais pas même visuel
      */
 
     /* BUGS : 
      * - KARUTO - Problème d'alignement quand on active le téléchargement
+     * - Bouttons ne semble plus se disable quand tous les decks sont sélectionés
+     * - Le  sprite de default est trop bas dans le jeu
      */
 
     public class DecksManager : MonoBehaviour
@@ -188,13 +190,19 @@ namespace Karuta
                 foreach (JsonDeckInfo jsonDeckInfo in JsonUtility.FromJson<JsonDeckInfoList>(File.ReadAllText(LoadManager.DecksFilePath)).deckInfoList)
                 {
                     DeckInfo deckInfo = new(jsonDeckInfo);
+
+                    if (deckInfo.GetCategory() >= categories.Count && deckInfo.GetDeckType() >= types.Count)
+                    {
+                        Debug.LogWarning("Deck " + deckInfo.GetName() + " category or type is not supported");
+                        continue;
+                    }
                     deckInfoList.Add(deckInfo);
                     decksCount[deckInfo.GetCategory() * types.Count + deckInfo.GetDeckType()]++;
                 }
             }
             else
             {
-                Debug.LogError("List does not exist " + LoadManager.DecksFilePath);
+                Debug.LogWarning("List does not exist " + LoadManager.DecksFilePath);
             }
 
             DecksInformationsQuickSort(0, deckInfoList.Count - 1);
@@ -393,7 +401,7 @@ namespace Karuta
             return categories;
         }
 
-        public string GetCategory(int i)
+        public string GetCategoryName(int i)
         {
             return categories[i];
         }

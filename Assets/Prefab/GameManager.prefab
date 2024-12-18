@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedDecksMax: 2
-  selectedDecks: 000000000c000000
+  selectedDecks: 
 --- !u!114 &1832540871454595060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,9 +62,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   downloadTimeout: 10
+  connexionCheckTimeout: 0
   minDownloadedBytes: 2048
   defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
-  defaultAudio: {fileID: 8300000, guid: 719ec2645c586c34cad3a25b7ca6998c, type: 3}
 --- !u!114 &4119100899951645458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,50 +94,92 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602f1a5b9487dfd48bb61cd46fd1331a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applier: {fileID: 0}
   baseTheme:
-    mainMenuBackground: {fileID: 0}
-    decksChoiceBackground: {fileID: 0}
-    gameBackground: {fileID: 0}
-    mainColor: {r: 0, g: 0, b: 0, a: 0}
-    mainTextColor: {r: 0, g: 0, b: 0, a: 0}
-    secondaryColor: {r: 0, g: 0, b: 0, a: 0}
-    backgroundColorMainMenu: {r: 0, g: 0, b: 0, a: 0}
-    backgroundColorDecksChoice: {r: 0, g: 0, b: 0, a: 0}
+    mainBackground:
+      ignore: 0
+      isTexture: 1
+      texture: {fileID: 2800000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
+      videoPath: 
+    decksSelectionBackground:
+      ignore: 1
+      isTexture: 1
+      texture: {fileID: 0}
+      videoPath: 
+    gameBackground:
+      ignore: 1
+      isTexture: 1
+      texture: {fileID: 0}
+      videoPath: 
+    questionPanelColor: {r: 0, g: 0, b: 0, a: 0.4}
+    questionTextColor: {r: 1, g: 1, b: 1, a: 1}
+    questionNumberPanelColor: {r: 0, g: 0, b: 0, a: 0.4}
+    questionNumberSelectedPanelColor: {r: 0.3019608, g: 0.54509807, b: 0.67058825, a: 0.70980394}
+    questionNumberTextColor: {r: 1, g: 1, b: 1, a: 1}
+    downloadOnlyToggleLabelColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    downloadOnlyToggleLabelOutlineColor: {r: 1, g: 0.8156863, b: 1, a: 1}
+    downloadOnlyToggleCheckBoxOutlineColor: {r: 0.5647059, g: 0.5647059, b: 0.5647059, a: 1}
+    downloadOnlyToggleCheckBoxColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    downloadOnlyToggleCheckMarkColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    categoryButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    categoryButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    arrowButtonOutsideColor: {r: 1, g: 1, b: 1, a: 1}
+    arrowButtonInsideColor: {r: 0, g: 0, b: 0, a: 1}
+    arrowButtonTextColor: {r: 1, g: 1, b: 1, a: 1}
+    reverseArrowButtonOutsideColor: {r: 1, g: 1, b: 1, a: 1}
+    reverseArrowButtonInsideColor: {r: 0, g: 0, b: 0, a: 1}
+    reverseArrowButtonTextColor: {r: 1, g: 1, b: 1, a: 1}
+    optionButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    optionButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    optionButtonIconColor: {r: 1, g: 1, b: 1, a: 1}
+    optionsTogglesLabelColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    optionsTogglesLabelOutlineColor: {r: 1, g: 0.8156863, b: 1, a: 1}
+    optionsTogglesCheckBoxOutlineColor: {r: 0.5647059, g: 0.5647059, b: 0.5647059, a: 1}
+    optionsTogglesCheckBoxColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    optionsTogglesCheckMarkColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    closeButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    closeButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    closeButtonIconColor: {r: 1, g: 1, b: 1, a: 1}
+    panelButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    panelButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    panelButtonTextColor: {r: 1, g: 1, b: 1, a: 1}
+    optionPanelColor: {r: 1, g: 0.92941177, b: 0.8156863, a: 1}
+    optionPanelBorderColor: {r: 0.9529412, g: 0.8039216, b: 0.92156863, a: 0.8}
+    deckSelectionButtonOutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    deckSelectionButtonInsideColor: {r: 1, g: 1, b: 1, a: 1}
+    deckSelectionButtonTextColor: {r: 0, g: 0, b: 0, a: 1}
+    deckDownloadButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    deckDownloadButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    selectAllToggleLabelColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    selectAllToggleLabelOutlineColor: {r: 1, g: 0.8156863, b: 1, a: 1}
+    selectAllToggleCheckBoxOutlineColor: {r: 0.5647059, g: 0.5647059, b: 0.5647059, a: 1}
+    selectAllToggleCheckBoxColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    selectAllToggleCheckMarkColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    deckDownloadTogglesLabelColor: {r: 0.19607845, g: 0.19607845, b: 0.19607845, a: 1}
+    deckDownloadTogglesLabelOutlineColor: {r: 1, g: 0.81568635, b: 1, a: 0}
+    deckDownloadTogglesCheckBoxOutlineColor: {r: 0.5647059, g: 0.5647059, b: 0.5647059, a: 1}
+    deckDownloadTogglesCheckBoxColor: {r: 0.9921569, g: 0.627451, b: 0.81568635, a: 1}
+    deckDownloadTogglesCheckMarkColor: {r: 0.98823535, g: 0.8000001, b: 0.6117647, a: 1}
+    deckDownloadTogglesBackgroundColor: {r: 1, g: 0.89411765, b: 0.72156864, a: 1}
+    foundArrowOutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    foundArrowInsideColor: {r: 0, g: 0, b: 0, a: 0}
+    foundArrowTextColor: {r: 0, g: 0, b: 0, a: 0}
+    notFoundArrowOutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    notFoundArrowInsideColor: {r: 0, g: 0, b: 0, a: 0}
+    notFoundArrowTextColor: {r: 0, g: 0, b: 0, a: 0}
+    mainColor: {r: 0, g: 0.050980568, b: 1, a: 1}
+    mainTextColor: {r: 1, g: 1, b: 1, a: 1}
+    secondaryColor: {r: 0, g: 0, b: 0, a: 1}
+    backgroundColorMainMenu: {r: 0, g: 0, b: 0, a: 1}
+    backgroundColorDecksChoice: {r: 0, g: 0, b: 0, a: 1}
     backgroundColorGame: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionButton: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionButtonText: {r: 0, g: 0, b: 0, a: 0}
-    colorQuitButton: {r: 0, g: 0, b: 0, a: 0}
     colorPlayPause: {r: 0, g: 0, b: 0, a: 0}
-    colorCheckBox: {r: 0, g: 0, b: 0, a: 0}
-    colorTextNumberPlayersQuestion: {r: 0, g: 0, b: 0, a: 0}
-    colorPanelNumberPlayersQuestion: {r: 0, g: 0, b: 0, a: 0}
-    colorPanelNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
-    colorCentralPanelNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
-    colorTextNumberPlayers: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionPanel: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionPanelBorder: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionsText: {r: 0, g: 0, b: 0, a: 0}
-    colorOptionsTextOutline: {r: 0, g: 0, b: 0, a: 0}
-    colorSliderHandle: {r: 0, g: 0, b: 0, a: 0}
-    colorSliderBackground: {r: 0, g: 0, b: 0, a: 0}
-    colorSliderFill: {r: 0, g: 0, b: 0, a: 0}
-    colorUpdateButton: {r: 0, g: 0, b: 0, a: 0}
-    colorUpdateButtonText: {r: 0, g: 0, b: 0, a: 0}
-    colorContinueArrow: {r: 0, g: 0, b: 0, a: 0}
-    colorBackArrow: {r: 0, g: 0, b: 0, a: 0}
-    colorPanelCurrentPlayer: {r: 0, g: 0, b: 0, a: 0}
-    colorTextCurrentPlayer: {r: 0, g: 0, b: 0, a: 0}
-    colorDeckArrow: {r: 0, g: 0, b: 0, a: 0}
-    colorDeckArrowText: {r: 0, g: 0, b: 0, a: 0}
     colorNumberOfCardsLeft: {r: 0, g: 0, b: 0, a: 0}
     colorAnimeTitle: {r: 0, g: 0, b: 0, a: 0}
-    colorCardFoundArrow: {r: 0, g: 0, b: 0, a: 0}
-    colorCardFoundText: {r: 0, g: 0, b: 0, a: 0}
-    colorCardNotFoundArrow: {r: 0, g: 0, b: 0, a: 0}
-    colorCardNotFoundText: {r: 0, g: 0, b: 0, a: 0}
     colorThemesButton: {r: 0, g: 0, b: 0, a: 0}
     colorThemesQuitButton: {r: 0, g: 0, b: 0, a: 0}
     colorThemesPanel: {r: 0, g: 0, b: 0, a: 0}
     colorThemesTitleText: {r: 0, g: 0, b: 0, a: 0}
     colorThemeSelectedIndicator: {r: 0, g: 0, b: 0, a: 0}
     colorThemeUnselectedIndicator: {r: 0, g: 0, b: 0, a: 0}
+  baseThemeName: Classic

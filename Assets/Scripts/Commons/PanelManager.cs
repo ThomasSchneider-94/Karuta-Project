@@ -1,6 +1,8 @@
 using Karuta;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -14,20 +16,20 @@ namespace Karuta.Commons
     {
         None,
         MainMenu,
-        DeckSelection,
-        Game
+        DeckSelection
     }
 
     [System.Serializable]
     public class Panel
     {
-        public GameObject panel;
-        public PanelType type;
+        public GameObject panelObject;
+        public PanelType panelType;
+        public List<GameObject> allowedPanelObject;
     }
 
     public class PanelManager : MonoBehaviour
     {
-        [SerializeField] private Panel startPanel;
+        [SerializeField] private GameObject startPanel;
 
         [Header("Panels")]
         [SerializeField] private List<Panel> panels = new();
@@ -38,24 +40,30 @@ namespace Karuta.Commons
 
         private void Start()
         {
-            TogglePanel(startPanel.panel);
+            TogglePanel(startPanel);
         }
 
-        public void TogglePanel(GameObject panelToToggle)
+        public void TogglePanel(GameObject panelObjectToToggle)
         {
+            Panel panelToToggle = new();
             foreach (Panel panel in panels)
             {
-                if (panel.panel == panelToToggle)
+                if (panel.panelObject == panelObjectToToggle)
                 {
-                    currentPanels.Push(panel);
-                    panel.panel.SetActive(true);
-                    PanelUpdateEvent.Invoke(panel.type);
-                }
-                else
-                {
-                    panel.panel.SetActive(false);
+                    panelToToggle = panel;
+                    break;
                 }
             }
+
+            // Desactivate the panel not allowded
+            foreach (var panel in panels.Where(panel => !panelToToggle.allowedPanelObject.Contains(panel.panelObject)))
+            {
+                panel.panelObject.SetActive(false);
+            }
+
+            currentPanels.Push(panelToToggle);
+            panelToToggle.panelObject.SetActive(true);
+            PanelUpdateEvent.Invoke(panelToToggle.panelType);
         }
 
         public void ReturnToPreviousPanel()
@@ -64,18 +72,16 @@ namespace Karuta.Commons
 
             currentPanels.Pop();
 
-            foreach (Panel panel in panels)
+            Panel panelToToggle = currentPanels.Peek();
+
+            // Desactivate the panel not allowded
+            foreach (var panel in panels.Where(panel => !panelToToggle.allowedPanelObject.Contains(panel.panelObject)))
             {
-                if (panel == currentPanels.Peek())
-                {
-                    panel.panel.SetActive(true);
-                    PanelUpdateEvent.Invoke(panel.type);
-                }
-                else
-                {
-                    panel.panel.SetActive(false);
-                }
+                panel.panelObject.SetActive(false);
             }
+
+            panelToToggle.panelObject.SetActive(true);
+            PanelUpdateEvent.Invoke(panelToToggle.panelType);
         }
 
         public static void LoadMenu()

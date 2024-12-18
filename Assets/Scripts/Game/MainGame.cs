@@ -10,6 +10,7 @@ using UnityEngine.InputSystem.LowLevel;
 using System.Collections;
 using Unity.VisualScripting;
 using System.Security;
+using UnityEngine.Events;
 
 namespace Karuta.Game
 {
@@ -52,12 +53,8 @@ namespace Karuta.Game
         private float distanceTreshold;
 
         [Header("Indications")]
-        [SerializeField] private Image foundImage;
-        [SerializeField] private TextMeshProUGUI foundText;
-        [SerializeField] private Image notFoundImage;
-        [SerializeField] private TextMeshProUGUI notFoundText;
-        [SerializeField] private Color foundColor;
-        [SerializeField] private Color notFoundColor;
+        [SerializeField] private MultiLayerButton notFoundArrow;
+        [SerializeField] private MultiLayerButton foundArrow;
 
         private readonly List<Card> cards = new();
         private Card currentCard;
@@ -67,6 +64,9 @@ namespace Karuta.Game
 
         private bool visualLoaded = false;
         private bool audioLoaded = false;
+
+        // Events for Arduino Handler
+        public UnityEvent<float, float> ColorIndicationUpdate { get; } = new ();
 
         private void OnEnable()
         {
@@ -78,16 +78,7 @@ namespace Karuta.Game
             maxImageSize = cardImage.rectTransform.sizeDelta;
             cardBasePosition = cardImage.rectTransform.localPosition;
 
-            // Set indication color to transparent
-            Color tempFoundColor = foundColor;
-            tempFoundColor.a = 0;
-            foundColor = tempFoundColor;
-
-            Color tempNotFoundColor = notFoundColor;
-            tempNotFoundColor.a = 0;
-            notFoundColor = tempNotFoundColor;
-
-            ApplyIndicationColors();
+            ApplyArrowsColors(0, 0);
 
             distanceTreshold = rotationDivisor * (angleThreshold / maxRotation);
 
@@ -124,7 +115,7 @@ namespace Karuta.Game
             {
                 DeckInfo deck = DecksManager.Instance.GetDeck(deckIndex);
 
-                JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategory(deck.GetCategory()), deck.GetName() + ".json")));
+                JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategoryName(deck.GetCategory()), deck.GetName() + ".json")));
 
                 foreach (JsonCard jsonCard in jsonCards.cards)
                 {
@@ -394,7 +385,7 @@ namespace Karuta.Game
         /// </summary>
         /// <param name="startPosition"></param>
         /// <param name="currentPosition"></param>
-        private void MoveCard(Vector2 startPosition, Vector2 currentPosition)
+        public void MoveCard(Vector2 startPosition, Vector2 currentPosition)
         {
             // Make the card follow verticaly the currentPosition on touchscreen
             cardImage.transform.localPosition = cardBasePosition + new Vector2(0, currentPosition.y - startPosition.y);
@@ -402,15 +393,8 @@ namespace Karuta.Game
             int sign = currentPosition.x - startPosition.x < 0 ? 1 : -1;
             cardImage.transform.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(0, sign * maxRotation, (Mathf.Abs(currentPosition.x - startPosition.x)) / rotationDivisor));
 
-            Color tempColor = foundColor;
-            tempColor.a = Mathf.Lerp(0, 1, (currentPosition.x - startPosition.x) / distanceTreshold);
-            foundColor = tempColor;
-
-            tempColor = notFoundColor;
-            tempColor.a = Mathf.Lerp(0, 1, -(currentPosition.x - startPosition.x) / distanceTreshold);
-            notFoundColor = tempColor;
-
-            ApplyIndicationColors();
+            ApplyArrowsColors(Mathf.Lerp(0, 1, -(currentPosition.x - startPosition.x) / distanceTreshold),
+                Mathf.Lerp(0, 1, (currentPosition.x - startPosition.x) / distanceTreshold));
         }
 
         /// <summary>
@@ -418,21 +402,12 @@ namespace Karuta.Game
         /// </summary>
         /// <param name="startPosition"></param>
         /// <param name="currentPosition"></param>
-        private void OnMoveRelease(Vector2 startPosition, Vector2 currentPosition)
+        public void OnMoveRelease(Vector2 startPosition, Vector2 currentPosition)
         {
             // If the answer validate, we play the next card
             if (Mathf.Abs(cardImage.transform.localEulerAngles.z - (cardImage.transform.localEulerAngles.z > 90 ? 360 : 0)) > angleThreshold)
             {
-                // Set indication color to transparent
-                Color tempColor = foundColor;
-                tempColor.a = 0;
-                foundColor = tempColor;
-
-                tempColor = notFoundColor;
-                tempColor.a = 0;
-                notFoundColor = tempColor;
-
-                ApplyIndicationColors();
+                ApplyArrowsColors(0, 0);
 
                 cardImage.rectTransform.localPosition = cardBasePosition;
                 cardImage.transform.localEulerAngles = Vector3.zero;
@@ -446,19 +421,32 @@ namespace Karuta.Game
                 // Else we return to the starting position
                 StartCoroutine(ReturnToPosition());
             }
-
-
         }
 
         /// <summary>
         /// Apply the color correction to the indications
         /// </summary>
-        private void ApplyIndicationColors()
+        private void ApplyArrowsColors(float notFoundColorA, float foundColorA)
         {
-            foundImage.color = foundColor;
-            foundText.color = foundColor;
-            notFoundImage.color = notFoundColor;
-            notFoundText.color = notFoundColor;
+            Color tmpColor = notFoundArrow.GetColor(0);
+            tmpColor.a = notFoundColorA;
+            notFoundArrow.SetColor(0, tmpColor);
+            notFoundArrow.GetLabel().color = tmpColor;
+
+            tmpColor = notFoundArrow.GetColor(1);
+            tmpColor.a = notFoundColorA;
+            notFoundArrow.SetColor(1, tmpColor);
+
+            tmpColor = foundArrow.GetColor(0);
+            tmpColor.a = foundColorA;
+            foundArrow.SetColor(0, tmpColor);
+            foundArrow.GetLabel().color = tmpColor;
+
+            tmpColor = foundArrow.GetColor(1);
+            tmpColor.a = foundColorA;
+            foundArrow.SetColor(1, tmpColor);
+
+            ColorIndicationUpdate.Invoke(notFoundColorA, foundColorA);
         }
 
         /// <summary>
@@ -472,24 +460,16 @@ namespace Karuta.Game
             Vector3 currentEuler = cardImage.rectTransform.localEulerAngles;
             currentEuler.z -= (currentEuler.z > 90 ? 360 : 0);
 
-            Color tempColor;
-            float initFoundColorA = foundColor.a;
-            float initNotFoundColorA = notFoundColor.a;
+            float initFoundColorA = foundArrow.GetColor(0).a;
+            float initNotFoundColorA = notFoundArrow.GetColor(0).a;
 
             while (t < returnToPositionTime)
             {
                 cardImage.rectTransform.localPosition = Vector2.Lerp(currentPosition, cardBasePosition, t / returnToPositionTime);
                 cardImage.rectTransform.localEulerAngles = Vector3.LerpUnclamped(currentEuler, Vector3.zero, t / returnToPositionTime);
 
-                tempColor = foundColor;
-                tempColor.a = Mathf.Lerp(initFoundColorA, 0, t / returnToPositionTime);
-                foundColor = tempColor;
-
-                tempColor = notFoundColor;
-                tempColor.a = Mathf.Lerp(initNotFoundColorA, 0, -t / returnToPositionTime);
-                notFoundColor = tempColor;
-
-                ApplyIndicationColors();
+                ApplyArrowsColors(Mathf.Lerp(initNotFoundColorA, 0, -t / returnToPositionTime),
+                    Mathf.Lerp(initFoundColorA, 0, t / returnToPositionTime));
 
                 t += Time.deltaTime;
                 yield return null;
@@ -498,16 +478,7 @@ namespace Karuta.Game
             cardImage.rectTransform.localPosition = cardBasePosition;
             cardImage.rectTransform.localEulerAngles = Vector3.zero;
 
-            // Set indication color to transparent
-            tempColor = foundColor;
-            tempColor.a = 0;
-            foundColor = tempColor;
-
-            tempColor = notFoundColor;
-            tempColor.a = 0;
-            notFoundColor = tempColor;
-
-            ApplyIndicationColors();
+            ApplyArrowsColors(0, 0);
         }
         #endregion Card Movement
 
@@ -542,7 +513,7 @@ namespace Karuta.Game
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            ApplyIndicationColors();
+            ApplyArrowsColors(1, 1);
             distanceTreshold = rotationDivisor * (angleThreshold / maxRotation);
         }
 #endif

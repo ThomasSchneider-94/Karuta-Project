@@ -25,7 +25,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 540199034390028241}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.9, y: 0.9, z: 0}
   m_ConstrainProportionsScale: 0
@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 68.7, y: 96}
+  m_SizeDelta: {x: 107, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1703834092437767206
 CanvasRenderer:
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2088e6e80481c16409e4e4f18f624e7e, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -111,7 +111,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 68.7, y: 96}
+  m_SizeDelta: {x: 107, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1675825520088074342
 CanvasRenderer:
@@ -134,14 +134,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.8016839, b: 1, a: 1}
+  m_Color: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 885f5bb2b78dde84cbdbc46be8490b8a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -189,7 +189,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 68.7, y: 96}
+  m_SizeDelta: {x: 107, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7666044131801687644
 CanvasRenderer:
@@ -212,14 +212,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.070367336, b: 1, a: 1}
+  m_Color: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 885f5bb2b78dde84cbdbc46be8490b8a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -287,11 +287,11 @@ MonoBehaviour:
         m_CallState: 2
   buttonLayers:
   - image: {fileID: 1968225418801097566}
-    sprite: {fileID: 0}
-    color: {r: 0, g: 0.8016839, b: 1, a: 1}
+    sprite: {fileID: 21300000, guid: 885f5bb2b78dde84cbdbc46be8490b8a, type: 3}
+    color: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
     scale: {x: 0.9, y: 0.9}
   - image: {fileID: 6587323642319149557}
-    sprite: {fileID: 21300000, guid: 2088e6e80481c16409e4e4f18f624e7e, type: 3}
+    sprite: {fileID: 0}
     color: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 0.9, y: 0.9}
   useDisabledColor: 1

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using TMPro;
 
 namespace Karuta.UIComponent
 {
@@ -17,6 +17,8 @@ namespace Karuta.UIComponent
 
     public class MultiLayerButton : Button
     {
+        [SerializeField] protected TextMeshProUGUI textMesh;
+
         [Header("Button Layers")]
         [SerializeField] protected List<ButtonLayer> buttonLayers;
 
@@ -32,10 +34,13 @@ namespace Karuta.UIComponent
         #region Setters
         public void SetImage(int i, Image image)
         {
-            buttonLayers[i].image = image;
-            buttonLayers[i].image.sprite = buttonLayers[i].sprite;
-            buttonLayers[i].image.color = buttonLayers[i].color;
-            buttonLayers[i].image.transform.localScale = buttonLayers[i].scale;
+            if (i > 0)
+            {
+                buttonLayers[i - 1].image = image;
+                buttonLayers[i - 1].image.sprite = buttonLayers[i - 1].sprite;
+                buttonLayers[i - 1].image.color = buttonLayers[i - 1].color;
+                buttonLayers[i - 1].image.transform.localScale = buttonLayers[i].scale;
+            }
         }
 
         public void SetSprite(int i, Sprite sprite)
@@ -46,8 +51,8 @@ namespace Karuta.UIComponent
             }
             else
             {
-                buttonLayers[i].sprite = sprite;
-                buttonLayers[i].image.sprite = sprite;
+                buttonLayers[i - 1].sprite = sprite;
+                buttonLayers[i - 1].image.sprite = sprite;
             }
         }
 
@@ -59,7 +64,8 @@ namespace Karuta.UIComponent
         {
             if (buttonLayers.Count > 0)
             {
-                SetSprite(buttonLayers.Count - 1, sprite);
+                buttonLayers[^1].sprite = sprite;
+                buttonLayers[^1].image.sprite = sprite;
             }
             else
             {
@@ -75,8 +81,8 @@ namespace Karuta.UIComponent
             }
             else
             {
-                buttonLayers[i].color = color;
-                buttonLayers[i].image.color = color;
+                buttonLayers[i - 1].color = color;
+                buttonLayers[i - 1].image.color = color;
             }
         }
 
@@ -88,8 +94,8 @@ namespace Karuta.UIComponent
             }
             else
             {
-                buttonLayers[i].scale = scale;
-                buttonLayers[i].image.transform.localScale = scale;
+                buttonLayers[i - 1].scale = scale;
+                buttonLayers[i - 1].image.transform.localScale = scale;
             }
         }
         #endregion Setters
@@ -210,6 +216,11 @@ namespace Karuta.UIComponent
             {
                 buttonLayer.image.rectTransform.sizeDelta = size;
             }
+        }
+
+        public TextMeshProUGUI GetLabel()
+        {
+            return textMesh;
         }
 
 #if UNITY_EDITOR

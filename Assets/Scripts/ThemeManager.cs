@@ -1,17 +1,26 @@
-using System.IO;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using Karuta.Objects;
-using System.Runtime.InteropServices.WindowsRuntime;
+using Karuta.Commons;
 
 namespace Karuta
 {
+    [System.Serializable]
+    public class Background
+    {
+        public bool ignore;
+        public bool isTexture;
+        public Texture texture;
+        public string videoPath;
+    }
+
     public class ThemeManager : MonoBehaviour
     {
         public static ThemeManager Instance { get; private set; }
 
-        [SerializeField] private Theme baseTheme;
+        [SerializeField] private ThemeApplier applier;
+
+        [SerializeField] private BaseTheme baseTheme;
         [SerializeField] private string baseThemeName;
 
 
@@ -19,8 +28,8 @@ namespace Karuta
         /*
         private readonly List<LightJsonTheme> lightThemes = new();
         private readonly List<string> lightThemesNames = new();*/
-        private int currentLightTheme;
-        private Theme currentTheme;
+        private int currentThemeIndex;
+        private Theme currentTheme = new();
 
         public UnityEvent InitializeThemeEvent { get; } = new UnityEvent();
         public UnityEvent UpdateThemeEvent { get; } = new UnityEvent();
@@ -55,9 +64,7 @@ namespace Karuta
         {
             InitLightThemes();
 
-            baseTheme.Init();
-            
-            currentLightTheme = PlayerPrefs.GetInt("theme", 0);
+            currentThemeIndex = PlayerPrefs.GetInt("theme", 0);
 
             LoadTheme();
 
@@ -77,8 +84,8 @@ namespace Karuta
 
             lightThemes.Add(new()
             {
-                mainMenuBackground = baseTheme.GetMainMenuBackgroundPath(),
-                decksChoiceBackground = baseTheme.GetDecksChoiceBackgroundPath()
+                mainBackground = baseTheme.GetMainMenuBackgroundPath(),
+                decksSelectionBackground = baseTheme.GetDecksChoiceBackgroundPath()
             });
             lightThemesNames.Add(baseThemeName);
 
@@ -92,19 +99,15 @@ namespace Karuta
 
             foreach (LightJsonTheme theme in lightThemes)
             {
-                Debug.Log(theme.mainMenuBackground);
+                Debug.Log(theme.mainBackground);
             }*/
         }
 
         public void LoadTheme()
         {
-            if (currentLightTheme == 0)
+            if (currentThemeIndex > 0)
             {
-                currentTheme = baseTheme;
-            }
-            else
-            {
-                //currentTheme = new(JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentLightTheme]))));
+                //currentTheme = new(JsonUtility.FromJson<JsonTheme>(File.ReadAllText(Path.Combine(LoadManager.ThemesDirectoryPath, lightThemesNames[currentThemeIndex]))));
             }
         }
 
@@ -112,51 +115,382 @@ namespace Karuta
         /*
         public LightJsonTheme GetCurrentLightTheme()
         {
-            return lightThemes[currentLightTheme];
+            return lightThemes[currentThemeIndex];
         }*/
 
         public int GetCurrentLightThemeInt()
         {
-            return currentLightTheme;
+            return currentThemeIndex;
         }
         #endregion Theme Getter
-
-
-
-
-
 
         #region Theme Component Getter
 
         #region Backgrounds
-        public Background GetMainMenuBackground()
+        public Background GetMainBackground()
         {
-            if (currentTheme.GetMainMenuBackground() == null)
-            {
-                return baseTheme.GetMainMenuBackground();
-            }
-            return currentTheme.GetMainMenuBackground();
+            return GetBackgroundFromString(currentTheme.GetMainBackground(), baseTheme.GetMainBackground());
         }
 
-        public Background GetDecksChoiceBackground()
+        public Background GetDecksSelectionBackground()
         {
-            if (currentTheme.GetDecksChoiceBackground() == null)
-            {
-                return baseTheme.GetMainMenuBackground();
-            }
-            return currentTheme.GetDecksChoiceBackground();
+            return GetBackgroundFromString(currentTheme.GetDecksSelectionBackground(), baseTheme.GetDecksSelectionBackground());
         }
 
         public Background GetGameBackground()
         {
-            if (currentTheme.GetGameBackground() == null)
+            return GetBackgroundFromString(currentTheme.GetGameBackground(), baseTheme.GetGameBackground());
+        }
+
+        private static Background GetBackgroundFromString(string backgroundString, Background defaultBackground)
+        {
+            if (string.IsNullOrEmpty(backgroundString))
             {
-                return baseTheme.GetMainMenuBackground();
+                return defaultBackground;
             }
-            return currentTheme.GetGameBackground();
+            bool isTexture = backgroundString.Split(".")[^1] == "png";
+
+            return new()
+            {
+                isTexture = isTexture,
+                texture = isTexture ? LoadManager.LoadThemeVisual(backgroundString) : null,
+                videoPath = isTexture ? null : backgroundString,
+            };
+
         }
         #endregion Backgrounds
 
+        #region Question Color
+        public Color GetQuestionPanelColor()
+        {
+            return GetColorFromString(currentTheme.questionPanelColor, baseTheme.questionPanelColor);
+        }
+
+        public Color GetQuestionTextColor()
+        {
+            return GetColorFromString(currentTheme.questionTextColor, baseTheme.questionTextColor);
+        }
+
+        public Color GetQuestionNumberPanelColor()
+        {
+            return GetColorFromString(currentTheme.questionNumberPanelColor, baseTheme.questionNumberPanelColor);
+        }
+
+        public Color GetQuestionNumberSelectedPanelColor()
+        {
+            return GetColorFromString(currentTheme.questionNumberSelectedPanelColor, baseTheme.questionNumberSelectedPanelColor);
+        }
+
+        public Color GetQuestionNumberTextColor()
+        {
+            return GetColorFromString(currentTheme.questionNumberTextColor, baseTheme.questionNumberTextColor);
+        }
+        #endregion Question Color
+
+        #region Download Only Toggle
+        public Color GetDownloadOnlyToggleLabelColor()
+        {
+            return GetColorFromString(currentTheme.downloadOnlyToggleLabelColor, baseTheme.downloadOnlyToggleLabelColor);
+        }
+
+        public Color GetDownloadOnlyToggleLabelOutlineColor()
+        {
+            return GetColorFromString(currentTheme.downloadOnlyToggleLabelOutlineColor, baseTheme.downloadOnlyToggleLabelOutlineColor);
+        }
+
+        public Color GetDownloadOnlyToggleCheckBoxOutlineColor()
+        {
+            return GetColorFromString(currentTheme.downloadOnlyToggleCheckBoxOutlineColor, baseTheme.downloadOnlyToggleCheckBoxOutlineColor);
+        }
+
+        public Color GetDownloadOnlyToggleCheckBoxColor()
+        {
+            return GetColorFromString(currentTheme.downloadOnlyToggleCheckBoxColor, baseTheme.downloadOnlyToggleCheckBoxColor);
+        }
+
+        public Color GetDownloadOnlyToggleCheckMarkColor()
+        {
+            return GetColorFromString(currentTheme.downloadOnlyToggleCheckMarkColor, baseTheme.downloadOnlyToggleCheckMarkColor);
+        }
+        #endregion Download Only Toggle
+
+        #region Category Buttons Color
+        public Color GetCategoryButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.categoryButtonOutlineColor, baseTheme.categoryButtonOutlineColor);
+        }
+
+        public Color GetCategoryButtonInsdeColor()
+        {
+            return GetColorFromString(currentTheme.categoryButtonInsideColor, baseTheme.categoryButtonInsideColor);
+        }
+        #endregion Category Buttons Color
+
+        #region Arrow Buttons Color
+        public Color GetArrowButtonOutsideColor()
+        {
+            return GetColorFromString(currentTheme.arrowButtonOutsideColor, baseTheme.arrowButtonOutsideColor);
+        }
+
+        public Color GetArrowButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.arrowButtonInsideColor, baseTheme.arrowButtonInsideColor);
+        }
+
+        public Color GetArrowButtonTextColor()
+        {
+            return GetColorFromString(currentTheme.arrowButtonTextColor, baseTheme.arrowButtonTextColor);
+        }
+
+        public Color GetReverseArrowButtonOutsideColor()
+        {
+            return GetColorFromString(currentTheme.reverseArrowButtonOutsideColor, baseTheme.reverseArrowButtonOutsideColor);
+        }
+
+        public Color GetReverseArrowButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.reverseArrowButtonInsideColor, baseTheme.reverseArrowButtonInsideColor);
+        }
+
+        public Color GetReverseArrowButtonTextColor()
+        {
+            return GetColorFromString(currentTheme.reverseArrowButtonTextColor, baseTheme.reverseArrowButtonTextColor);
+        }
+        #endregion Arrow Buttons Color
+
+        #region Option Buttons Color
+        public Color GetOptionButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.optionButtonOutlineColor, baseTheme.optionButtonOutlineColor);
+        }
+
+        public Color GetOptionButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.optionButtonInsideColor, baseTheme.optionButtonInsideColor);
+        }
+
+        public Color GetOptionButtonIconColor()
+        {
+            return GetColorFromString(currentTheme.optionButtonIconColor, baseTheme.optionButtonIconColor);
+        }
+        #endregion Option Buttons Color
+
+        #region Option Toggles Color
+        public Color GetOptionsTogglesLabelColor()
+        {
+            return GetColorFromString(currentTheme.optionsTogglesLabelColor, baseTheme.optionsTogglesLabelColor);
+        }
+
+        public Color GetOptionsTogglesLabelOutlineColor()
+        {
+            return GetColorFromString(currentTheme.optionsTogglesLabelOutlineColor, baseTheme.optionsTogglesLabelOutlineColor);
+        }
+
+        public Color GetOptionsTogglesCheckBoxOutlineColor()
+        {
+            return GetColorFromString(currentTheme.optionsTogglesCheckBoxOutlineColor, baseTheme.optionsTogglesCheckBoxOutlineColor);
+        }
+
+        public Color GetOptionsTogglesCheckBoxColor()
+        {
+            return GetColorFromString(currentTheme.optionsTogglesCheckBoxColor, baseTheme.optionsTogglesCheckBoxColor);
+        }
+
+        public Color GetOptionsTogglesCheckMarkColor()
+        {
+            return GetColorFromString(currentTheme.optionsTogglesCheckMarkColor, baseTheme.optionsTogglesCheckMarkColor);
+        }
+        #endregion Option Toggles Color
+
+        #region Close Buttons Color
+        public Color GetCloseButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.closeButtonOutlineColor, baseTheme.closeButtonOutlineColor);
+        }
+
+        public Color GetCloseButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.closeButtonInsideColor, baseTheme.closeButtonInsideColor);
+        }
+
+        public Color GetCloseButtonIconColor()
+        {
+            return GetColorFromString(currentTheme.closeButtonIconColor, baseTheme.closeButtonIconColor);
+        }
+        #endregion Option Buttons Color
+
+        #region Panel Buttons Color
+        public Color GetPanelButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.panelButtonOutlineColor, baseTheme.panelButtonOutlineColor);
+        }
+
+        public Color GetPanelButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.panelButtonInsideColor, baseTheme.panelButtonInsideColor);
+        }
+
+        public Color GetPanelButtonTextColor()
+        {
+            return GetColorFromString(currentTheme.panelButtonTextColor, baseTheme.panelButtonTextColor);
+        }
+        #endregion Panel Buttons Color
+
+        #region Option Panel Color
+        public Color GetOptionPanelColor()
+        {
+            return GetColorFromString(currentTheme.optionPanelColor, baseTheme.optionPanelColor);
+        }
+
+        public Color GetOptionPanelBorderColor()
+        {
+            return GetColorFromString(currentTheme.optionPanelBorderColor, baseTheme.optionPanelBorderColor);
+        }
+        #endregion Option Panel Color
+
+        #region Deck Selection Button Color
+        public Color GetDeckSelectionButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.deckSelectionButtonOutlineColor, baseTheme.deckSelectionButtonOutlineColor);
+        }
+
+        public Color GetDeckSelectionButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.deckSelectionButtonInsideColor, baseTheme.deckSelectionButtonInsideColor);
+        }
+
+        public Color GetDeckSelectionButtonTextColor()
+        {
+            return GetColorFromString(currentTheme.deckSelectionButtonTextColor, baseTheme.deckSelectionButtonTextColor);
+        }
+        #endregion Deck Selection Button Color
+
+        #region Deck Download Buttons Color
+        public Color GetDeckDownloadButtonOutlineColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadButtonOutlineColor, baseTheme.deckDownloadButtonOutlineColor);
+        }
+
+        public Color GetDeckDownloadButtonInsideColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadButtonInsideColor, baseTheme.deckDownloadButtonInsideColor);
+        }
+        #endregion Deck Download Buttons Color
+
+        #region Select All Toggle Color
+        public Color GetSelectAllToggleLabelColor()
+        {
+            return GetColorFromString(currentTheme.selectAllToggleLabelColor, baseTheme.selectAllToggleLabelColor);
+        }
+
+        public Color GetSelectAllToggleLabelOutlineColor()
+        {
+            return GetColorFromString(currentTheme.selectAllToggleLabelOutlineColor, baseTheme.selectAllToggleLabelOutlineColor);
+        }
+
+        public Color GetSelectAllToggleCheckBoxOutlineColor()
+        {
+            return GetColorFromString(currentTheme.selectAllToggleCheckBoxOutlineColor, baseTheme.selectAllToggleCheckBoxOutlineColor);
+        }
+
+        public Color GetSelectAllToggleCheckBoxColor()
+        {
+            return GetColorFromString(currentTheme.selectAllToggleCheckBoxColor, baseTheme.selectAllToggleCheckBoxColor);
+        }
+
+        public Color GetSelectAllToggleCheckMarkColor()
+        {
+            return GetColorFromString(currentTheme.selectAllToggleCheckMarkColor, baseTheme.selectAllToggleCheckMarkColor);
+        }
+        #endregion Select All Toggle Color
+
+        #region Deck Download Toggles Color
+        public Color GetDeckDownloadTogglesLabelColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesLabelColor, baseTheme.deckDownloadTogglesLabelColor);
+        }
+
+        public Color GetDeckDownloadTogglesLabelOutlineColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesLabelOutlineColor, baseTheme.deckDownloadTogglesLabelOutlineColor);
+        }
+
+        public Color GetDeckDownloadTogglesCheckBoxOutlineColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesCheckBoxOutlineColor, baseTheme.deckDownloadTogglesCheckBoxOutlineColor);
+        }
+
+        public Color GetDeckDownloadTogglesCheckBoxColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesCheckBoxColor, baseTheme.deckDownloadTogglesCheckBoxColor);
+        }
+
+        public Color GetDeckDownloadTogglesCheckMarkColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesCheckMarkColor, baseTheme.deckDownloadTogglesCheckMarkColor);
+        }
+
+        public Color GetDeckDownloadTogglesBackgroundColor()
+        {
+            return GetColorFromString(currentTheme.deckDownloadTogglesBackgroundColor, baseTheme.deckDownloadTogglesBackgroundColor);
+        }
+        #endregion Deck Download Toggles Color
+
+        #region Indication Arrows Colors
+        public Color GetFoundArrowOutlineColor()
+        {
+            return GetColorFromString(currentTheme.foundArrowOutlineColor, baseTheme.foundArrowOutlineColor);
+        }
+
+        public Color GetFoundArrowInsideColor()
+        {
+            return GetColorFromString(currentTheme.foundArrowInsideColor, baseTheme.foundArrowInsideColor);
+        }
+
+        public Color GetFoundArrowTextColor()
+        {
+            return GetColorFromString(currentTheme.foundArrowTextColor, baseTheme.foundArrowTextColor);
+        }
+
+        public Color GetNotFoundArrowOutlineColor()
+        {
+            return GetColorFromString(currentTheme.notFoundArrowOutlineColor, baseTheme.notFoundArrowOutlineColor);
+        }
+
+        public Color GetNotFoundArrowInsideColor()
+        {
+            return GetColorFromString(currentTheme.notFoundArrowInsideColor, baseTheme.notFoundArrowInsideColor);
+        }
+
+        public Color GetNotFoundArrowTextColor()
+        {
+            return GetColorFromString(currentTheme.notFoundArrowTextColor, baseTheme.notFoundArrowTextColor);
+        }
+        #endregion Indication Arrows Colors
+
+
+
+        private static Color GetColorFromString(string colorString, Color defaultColor)
+        {
+            if (ColorUtility.TryParseHtmlString(colorString, out Color color))
+            {
+                return color;
+            }
+            return defaultColor;
+        }
         #endregion Theme Component Getter
+
+
+
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (applier != null)
+            {
+                applier.VisualizeApplication(this);
+            }
+        }
+#endif
     }
 }

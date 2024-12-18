@@ -90,9 +90,39 @@ namespace Karuta.Objects
     [Serializable]
     public class JsonTheme
     {
-        public string mainMenuBackground;
-        public string decksChoiceBackground;
+        // Backgrounds
+        public string mainBackground;
+        public string decksSelectionBackground;
         public string gameBackground;
+
+        // Question Colors
+        public string questionTextColor;
+        public string questionPanelColor;
+        public string questionNumberPanelColor;
+        public string questionNumberSelectedPanelColor;
+        public string questionNumberTextColor;
+
+        // Option Button Colors
+        public string optionButtonOutlineColor;
+        public string optionButtonInsideColor;
+        public string optionButtonIconColor;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public string mainColor;
         public string mainTextColor;
@@ -131,7 +161,6 @@ namespace Karuta.Objects
         public string colorCardFoundText;
         public string colorCardNotFoundArrow;
         public string colorCardNotFoundText;
-
         public string colorThemesButton;
         public string colorThemesQuitButton;
         public string colorThemesPanel;
