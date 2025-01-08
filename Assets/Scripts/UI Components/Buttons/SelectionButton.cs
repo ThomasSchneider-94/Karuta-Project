@@ -41,6 +41,11 @@ namespace Karuta.UIComponent
             this.nameSpacing = spacing;
             deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + spacing));
         }
+
+        public void SetSelectedColor(Color selectedColor)
+        {
+            this.selectedColor = selectedColor;
+        }
         #endregion Setter
 
         #region Getter
@@ -118,7 +123,10 @@ namespace Karuta.UIComponent
         {
             base.OnRectTransformDimensionsChange();
 
-            deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
+            if (deckNameTextMesh != null)
+            {
+                deckNameTextMesh.transform.localPosition = new Vector2(0, -(targetGraphic.rectTransform.sizeDelta.y / 2 + nameSpacing));
+            }
         }
 
 #if UNITY_EDITOR
@@ -128,10 +136,17 @@ namespace Karuta.UIComponent
 
             base.OnValidate();
 
-            SetDeckName(deckName);
-            SetNameWidth(nameWidth);
-            SetNameSpacing(nameSpacing);
-            SetCounter(count);
+            if (deckNameTextMesh != null)
+            {
+                SetDeckName(deckName);
+                SetNameWidth(nameWidth);
+                SetNameSpacing(nameSpacing);
+                
+            }
+            if (counterTextMesh != null)
+            {
+                SetCounter(count);
+            }
         }
 #endif
     }

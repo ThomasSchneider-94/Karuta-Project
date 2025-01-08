@@ -26,10 +26,10 @@ namespace Karuta
 
         private readonly List<Sprite> categoriesIcons = new();
 
-        public UnityEvent OptionsInitializedEvent { get; } = new UnityEvent();
-        public UnityEvent UpdateCategoryEvent { get; } = new UnityEvent();
-        public UnityEvent UpdateMirorMatchEvent { get; } = new UnityEvent();
-        public UnityEvent UpdateHidenAnswerEvent { get; } = new UnityEvent();
+        public UnityEvent OptionsInitializedEvent { get; } = new();
+        public UnityEvent UpdateCategoryEvent { get; } = new();
+        public UnityEvent UpdateMirorMatchEvent { get; } = new();
+        public UnityEvent UpdateHidenAnswerEvent { get; } = new();
 
         private bool initialized;
 
@@ -41,7 +41,7 @@ namespace Karuta
                 Instance = this;
 
                 Initialize();
-                DecksManager.Instance.UpdateCategoriesEvent.AddListener(UpdateCategoryIcons);
+                DecksManager.Instance.UpdateCategoriesAndTypesEvent.AddListener(UpdateCategoryIcons);
 
                 initialized = true;
             }
@@ -73,7 +73,7 @@ namespace Karuta
 
                 foreach (Category category in categoriesAndTypes.categories)
                 {
-                    categoriesIcons.Add(LoadManager.Instance.LoadCategoryVisual(category.icon));
+                    categoriesIcons.Add(LoadManager.Instance.LoadCategoryVisualSprite(category.icon));
                 }
             }
 

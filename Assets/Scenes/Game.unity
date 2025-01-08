@@ -518,7 +518,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
+  m_Texture: {fileID: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -632,6 +632,14 @@ PrefabInstance:
     - target: {fileID: 6692309867049431008, guid: b0ee4630ba4506a4c8d2362b8d47d01b, type: 3}
       propertyPath: m_SizeDelta.y
       value: 126
+      objectReference: {fileID: 0}
+    - target: {fileID: 8680074882073269107, guid: b0ee4630ba4506a4c8d2362b8d47d01b, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8680074882073269107, guid: b0ee4630ba4506a4c8d2362b8d47d01b, type: 3}
+      propertyPath: useDisabledColor
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9180183561188267226, guid: b0ee4630ba4506a4c8d2362b8d47d01b, type: 3}
       propertyPath: m_text
@@ -933,7 +941,7 @@ GameObject:
   - component: {fileID: 381289219}
   - component: {fileID: 381289221}
   m_Layer: 5
-  m_Name: Panel 1 - Base
+  m_Name: Panel 1 - Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1157,6 +1165,7 @@ GameObject:
   - component: {fileID: 691175411}
   - component: {fileID: 691175412}
   - component: {fileID: 691175414}
+  - component: {fileID: 691175415}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -1211,7 +1220,7 @@ MonoBehaviour:
   - panelObject: {fileID: 381289218}
     panelType: 0
     allowedPanelObject: []
-  - panelObject: {fileID: 0}
+  - panelObject: {fileID: 657391505}
     panelType: 0
     allowedPanelObject:
     - {fileID: 381289218}
@@ -1258,9 +1267,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   toggles:
-  - toggle: {fileID: 0}
+  - toggle: {fileID: 940354255}
     optionType: 0
-  - toggle: {fileID: 0}
+  - toggle: {fileID: 1441370932}
     optionType: 1
   categoryButtons: []
 --- !u!114 &691175412
@@ -1355,13 +1364,11 @@ MonoBehaviour:
   backgroundRawImage: {fileID: 190659846}
   videoPlayer: {fileID: 190659845}
   renderTexture: {fileID: 8400000, guid: df64543c9f70a8d48bde24e470a9d3f7, type: 2}
-  optionButtons:
-  - {fileID: 1508029603}
-  closeButtons:
-  - {fileID: 1114294987}
   arrowButtons: []
   reverseArrowButtons:
   - {fileID: 1921204170}
+  optionButtons:
+  - {fileID: 1508029603}
   optionToggles:
   - {fileID: 940354255}
   - {fileID: 1441370932}
@@ -1369,8 +1376,31 @@ MonoBehaviour:
   - {fileID: 856053692}
   optionPanels:
   - {fileID: 1853997672}
+  closeButtons:
+  - {fileID: 1114294987}
   notFoundArrow: {fileID: 1315294029}
   foundArrow: {fileID: 234093251}
+--- !u!114 &691175415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691175403}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15084c9b4e4b6b141bc7a982c6d09d1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  game: {fileID: 691175412}
+  serialPort: COM5
+  baudRate: 115200
+  audioMixer: {fileID: 24100000, guid: 60e8b23f70e27484abda4e02e340f80a, type: 2}
+  volumeMinValue: 0.00001
+  audioMixerParameter: Master Volume
+  colorFactor: 255
+  colorTolerance: 3
+  movementTolerance: 5
 --- !u!1 &856053690
 GameObject:
   m_ObjectHideFlags: 0
@@ -1995,7 +2025,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
-  m_AdditionalShaderChannelsFlag: 1
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -2185,7 +2215,7 @@ PrefabInstance:
     - target: {fileID: 3123658344248235655, guid: 6d53fbc0631d89e42a61cdad357899c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 691175409}
     - target: {fileID: 3123658344248235655, guid: 6d53fbc0631d89e42a61cdad357899c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -2196,7 +2226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3123658344248235655, guid: 6d53fbc0631d89e42a61cdad357899c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Karuta.Menu.PanelManager, Assembly-CSharp
+      value: Karuta.Commons.PanelManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 3123658344248235655, guid: 6d53fbc0631d89e42a61cdad357899c9, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -2339,6 +2369,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 940834634}
     m_Modifications:
+    - target: {fileID: 233915603166523076, guid: 18a739a1d94050842a8b19368ea26349, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 233915603166523076, guid: 18a739a1d94050842a8b19368ea26349, type: 3}
+      propertyPath: useDisabledColor
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 681492769514431171, guid: 18a739a1d94050842a8b19368ea26349, type: 3}
       propertyPath: m_SizeDelta.x
       value: 275
@@ -2796,7 +2834,7 @@ PrefabInstance:
     - target: {fileID: 3123658344248235655, guid: e1dee1d08c327b94cb4d8dc5eaac46ea, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 657391505}
     - target: {fileID: 6005370005558533576, guid: e1dee1d08c327b94cb4d8dc5eaac46ea, type: 3}
       propertyPath: m_Name
       value: Option Button
@@ -2902,6 +2940,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 546aa62015bb2a44f9c538d3abab1984, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &1617447111
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 674.09283
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1123.87
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 4.5495424
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3663712299419047225, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3862114199444822441, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
+      propertyPath: m_Name
+      value: LoadManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 671eaacf27b4fb04085c7c080d9370f8, type: 3}
 --- !u!1 &1853997669
 GameObject:
   m_ObjectHideFlags: 0
@@ -3277,7 +3372,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2172732764575286253, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: selectedDecks.Array.data[0]
-      value: 14
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2172732764575286253, guid: 82a9ee52f4b60034e8075051122bed7e, type: 3}
       propertyPath: selectedDecks.Array.data[1]
@@ -3409,3 +3504,4 @@ SceneRoots:
   - {fileID: 913791698}
   - {fileID: 691175406}
   - {fileID: 3120667500338045232}
+  - {fileID: 1617447111}

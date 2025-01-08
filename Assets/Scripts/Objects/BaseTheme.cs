@@ -62,10 +62,11 @@ namespace Karuta.Objects
         public Color optionPanelColor;
         public Color optionPanelBorderColor;
 
-        [Header("Option Panel Colors")]
+        [Header("Deck Selection Button Colors")]
         public Color deckSelectionButtonOutlineColor;
         public Color deckSelectionButtonInsideColor;
         public Color deckSelectionButtonTextColor;
+        public Color deckSelectionButtonSelectedColor;
 
         [Header("Deck Download Buttons Colors")]
         public Color deckDownloadButtonOutlineColor;
@@ -94,8 +95,19 @@ namespace Karuta.Objects
         public Color notFoundArrowInsideColor;
         public Color notFoundArrowTextColor;
 
+        [Header("Delete Mode Button Colors")]
+        public Color deleteModeButtonOutlineColor;
+        public Color deleteModeButtonInsideColor;
+        public Color deleteModeButtonIconColor;
+        public Color deleteModeButtonSelectedColor;
 
+        [Header("Category Label Colors")]
+        public Color categoryLabelColor;
+        public Color categoryLabelOutlineColor;
 
+        [Header("Type Label Colors")]
+        public Color typeLabelColor;
+        public Color typeLabelOutlineColor;
 
 
 
@@ -122,29 +134,18 @@ namespace Karuta.Objects
         [SerializeField] private Color colorThemeSelectedIndicator;
         [SerializeField] private Color colorThemeUnselectedIndicator;
 
-        #region Backgrounds Getter
-        public Background GetMainBackground()
+        public void Init()
         {
-            return mainBackground;
-        }
-
-        public Background GetDecksSelectionBackground()
-        {
-            if (this.decksSelectionBackground.ignore)
+            if ((this.decksSelectionBackground.isTexture && this.decksSelectionBackground.texture == null)
+                || (!this.decksSelectionBackground.isTexture) && string.IsNullOrEmpty(this.decksSelectionBackground.videoPath))
             {
-                return mainBackground;
+                this.decksSelectionBackground = this.mainBackground;
             }
-            return this.decksSelectionBackground;
-        }
-
-        public Background GetGameBackground()
-        {
-            if (this.gameBackground.ignore)
+            if ((this.gameBackground.isTexture && this.gameBackground.texture == null)
+                || (!this.gameBackground.isTexture) && string.IsNullOrEmpty(this.gameBackground.videoPath))
             {
-                return mainBackground;
+                this.gameBackground = this.mainBackground;
             }
-            return this.gameBackground;
         }
-        #endregion Backgrounds Getter
     }
 }

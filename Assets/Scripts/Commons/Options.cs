@@ -24,7 +24,6 @@ namespace Karuta.Commons
         {
             optionsManager = OptionsManager.Instance;
 
-            DecksManager.Instance.UpdateCategoriesEvent.AddListener(ShowCategoryButton);
             DecksManager.Instance.UpdateDeckListEvent.AddListener(ShowCategoryButton);
             optionsManager.UpdateCategoryEvent.AddListener(ShowCategoryButton);
 

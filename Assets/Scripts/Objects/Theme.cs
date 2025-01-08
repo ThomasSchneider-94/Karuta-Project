@@ -6,9 +6,9 @@ namespace Karuta.Objects
     public class Theme
     {
         // Backgrounds
-        private readonly string mainBackground;
-        private readonly string decksSelectionBackground;
-        private readonly string gameBackground;
+        public readonly string mainBackground;
+        public string decksSelectionBackground;
+        public string gameBackground;
 
         // Question Color
         public readonly string questionPanelColor;
@@ -66,6 +66,7 @@ namespace Karuta.Objects
         public readonly string deckSelectionButtonOutlineColor;
         public readonly string deckSelectionButtonInsideColor;
         public readonly string deckSelectionButtonTextColor;
+        public readonly string deckSelectionButtonSelectedColor;
 
         // Deck Download Buttons
         public readonly string deckDownloadButtonOutlineColor;
@@ -94,9 +95,19 @@ namespace Karuta.Objects
         public readonly string notFoundArrowInsideColor;
         public readonly string notFoundArrowTextColor;
 
+        // Delete Mode Button Colors
+        public readonly string deleteModeButtonOutlineColor;
+        public readonly string deleteModeButtonInsideColor;
+        public readonly string deleteModeButtonIconColor;
+        public readonly string deleteModeButtonSelectedColor;
 
+        // Category Label Colors
+        public readonly string categoryLabelColor;
+        public readonly string categoryLabelOutlineColor;
 
-
+        // Type Label Colors
+        public readonly string typeLabelColor;
+        public readonly string typeLabelOutlineColor;
 
 
 
@@ -129,31 +140,17 @@ namespace Karuta.Objects
         public readonly Color colorThemeSelectedIndicator;
         public readonly Color colorThemeUnselectedIndicator;
 
-        public Theme() {}
 
-        #region Backgrounds Getter
-        public string GetMainBackground()
+        public void Init()
         {
-            return mainBackground;
-        }
-        
-        public string GetDecksSelectionBackground()
-        {
-            if (decksSelectionBackground == null)
+            if (string.IsNullOrEmpty(this.decksSelectionBackground))
             {
-                return mainBackground;
+                this.decksSelectionBackground = this.mainBackground;
             }
-            return decksSelectionBackground;
-        }
-
-        public string GetGameBackground()
-        {
-            if (gameBackground == null)
+            if (string.IsNullOrEmpty(this.gameBackground))
             {
-                return mainBackground;
+                this.gameBackground = this.mainBackground;
             }
-            return gameBackground;
         }
-        #endregion Backgrounds Getter
     }
 }

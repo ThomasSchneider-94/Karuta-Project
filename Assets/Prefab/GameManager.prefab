@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7250132207680843026}
   - component: {fileID: 2172732764575286253}
-  - component: {fileID: 1832540871454595060}
   - component: {fileID: 4119100899951645458}
   - component: {fileID: 7015680740462773684}
   m_Layer: 0
@@ -49,22 +48,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectedDecksMax: 2
   selectedDecks: 
---- !u!114 &1832540871454595060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6532226748591513060}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd0ede04bc79cc24a838ad725224f21c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  downloadTimeout: 10
-  connexionCheckTimeout: 0
-  minDownloadedBytes: 2048
-  defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
 --- !u!114 &4119100899951645458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,17 +80,14 @@ MonoBehaviour:
   applier: {fileID: 0}
   baseTheme:
     mainBackground:
-      ignore: 0
       isTexture: 1
       texture: {fileID: 2800000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
       videoPath: 
     decksSelectionBackground:
-      ignore: 1
       isTexture: 1
       texture: {fileID: 0}
       videoPath: 
     gameBackground:
-      ignore: 1
       isTexture: 1
       texture: {fileID: 0}
       videoPath: 

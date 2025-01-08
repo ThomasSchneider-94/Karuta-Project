@@ -5,9 +5,19 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using Karuta.Objects;
+using UnityEngine.TestTools;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Karuta
 {
+    #region Json Objects
+    [Serializable]
+    public class ConfigData
+    {
+        public string serverIP;
+    }
+    #endregion Json Objects
+
     public class LoadManager : MonoBehaviour
     {
         public static LoadManager Instance { get; private set; }
@@ -22,21 +32,55 @@ namespace Karuta
         [Header("Default")]
         [SerializeField] private Sprite defaultSprite;
 
-        // Directory paths
+        [Header("Directories")]
+        [SerializeField] private string decksFile = "DecksInfo.json";
+        [SerializeField] private string categoriesFile = "Categories.json";
+        [SerializeField] private string decksDirectory = "Decks";
+        [SerializeField] private string categoryVisualsDirectory = "Categories Visual";
+        [SerializeField] private string coversDirectory = "Covers";
+        [SerializeField] private string visualsDirectory = "Visuals";
+        [SerializeField] private string audioDirectory = "Audio";
+
+        [Header("End Points")]
+        [SerializeField] private string deckNamesEp = "deck_names";
+        [SerializeField] private string deckDataEp = "deck_metadata/";
+        [SerializeField] private string categoriesAndTypesEp = "get_categories";
+        [SerializeField] private string categoriesIconEp = "get_categories";
+        [SerializeField] private string coversEp = "cover/";
+        [SerializeField] private string visualsEp = "visual/";
+        [SerializeField] private string audioEp = "sound/";
+
+        // Files
+        #region Files
         public static string DecksFilePath { get; private set; }
+
         public static string CategoriesFilePath { get; private set; }
-        public static string CategoriesDirectoryPath { get; private set; }
+        #endregion Files
+
+        // Directory paths
+        #region Directory Paths
         public static string DecksDirectoryPath { get; private set; }
+        public static string CategoryVisualsDirectoryPath { get; private set; }
         public static string CoversDirectoryPath { get; private set; }
         public static string VisualsDirectoryPath { get; private set; }
         public static string AudioDirectoryPath { get; private set; }
         public static string ThemesDirectoryPath { get; private set; }
+        #endregion Directory Paths
 
-        public UnityEvent DirectoriesInitializedEvent { get; } = new UnityEvent();
+        // End Points
+        #region End Points
+        public static string DeckNamesEndPoint { get; private set; }
+        public static string DeckDataEndPoint { get; private set; }
+        public static string CategoriesAndTypesEndPoint { get; private set; }
+        public static string CategoriesIconEndPoint { get; private set; }
+        public static string CoversEndPoint { get; private set; }
+        public static string VisualsEndPoint { get; private set; }
+        public static string AudioEndPoint { get; private set; }
+        #endregion End Points
+
+        public UnityEvent LoadManagerInitializedEvent { get; } = new();
 
         private string serverIP;
-
-        private bool initialized;
 
         private bool connexionError = false;
 
@@ -44,54 +88,49 @@ namespace Karuta
 
         private void Awake()
         {
-            // Be sure that there is only one instance of DecksManager
-            if (Instance == null)
-            {
-                Instance = this;
+            Instance = this;
 
-                Initialize();
-
-                initialized = true;
-            }
-            else
-            {
-                Destroy(gameObject); // Destroy if another DecksManager exist
-            }
-            DontDestroyOnLoad(gameObject);
-        }
-
-        // Start is called before the first frame update
-        void Start()
-        {
-            DirectoriesInitializedEvent.Invoke();
-        }
-
-        public bool IsInitialized()
-        {
-            return initialized;
+            Initialize();
         }
 
         private void Initialize()
         {
-            DecksFilePath = Path.Combine(Application.persistentDataPath, "DecksInfo.json");
-            CategoriesFilePath = Path.Combine(Application.persistentDataPath, "Categories", "Categories.json");
-            CategoriesDirectoryPath = Path.Combine(Application.persistentDataPath, "Categories");
-            DecksDirectoryPath = Path.Combine(Application.persistentDataPath, "Decks");
-            CoversDirectoryPath = Path.Combine(Application.persistentDataPath, "Covers");
-            VisualsDirectoryPath = Path.Combine(Application.persistentDataPath, "Visuals");
-            AudioDirectoryPath = Path.Combine(Application.persistentDataPath, "Audio");
-            ThemesDirectoryPath = Path.Combine(Application.persistentDataPath, "Themes");
+            InitializeStaticPaths();
 
             serverIP = JsonUtility.FromJson<ConfigData>(Resources.Load<TextAsset>("config").text).serverIP;
 
             InitDirectories();
         }
 
+        private void InitializeStaticPaths()
+        {
+            // Files
+            DecksFilePath = Path.Combine(Application.persistentDataPath, decksFile);
+            CategoriesFilePath = Path.Combine(Application.persistentDataPath, categoriesFile);
+
+            // Directories
+            DecksDirectoryPath = Path.Combine(Application.persistentDataPath, decksDirectory);
+            CategoryVisualsDirectoryPath = Path.Combine(Application.persistentDataPath, categoryVisualsDirectory);
+            CoversDirectoryPath = Path.Combine(Application.persistentDataPath, coversDirectory);
+            VisualsDirectoryPath = Path.Combine(Application.persistentDataPath, visualsDirectory);
+            AudioDirectoryPath = Path.Combine(Application.persistentDataPath, audioDirectory);
+            ThemesDirectoryPath = Path.Combine(Application.persistentDataPath, "Themes");
+
+            // End Points
+            DeckNamesEndPoint = deckNamesEp;
+            DeckDataEndPoint = deckDataEp;
+            CategoriesAndTypesEndPoint = categoriesAndTypesEp;
+            CategoriesIconEndPoint = categoriesIconEp;
+            CoversEndPoint = coversEp;
+            VisualsEndPoint = visualsEp;
+            AudioEndPoint = audioEp;
+        }
+
         private static void InitDirectories()
         {
-            if (!Directory.Exists(CategoriesDirectoryPath))
+            if (!Directory.Exists(CategoryVisualsDirectoryPath))
             {
-                Directory.CreateDirectory(CategoriesDirectoryPath);
+                Directory.CreateDirectory(CategoryVisualsDirectoryPath);
             }
             if (!Directory.Exists(DecksDirectoryPath))
             {
@@ -117,58 +156,75 @@ namespace Karuta
 
         #region Loader
         /// <summary>
-        /// Load the cover visual file from files
+        /// Load a category visual from file
         /// </summary>
-        /// <param name="coverName"></param>
+        /// <param name="visual"></param>
         /// <returns></returns>
-        public Sprite LoadCover(string coverName)
+        public Sprite LoadCategoryVisualSprite(string visual)
         {
-            if (!File.Exists(Path.Combine(CoversDirectoryPath, coverName)))
+            return LoadSprite(Path.Combine(CategoriesFilePath, visual));
+        }
+
+        /// <summary>
+        /// Load a deck cover from file
+        /// </summary>
+        /// <param name="cover"></param>
+        /// <returns></returns>
+        public Sprite LoadCoverSprite(string cover)
+        {
+            return LoadSprite(Path.Combine(CoversDirectoryPath, cover));
+        }
+
+        /// <summary>
+        /// Load a card visual from file
+        /// </summary>
+        /// <param name="visual"></param>
+        /// <returns></returns>
+        public Sprite LoadVisualSprite(string visual)
+        {
+            return LoadSprite(Path.Combine(VisualsDirectoryPath, visual));
+        }
+
+        /// <summary>
+        /// Load a sprite from file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="alreadyChecked"></param>
+        /// <returns></returns>
+        private Sprite LoadSprite(string filePath, bool alreadyChecked = false)
+        {
+            if (!alreadyChecked && !File.Exists(filePath))
             {
                 return defaultSprite;
             }
 
-            string filePath = Path.Combine(CoversDirectoryPath, coverName);
-
-            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
-
-            Texture2D texture = new(1, 1);
-            texture.LoadImage(bytes);
+            Texture2D texture = LoadTexture(filePath, true);
 
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
         }
 
         /// <summary>
-        /// Load the category visual from file
+        /// Load a theme texture from file
         /// </summary>
-        /// <param name="categoryVisual"></param>
+        /// <param name="texture"></param>
         /// <returns></returns>
-        public Sprite LoadCategoryVisual(string categoryVisual)
+        public static Texture2D LoadThemeTexture(string texture)
         {
-            if (!File.Exists(Path.Combine(CategoriesDirectoryPath, categoryVisual)))
-            {
-                return defaultSprite;
-            }
-
-            string filePath = Path.Combine(CategoriesDirectoryPath, categoryVisual);
-
-            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
-
-            Texture2D texture = new(1, 1);
-            texture.LoadImage(bytes);
-
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            return LoadTexture(Path.Combine(ThemesDirectoryPath, texture));
         }
 
-        #region Theme
-        public static Texture LoadThemeVisual(string visual)
+        /// <summary>
+        /// Load a texture from file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="alreadyChecked"></param>
+        /// <returns></returns>
+        private static Texture2D LoadTexture(string filePath, bool alreadyChecked = false)
         {
-            if (!File.Exists(Path.Combine(ThemesDirectoryPath, visual)))
+            if (!alreadyChecked && !File.Exists(filePath))
             {
                 return null;
             }
-
-            string filePath = Path.Combine(CoversDirectoryPath, visual);
 
             byte[] bytes = System.IO.File.ReadAllBytes(filePath);
 
@@ -177,8 +233,6 @@ namespace Karuta
 
             return texture;
         }
-
-        #endregion Theme
 
         #region Visual
         /// <summary>
@@ -191,7 +245,7 @@ namespace Karuta
             if (File.Exists(Path.Combine(VisualsDirectoryPath, visual)))
             {
                 Debug.Log("From visual file : " + visual);
-                LoadSpriteFromFile(visual, onLoaded);
+                onLoaded.Invoke(LoadSprite(visual, true), true);
             }
             else if (!connexionError)
             {
@@ -205,21 +259,6 @@ namespace Karuta
         }
 
         /// <summary>
-        /// Load a visual by its name from files. Call onLoaded at the end.
-        /// </summary>
-        /// <param name="visual"></param>
-        /// <param name="onLoaded"></param>
-        public static void LoadSpriteFromFile(string visual, Action<Sprite, bool> onLoaded)
-        {
-            byte[] bytes = System.IO.File.ReadAllBytes(Path.Combine(VisualsDirectoryPath, visual));
-
-            Texture2D texture = new(1, 1);
-            texture.LoadImage(bytes);
-
-            onLoaded.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)), true);
-        }
-
-        /// <summary>
         /// Load a visual by its name from download. Call onLoaded at the end.
         /// </summary>
         /// <param name="visual"></param>
@@ -228,7 +267,7 @@ namespace Karuta
         public IEnumerator DownloadVisual(string visual, Action<Sprite, bool> onLoaded)
         {
             // Initiate the webRequest
-            using UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(serverIP + "visual/" + visual);
+            using UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(serverIP + VisualsEndPoint + visual);
             webRequest.timeout = downloadTimeout;
 
             yield return webRequest.SendWebRequest();
@@ -329,7 +368,7 @@ namespace Karuta
         public IEnumerator DownloadAudio(string audio, Action<AudioClip> onLoaded)
         {
             // Initiate the webRequest
-            using UnityWebRequest webRequest = UnityWebRequestMultimedia.GetAudioClip(serverIP + "sound/" + audio, AudioType.MPEG);
+            using UnityWebRequest webRequest = UnityWebRequestMultimedia.GetAudioClip(serverIP + AudioEndPoint + audio, AudioType.MPEG);
             ((DownloadHandlerAudioClip)webRequest.downloadHandler).streamAudio = true;
             webRequest.timeout = downloadTimeout;
 
@@ -430,6 +469,8 @@ namespace Karuta
             }
             else if (webRequest.result == UnityWebRequest.Result.ConnectionError)
             {
+                yield return new WaitForSeconds(connexionCheckTimeout);
+
                 Debug.LogWarning("Connexion Error Again");
                 StartCoroutine(ConnectionCheck());
             }

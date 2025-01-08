@@ -66,7 +66,7 @@ namespace Karuta.Game
         private bool audioLoaded = false;
 
         // Events for Arduino Handler
-        public UnityEvent<float, float> ColorIndicationUpdate { get; } = new ();
+        public UnityEvent<float, float> ColorIndicationUpdate { get; } = new();
 
         private void OnEnable()
         {
@@ -89,7 +89,7 @@ namespace Karuta.Game
             }
             else
             {
-                DecksManager.Instance.DeckListInitializedEvent.AddListener(ResetGame);
+                DecksManager.Instance.DeckManagerInitializedEvent.AddListener(ResetGame);
             }
         }
 
@@ -510,10 +510,14 @@ namespace Karuta.Game
             SetCardVisualAndInformation();
         }
 
+        public float GetMaxDistance()
+        {
+            return rotationDivisor;
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            ApplyArrowsColors(1, 1);
             distanceTreshold = rotationDivisor * (angleThreshold / maxRotation);
         }
 #endif

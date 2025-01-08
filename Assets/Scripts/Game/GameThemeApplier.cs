@@ -1,11 +1,8 @@
-using Karuta.Commons;
-using Karuta.Menu;
-using Karuta.UIComponent;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
+using Karuta.Commons;
+using Karuta.Objects;
+using Karuta.UIComponent;
 
 namespace Karuta.Game
 {
@@ -15,21 +12,17 @@ namespace Karuta.Game
         [SerializeField] private MultiLayerButton notFoundArrow;
         [SerializeField] private MultiLayerButton foundArrow;
 
-        public override void ApplyTheme()
+        #region Theme Applier
+        protected override void ApplyTheme(Theme currentTheme, BaseTheme baseTheme)
         {
-            Debug.Log("Coucou");
+            base.ApplyTheme(currentTheme, baseTheme);
 
-
-            base.ApplyTheme();
-
-            Debug.Log("Coucou");
-
-            ApplyIndicationArrowsColors();
+            ApplyIndicationArrowsColors(currentTheme, baseTheme);
         }
 
-        protected override void ApplyBackground()
+        protected override void ApplyBackground(Theme currentTheme, BaseTheme baseTheme)
         {
-            Background background = themeManager.GetGameBackground();
+            Background background = GetBackgroundFromString(currentTheme.gameBackground, baseTheme.gameBackground);
 
             if (background.isTexture)
             {
@@ -49,16 +42,16 @@ namespace Karuta.Game
             }
         }
 
-        private void ApplyIndicationArrowsColors()
+        private void ApplyIndicationArrowsColors(Theme currentTheme, BaseTheme baseTheme)
         {
-            notFoundArrow.SetColor(0, themeManager.GetNotFoundArrowOutlineColor());
-            notFoundArrow.SetColor(1, themeManager.GetNotFoundArrowInsideColor());
-            notFoundArrow.GetLabel().color = themeManager.GetNotFoundArrowTextColor();
+            notFoundArrow.SetColor(0, GetColorFromString(currentTheme.notFoundArrowOutlineColor, baseTheme.notFoundArrowOutlineColor));
+            notFoundArrow.SetColor(1, GetColorFromString(currentTheme.notFoundArrowInsideColor, baseTheme.notFoundArrowInsideColor));
+            notFoundArrow.GetLabel().color = GetColorFromString(currentTheme.notFoundArrowTextColor, baseTheme.notFoundArrowTextColor);
 
-            foundArrow.SetColor(0, themeManager.GetFoundArrowOutlineColor());
-            foundArrow.SetColor(1, themeManager.GetFoundArrowInsideColor());
-            foundArrow.GetLabel().color = themeManager.GetFoundArrowTextColor();
+            foundArrow.SetColor(0, GetColorFromString(currentTheme.foundArrowOutlineColor, baseTheme.foundArrowOutlineColor));
+            foundArrow.SetColor(1, GetColorFromString(currentTheme.foundArrowInsideColor, baseTheme.foundArrowInsideColor));
+            foundArrow.GetLabel().color = GetColorFromString(currentTheme.foundArrowTextColor, baseTheme.foundArrowTextColor);
         }
-
+        #endregion Theme Applier
     }
 }

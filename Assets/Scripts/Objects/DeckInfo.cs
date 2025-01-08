@@ -1,8 +1,37 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Karuta.Objects
 {
+    #region Json Objects
+    [Serializable]
+    public class JsonDeck
+    {
+        public string name;
+        public string category;
+        public string type;
+        public string cover;
+        public List<JsonCard> cards;
+    }
+
+    [Serializable]
+    public class JsonDeckInfo
+    {
+        public string name;
+        public int category;
+        public int type;
+        public string cover;
+        public bool isDownloaded;
+    }
+
+    [Serializable]
+    public class JsonDeckInfoList
+    {
+        public List<JsonDeckInfo> deckInfoList;
+    }
+    #endregion Json Objects
+
     public class DeckInfo
     {
         private readonly string deckName;
@@ -28,7 +57,7 @@ namespace Karuta.Objects
             this.deckName = jsonDeckInfo.name;
             this.category = jsonDeckInfo.category;
             this.type = jsonDeckInfo.type;
-            this.cover = LoadManager.Instance.LoadCover(jsonDeckInfo.cover);
+            this.cover = LoadManager.Instance.LoadCoverSprite(jsonDeckInfo.cover);
             this.coverName = jsonDeckInfo.cover;
             this.isDownloaded = jsonDeckInfo.isDownloaded;
         }

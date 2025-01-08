@@ -1,14 +1,9 @@
 using UnityEngine;
+using UnityEngine.Video;
+using System.Collections.Generic;
+using Karuta.UIComponent;
 using UnityEngine.UI;
 using Karuta.Objects;
-using UnityEngine.Video;
-using System.Net;
-using System;
-using Karuta.UIComponent;
-using System.Collections.Generic;
-using System.IO;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
-using UnityEditor.UI;
 
 
 namespace Karuta.Commons
@@ -22,28 +17,28 @@ namespace Karuta.Commons
         [SerializeField] protected VideoPlayer videoPlayer;
         [SerializeField] protected RenderTexture renderTexture;
 
-        [Header("Buttons")]
-        [SerializeField] private List<MultiLayerButton> optionButtons;
-        [SerializeField] private List<MultiLayerButton> closeButtons;
+        [Header("Arrow Buttons")]
         [SerializeField] private List<MultiLayerButton> arrowButtons;
         [SerializeField] private List<MultiLayerButton> reverseArrowButtons;
 
-        [Header("Toggles")]
+        #region Options
+        [Header("Option Buttons")]
+        [SerializeField] private List<MultiLayerButton> optionButtons;
+
+        [Header("Option Toggles")]
         [SerializeField] private List<LabeledToggle> optionToggles;
 
         [Header("Option Panels")]
         [SerializeField] private List<Image> optionPanelsBorders;
         [SerializeField] private List<Image> optionPanels;
 
-
-
-        protected int previousTheme;
+        [Header("Close Buttons")]
+        [SerializeField] private List<MultiLayerButton> closeButtons;
+        #endregion Options
 
         virtual protected void OnEnable()
         {
             themeManager = ThemeManager.Instance;
-
-            themeManager.UpdateThemeEvent.AddListener(SoftApplyTheme);
 
             // Initialize
             if (themeManager.IsInitialized())
@@ -54,6 +49,10 @@ namespace Karuta.Commons
             {
                 themeManager.InitializeThemeEvent.AddListener(ApplyTheme);
             }
+
+
+
+
         }
 
 
@@ -64,81 +63,121 @@ namespace Karuta.Commons
 
 
 
-        public virtual void ApplyTheme()
+
+
+
+
+
+
+
+
+
+        #region Theme Applier
+        public void ApplyTheme()
         {
-            ApplyBackground();
-
-            ApplyButtonsColors();
-
-            ApplyTogglesColors();
-
-            ApplyOptionPanelToggle();
+            ApplyTheme(themeManager.GetCurrentTheme(), themeManager.GetBaseTheme());
         }
 
-        protected abstract void ApplyBackground();
+        protected virtual void ApplyTheme(Theme currentTheme, BaseTheme baseTheme)
+        {
+            ApplyBackground(currentTheme, baseTheme);
 
-        virtual protected void ApplyButtonsColors()
+            ApplyButtonsColors(currentTheme, baseTheme);
+
+            ApplyTogglesColors(currentTheme, baseTheme);
+
+            ApplyOptionPanelColors(currentTheme, baseTheme);
+        }
+
+        protected abstract void ApplyBackground(Theme currentTheme, BaseTheme baseTheme);
+
+        virtual protected void ApplyButtonsColors(Theme currentTheme, BaseTheme baseTheme)
         {
             // Option Buttons
             foreach (MultiLayerButton button in optionButtons)
             {
-                button.SetColor(0, themeManager.GetOptionButtonOutlineColor());
-                button.SetColor(1, themeManager.GetOptionButtonInsideColor());
-                button.SetColor(2, themeManager.GetOptionButtonIconColor());
+                button.SetColor(0, GetColorFromString(currentTheme.optionButtonOutlineColor, baseTheme.optionButtonOutlineColor));
+                button.SetColor(1, GetColorFromString(currentTheme.optionButtonInsideColor, baseTheme.optionButtonInsideColor));
+                button.SetColor(2, GetColorFromString(currentTheme.optionButtonIconColor, baseTheme.optionButtonIconColor));
             }
 
             // Close Buttons
             foreach (MultiLayerButton button in closeButtons)
             {
-                button.SetColor(0, themeManager.GetCloseButtonOutlineColor());
-                button.SetColor(1, themeManager.GetCloseButtonInsideColor());
-                button.SetColor(2, themeManager.GetCloseButtonIconColor());
+                button.SetColor(0, GetColorFromString(currentTheme.closeButtonOutlineColor, baseTheme.closeButtonOutlineColor));
+                button.SetColor(1, GetColorFromString(currentTheme.closeButtonInsideColor, baseTheme.closeButtonInsideColor));
+                button.SetColor(2, GetColorFromString(currentTheme.closeButtonIconColor, baseTheme.closeButtonIconColor));
             }
 
             // Arrow Buttons
             foreach (MultiLayerButton button in arrowButtons)
             {
-                button.SetColor(0, themeManager.GetArrowButtonOutsideColor());
-                button.SetColor(1, themeManager.GetArrowButtonInsideColor());
-                button.GetLabel().color = themeManager.GetArrowButtonTextColor();
+                button.SetColor(0, GetColorFromString(currentTheme.arrowButtonOutsideColor, baseTheme.arrowButtonOutsideColor));
+                button.SetColor(1, GetColorFromString(currentTheme.arrowButtonInsideColor, baseTheme.arrowButtonInsideColor));
+                button.GetLabel().color = GetColorFromString(currentTheme.arrowButtonTextColor, baseTheme.arrowButtonTextColor);
             }
 
             // Reverse Arrow Buttons
             foreach (MultiLayerButton button in reverseArrowButtons)
             {
-                button.SetColor(0, themeManager.GetReverseArrowButtonOutsideColor());
-                button.SetColor(1, themeManager.GetReverseArrowButtonInsideColor());
-                button.GetLabel().color = themeManager.GetReverseArrowButtonTextColor();
+                button.SetColor(0, GetColorFromString(currentTheme.reverseArrowButtonOutsideColor, baseTheme.reverseArrowButtonOutsideColor));
+                button.SetColor(1, GetColorFromString(currentTheme.reverseArrowButtonInsideColor, baseTheme.reverseArrowButtonInsideColor));
+                button.GetLabel().color = GetColorFromString(currentTheme.reverseArrowButtonTextColor, baseTheme.reverseArrowButtonTextColor);
             }
         }
 
-        virtual protected void ApplyTogglesColors()
+        virtual protected void ApplyTogglesColors(Theme currentTheme, BaseTheme baseTheme)
         {
             // Option Toggles
             foreach (LabeledToggle toggle in optionToggles)
             {
-                toggle.GetText().color = themeManager.GetOptionsTogglesLabelColor();
-                toggle.GetOutline().effectColor = themeManager.GetOptionsTogglesLabelOutlineColor();
-                toggle.GetBackgoundOutline().color = themeManager.GetOptionsTogglesCheckBoxOutlineColor();
-                toggle.GetBackgound().color = themeManager.GetOptionsTogglesCheckBoxColor();
-                toggle.graphic.color = themeManager.GetOptionsTogglesCheckMarkColor();
+                toggle.GetText().color = GetColorFromString(currentTheme.optionsTogglesLabelColor, baseTheme.optionsTogglesLabelColor);
+                toggle.GetOutline().effectColor = GetColorFromString(currentTheme.optionsTogglesLabelOutlineColor, baseTheme.optionsTogglesLabelOutlineColor);
+                toggle.GetBackgoundOutline().color = GetColorFromString(currentTheme.optionsTogglesCheckBoxOutlineColor, baseTheme.optionsTogglesCheckBoxOutlineColor);
+                toggle.GetBackgound().color = GetColorFromString(currentTheme.optionsTogglesCheckBoxColor, baseTheme.optionsTogglesCheckBoxColor);
+                toggle.graphic.color = GetColorFromString(currentTheme.optionsTogglesCheckMarkColor, baseTheme.optionsTogglesCheckMarkColor);
             }
         }
 
-        protected void ApplyOptionPanelToggle()
+        protected void ApplyOptionPanelColors(Theme currentTheme, BaseTheme baseTheme)
         {
             foreach (Image image in optionPanelsBorders)
             {
-                image.color = themeManager.GetOptionPanelBorderColor();
+                image.color = GetColorFromString(currentTheme.optionPanelBorderColor, baseTheme.optionPanelBorderColor);
             }
             foreach (Image image in optionPanels)
             {
-                image.color = themeManager.GetOptionPanelColor();
+                image.color = GetColorFromString(currentTheme.optionPanelColor, baseTheme.optionPanelColor);
             }
         }
+        #endregion Theme Applier
 
+        #region From string getter
+        protected static Background GetBackgroundFromString(string backgroundString, Background defaultBackground)
+        {
+            if (string.IsNullOrEmpty(backgroundString))
+            {
+                return defaultBackground;
+            }
+            bool isTexture = backgroundString.Split(".")[^1] == "png";
 
-
+            return new()
+            {
+                isTexture = isTexture,
+                texture = isTexture ? LoadManager.LoadThemeTexture(backgroundString) : null,
+                videoPath = isTexture ? null : backgroundString,
+            };
+        }
+        
+        protected static Color GetColorFromString(string colorString, Color defaultColor)
+        {
+            if (ColorUtility.TryParseHtmlString(colorString, out Color color))
+            {
+                return color;
+            }
+            return defaultColor;
+        }
+        #endregion From string getter
 
 
 
@@ -146,34 +185,10 @@ namespace Karuta.Commons
 
 
 #if UNITY_EDITOR
-        public virtual void VisualizeApplication(ThemeManager themeManager)
+        public virtual void VisualizeApplication(Theme currentTheme, BaseTheme baseTheme)
         {
-            this.themeManager = themeManager;
-
-            ApplyTheme();
+            ApplyTheme(currentTheme, baseTheme);
         }
 #endif
-
-
-
-
-        public void ApplyThemeOnClose()
-        {
-            /*
-            if (themeManager.GetCurrentThemeInt() != previousTheme)
-            {
-                previousTheme = themeManager.GetCurrentThemeInt();
-                ApplyTheme();
-            }
-            else
-            {
-                SoftApplyTheme();
-            }*/
-        }
-
-        protected void SoftApplyTheme()
-        {
-
-        }
     }
 }

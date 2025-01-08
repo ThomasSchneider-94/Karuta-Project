@@ -1,7 +1,26 @@
+using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace Karuta.Objects
 {
+    #region Json Objects
+    [Serializable]
+    public class JsonCard
+    {
+        public string anime;
+        public string type;
+        public string visual;
+        public string audio;
+    }
+
+    [Serializable]
+    public class JsonCards
+    {
+        public List<JsonCard> cards;
+    }
+    #endregion Json Objects
+
     public class Card
     {
         private readonly string deck;

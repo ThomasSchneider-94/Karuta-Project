@@ -141,6 +141,11 @@ namespace Karuta.UIComponent
             return subLayout.transform;
         }
 
+        public TextMeshProUGUI GetNameTextMesh()
+        {
+            return nameTextMesh;
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using Karuta.Objects;
+using UnityEngine.Events;
 
 namespace Karuta.Menu
 {
@@ -22,19 +23,23 @@ namespace Karuta.Menu
         [SerializeField] private float categoryNameWidth;
         [SerializeField] private float categoryNameSpacing;
         [SerializeField] private float categorySpacing;
+        [Range(0f, 1f)]
+        [SerializeField] private float categoryOutlineWidth;
 
         [Header("Type Container Properties")]
         [SerializeField] protected float typeNameScale;
         [SerializeField] private float typeNameWidth;
         [SerializeField] private float typeNameSpacing;
+        [Range(0f, 1f)]
+        [SerializeField] private float typeOutlineWidth;
 
         [Header("Grid properties")]
         [SerializeField] private float nameSpacing = 20;
         [SerializeField] private float nameWidth = 200;
         [Min(1)]
         [SerializeField] private int columnNumber = 3;
-        [SerializeField] private Vector2 cellSize = new (100, 100);
-        [SerializeField] private Vector2 gridSpacing = new (10, 20);
+        [SerializeField] private Vector2 cellSize = new(100, 100);
+        [SerializeField] private Vector2 gridSpacing = new(10, 20);
 
         [Header("Prefabs")]
         [SerializeField] private Container categoryContainerPrefab;
@@ -47,21 +52,22 @@ namespace Karuta.Menu
         [SerializeField] private Toggle downloadedOnlyToggle;
         [SerializeField] private Button continueButton;
 
-
         // Lists
-        private readonly List<Container> categoryContainers = new ();
-        private int categoriesCount;
-        private readonly List<Container> typeContainers = new ();
-        private int typesCount;
-        private readonly List<CenteredGridLayout> grids = new ();
-        private readonly List<SelectionButton> buttons = new ();
+        private readonly List<Container> categoryContainers = new();
+        private readonly List<Container> typeContainers = new();
+        private readonly List<CenteredGridLayout> grids = new();
+        private readonly List<SelectionButton> buttons = new();
 
+        public UnityEvent ContainersCreatedEvent { get; } = new();
+
+        public UnityEvent ButtonsCreatedEvent { get; } = new();
+        
         private void OnEnable()
         {
             decksManager = DecksManager.Instance;
             optionsManager = OptionsManager.Instance;
 
-            decksManager.UpdateCategoriesEvent.AddListener(StartUpdateContainers);
+            decksManager.UpdateCategoriesAndTypesEvent.AddListener(StartUpdateContainers);
             decksManager.UpdateDeckListEvent.AddListener(StartUpdateButtons);
             optionsManager.UpdateCategoryEvent.AddListener(UpdateActiveCategory);
             optionsManager.UpdateMirorMatchEvent.AddListener(RemoveSelectedDoubles);
@@ -78,7 +84,7 @@ namespace Karuta.Menu
             }
             else
             {
-                decksManager.DeckListInitializedEvent.AddListener(InitializeContainersAndButtons);
+                decksManager.DeckManagerInitializedEvent.AddListener(InitializeContainersAndButtons);
             }
         }
 
@@ -90,11 +96,6 @@ namespace Karuta.Menu
             }
             numberButtons[value - 1].SelectButton();
             decksManager.SetMaxSelectedDeck(value);
-        }
-
-        private List<SelectionButton> GetTypeButtons(int category, int type)
-        {
-            return buttons.GetRange(decksManager.GetTypeIndex(category, type), decksManager.GetTypeDecksCount(category, type));
         }
 
         #region Create Containers & Buttons
@@ -121,9 +122,9 @@ namespace Karuta.Menu
         private void CreateContainers()
         {
             allButtonsParent.spacing = globalSpacing;
-            categoriesCount = decksManager.GetCategoriesCount();
-            typesCount = decksManager.GetTypesCount();
             CreateCategoryContainers();
+
+            ContainersCreatedEvent.Invoke();
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace Karuta.Menu
         /// <param name="categoriesDecks"></param>
         private void CreateCategoryContainers()
         {
-            for (int i = 0; i < categoriesCount; i++)
+            for (int i = 0; i < decksManager.GetCategoriesCount(); i++)
             {
                 CreateCategoryContainer(i);
             }
@@ -151,6 +152,7 @@ namespace Karuta.Menu
 
             container.transform.SetParent(allButtonsParent.transform);
             container.transform.localScale = Vector2.one;
+            container.GetNameTextMesh().outlineWidth = categoryOutlineWidth;
 
             // Create types containers
             CreateTypeContainers(category);
@@ -165,7 +167,7 @@ namespace Karuta.Menu
         /// <param name="category"></param>
         private void CreateTypeContainers(int category)
         {
-            for (int i = 0; i < typesCount; i++)
+            for (int i = 0; i < decksManager.GetTypesCount(); i++)
             {
                 CreateTypeContainer(category, i);
             }
@@ -184,6 +186,7 @@ namespace Karuta.Menu
             typeContainers.Add(container);
             container.transform.SetParent(categoryContainers[category].GetSubContainer());
             container.transform.localScale = Vector2.one;
+            container.GetNameTextMesh().outlineWidth = typeOutlineWidth;
 
             CreateGrid(category, type);
 
@@ -202,7 +205,7 @@ namespace Karuta.Menu
 
             // Add the type container to the list and it's parent category
             grids.Add(grid);
-            grid.transform.SetParent(typeContainers[category * typesCount + type].GetSubContainer());
+            grid.transform.SetParent(typeContainers[category * decksManager.GetTypesCount() + type].GetSubContainer());
             grid.transform.localScale = Vector2.one;
 
             // Set Parameters
@@ -221,6 +224,8 @@ namespace Karuta.Menu
             {
                 CreateButton(deckList[i], i);
             }
+
+            ButtonsCreatedEvent.Invoke();
         }
 
         /// <summary>
@@ -247,14 +252,14 @@ namespace Karuta.Menu
         /// </summary>
         private void PlaceButtons()
         {
-            for (int i = 0; i < categoriesCount; i++)
+            for (int i = 0; i < decksManager.GetCategoriesCount(); i++)
             {
-                for (int j = 0; j < typesCount; j++)
+                for (int j = 0; j < decksManager.GetTypesCount(); j++)
                 {
                     List<SelectionButton> buttonsToAdd = GetTypeButtons(i, j);
 
-                    grids[i * typesCount + j].AddItems(buttonsToAdd);
-                    typeContainers[i * typesCount + j].ResizeContainer();
+                    grids[i * decksManager.GetTypesCount() + j].AddItems(buttonsToAdd);
+                    typeContainers[i * decksManager.GetTypesCount() + j].ResizeContainer();
 
                     foreach (SelectionButton button in buttonsToAdd)
                     {
@@ -270,6 +275,8 @@ namespace Karuta.Menu
         #endregion Create Containers & Buttons
 
         #region Container & Buttons Update
+
+        #region Containers Update
         /// <summary>
         /// Update the containers list
         /// </summary>
@@ -280,11 +287,9 @@ namespace Karuta.Menu
 
         private IEnumerator UpdateContainers()
         {
-            yield return StartCoroutine(ClearContainers());
+            yield return ClearContainers();
 
             CreateContainers();
-
-            yield return StartCoroutine(UpdateButtons());
         }
 
         /// <summary>
@@ -292,7 +297,7 @@ namespace Karuta.Menu
         /// </summary>
         private IEnumerator ClearContainers()
         {
-            for (int i = 0; i < categoriesCount; i++)
+            for (int i = 0; i < categoryContainers.Count; i++)
             {
                 GameObject.Destroy(categoryContainers[i].gameObject);
             }
@@ -300,11 +305,14 @@ namespace Karuta.Menu
             categoryContainers.Clear();
             typeContainers.Clear();
             grids.Clear();
-            buttons.Clear();
+            buttons.Clear(); // Clear the buttons list, they are going to be destroyed anyway
 
+            // yield return to make sure destruction is effective
             yield return null;
         }
+        #endregion Containers Update
 
+        #region Buttons Update
         /// <summary>
         /// Update the button list
         /// </summary>
@@ -315,7 +323,7 @@ namespace Karuta.Menu
 
         private IEnumerator UpdateButtons()
         {
-            yield return StartCoroutine(ClearButtons());
+            yield return ClearButtons();
 
             CreateButtons();
 
@@ -335,6 +343,8 @@ namespace Karuta.Menu
             buttons.Clear();
             yield return null;
         }
+        #endregion Buttons Update
+
         #endregion Container & Buttons Update
 
         #region Buttons Gestion
@@ -356,7 +366,7 @@ namespace Karuta.Menu
             List<DeckInfo> deckList = decksManager.GetDeckList();
 
             // Initialize 2 list of bool to false
-            List<bool> activeCategories = new(new bool[categoriesCount]);
+            List<bool> activeCategories = new(new bool[categoryContainers.Count]);
             List<bool> activeTypes = new(new bool[typeContainers.Count]);
 
             // Set buttons active
@@ -367,7 +377,7 @@ namespace Karuta.Menu
                     buttons[i].gameObject.SetActive(true);
 
                     activeCategories[deckList[i].GetCategory()] = true;
-                    activeTypes[deckList[i].GetCategory() * typesCount + deckList[i].GetDeckType()] = true;
+                    activeTypes[deckList[i].GetCategory() * decksManager.GetTypesCount() + deckList[i].GetDeckType()] = true;
                 }
                 else
                 {
@@ -376,13 +386,13 @@ namespace Karuta.Menu
             }
 
             // Set containers active
-            for (int i = 0; i < categoriesCount; i++)
+            for (int i = 0; i < decksManager.GetCategoriesCount(); i++)
             {
                 categoryContainers[i].gameObject.SetActive(activeCategories[i] && optionsManager.IsCategoryActive(i));
 
-                for (int j = 0; j < typesCount; j++)
+                for (int j = 0; j < decksManager.GetTypesCount(); j++)
                 {
-                    typeContainers[i * typesCount + j].gameObject.SetActive(activeTypes[i * typesCount + j]);
+                    typeContainers[i * decksManager.GetTypesCount() + j].gameObject.SetActive(activeTypes[i * decksManager.GetTypesCount() + j]);
                 }
             }
 
@@ -414,13 +424,13 @@ namespace Karuta.Menu
         /// </summary>
         private void HideNonUsedContainers()
         {
-            for (int i = 0; i < categoriesCount; i++)
+            for (int i = 0; i < decksManager.GetCategoriesCount(); i++)
             {
                 categoryContainers[i].gameObject.SetActive(false);
 
-                for (int j = 0; j < typesCount; j++)
+                for (int j = 0; j < decksManager.GetTypesCount(); j++)
                 {
-                    typeContainers[i * typesCount + j].gameObject.SetActive(false);
+                    typeContainers[i * decksManager.GetTypesCount() + j].gameObject.SetActive(false);
 
                     // Control if one of the button of the type is active
                     foreach (SelectionButton button in GetTypeButtons(i, j))
@@ -428,7 +438,7 @@ namespace Karuta.Menu
                         if (button.gameObject.activeSelf)
                         {
                             categoryContainers[i].gameObject.SetActive(true);
-                            typeContainers[i * typesCount + j].gameObject.SetActive(true);
+                            typeContainers[i * decksManager.GetTypesCount() + j].gameObject.SetActive(true);
                             break;
                         }
                     }
@@ -573,15 +583,27 @@ namespace Karuta.Menu
             scrollRect.verticalNormalizedPosition = 1;
         }
 
-
-
         #region Getter
+        private List<SelectionButton> GetTypeButtons(int category, int type)
+        {
+            return buttons.GetRange(decksManager.GetTypeIndex(category, type), decksManager.GetTypeDecksCount(category, type));
+        }
+
         public List<SelectionButton> GetSelectionButtons()
         {
             return buttons;
         }
-        #endregion Getter
 
+        public List<Container> GetCategoryContainers()
+        {
+            return categoryContainers;
+        }
+
+        public List<Container> GetTypeContainers()
+        {
+            return typeContainers;
+        }
+        #endregion Getter
 
 #if UNITY_EDITOR
         // Called if changes in code or editor (not called at runtime)
@@ -607,6 +629,7 @@ namespace Karuta.Menu
                 container.SetNameScale(typeNameScale);
                 container.SetNameWidth(typeNameWidth);
                 container.SetNameSpacing(typeNameSpacing);
+                container.GetNameTextMesh().outlineWidth = typeNameWidth;
             }
 
             foreach (Container container in categoryContainers)
@@ -615,6 +638,7 @@ namespace Karuta.Menu
                 container.SetNameWidth(categoryNameWidth);
                 container.SetNameSpacing(categoryNameSpacing);
                 container.SetSpacing(categorySpacing);
+                container.GetNameTextMesh().outlineWidth = categoryNameWidth;
             }
         }
 #endif
