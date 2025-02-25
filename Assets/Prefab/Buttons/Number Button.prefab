@@ -146,7 +146,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2395505484917850648}
   - component: {fileID: 5431240159279388068}
-  - component: {fileID: 5375229815020010432}
+  - component: {fileID: 377756886783726385}
   - component: {fileID: 2923894684259905594}
   m_Layer: 5
   m_Name: Number Button
@@ -188,7 +188,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.7490196}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.4}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -205,7 +205,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5375229815020010432
+--- !u!114 &377756886783726385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,11 +214,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8343700029336433909}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9126493d63408a54ba00f7d0168b170e, type: 3}
+  m_Script: {fileID: 11500000, guid: 21603f1ebb139cd4dad8d3bca3e31e64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 0
+    m_Mode: 3
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -229,7 +229,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -248,22 +248,11 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5431240159279388068}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5375229815020010432}
-        m_TargetAssemblyTypeName: Karuta.UIComponent.NumberButton, Assembly-CSharp
-        m_MethodName: SelectButton
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  baseColor: {r: 0, g: 0, b: 0, a: 0.7490196}
-  selectedColor: {r: 0, g: 0, b: 0, a: 0}
-  text: {fileID: 7448273604366437823}
+      m_Calls: []
+  buttonLayers: []
+  isSelected: 0
+  selectedColor: {r: 0, g: 1, b: 0.8322139, a: 0.4}
+  baseColor: {r: 0, g: 0, b: 0, a: 0.4}
 --- !u!222 &2923894684259905594
 CanvasRenderer:
   m_ObjectHideFlags: 0

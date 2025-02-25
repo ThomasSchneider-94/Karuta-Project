@@ -1,11 +1,12 @@
 using UnityEditor;
 using UnityEngine;
-using Karuta.UIComponent;
+using Karuta.UI.CustomButton;
+using Karuta.UI.EditorLayout;
 
 namespace Karuta.EditorLayout
 {
     [CustomEditor(typeof(SelectionButton))]
-    public class DeckSelectionButtonEditor : MultiLayerButtonEditor
+    public class DeckSelectionButtonEditor : SelectableButtonEditor
     {
         [Header("Name")]
         SerializedProperty deckNameTextMesh;

@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
 using UnityEditor.UI;
 using UnityEngine;
-using Karuta.UIComponent;
 
-namespace Karuta.EditorLayout
+namespace Karuta.UI.EditorLayout
 {
     [CustomEditor(typeof(LabeledToggle))]
     public class LabeledToggleEditor : ToggleEditor

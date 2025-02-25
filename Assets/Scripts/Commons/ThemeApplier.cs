@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Video;
 using System.Collections.Generic;
+using Karuta.UI.CustomButton;
 using Karuta.UIComponent;
 using UnityEngine.UI;
 using Karuta.Objects;
@@ -114,7 +115,7 @@ namespace Karuta.Commons
             {
                 button.SetColor(0, GetColorFromString(currentTheme.arrowButtonOutsideColor, baseTheme.arrowButtonOutsideColor));
                 button.SetColor(1, GetColorFromString(currentTheme.arrowButtonInsideColor, baseTheme.arrowButtonInsideColor));
-                button.GetLabel().color = GetColorFromString(currentTheme.arrowButtonTextColor, baseTheme.arrowButtonTextColor);
+                //button.Label.color = GetColorFromString(currentTheme.arrowButtonTextColor, baseTheme.arrowButtonTextColor);
             }
 
             // Reverse Arrow Buttons
@@ -122,7 +123,7 @@ namespace Karuta.Commons
             {
                 button.SetColor(0, GetColorFromString(currentTheme.reverseArrowButtonOutsideColor, baseTheme.reverseArrowButtonOutsideColor));
                 button.SetColor(1, GetColorFromString(currentTheme.reverseArrowButtonInsideColor, baseTheme.reverseArrowButtonInsideColor));
-                button.GetLabel().color = GetColorFromString(currentTheme.reverseArrowButtonTextColor, baseTheme.reverseArrowButtonTextColor);
+                //button.Label.color = GetColorFromString(currentTheme.reverseArrowButtonTextColor, baseTheme.reverseArrowButtonTextColor);
             }
         }
 
@@ -164,7 +165,7 @@ namespace Karuta.Commons
             return new()
             {
                 isTexture = isTexture,
-                texture = isTexture ? LoadManager.LoadThemeTexture(backgroundString) : null,
+                texture = isTexture ? LoadManager.LoadThemeTextureFromFile(backgroundString) : null,
                 videoPath = isTexture ? null : backgroundString,
             };
         }

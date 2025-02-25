@@ -70,7 +70,6 @@ namespace Karuta.UIComponent
                 }
             }
 
-            Resize();
             UpdateActive();
         }
 
@@ -91,8 +90,6 @@ namespace Karuta.UIComponent
                     }
                     item.transform.SetParent(fullGrid.transform);
                     item.transform.SetAsLastSibling();
-
-                    Resize();
                 }
 
                 else
@@ -115,47 +112,21 @@ namespace Karuta.UIComponent
         public void RepositionItems()
         {
             List<Transform> childs = new();
-            for (int i = 0; i < fullGrid.transform.childCount; i++)
+            foreach (Transform child in fullGrid.transform)
             {
-                childs.Add(fullGrid.transform.GetChild(i));
+                childs.Add(child);
             }
-            for (int i = 0; i < nonFullGrid.transform.childCount; i++)
+            foreach (Transform child in nonFullGrid.transform)
             {
-                childs.Add(nonFullGrid.transform.GetChild(i));
+                childs.Add(child);
             }
-            for (int i = 0; i < nonActiveObjects.childCount; i++)
+            foreach (Transform child in nonActiveObjects.transform)
             {
-                childs.Add(nonActiveObjects.GetChild(i));
+                childs.Add(child);
             }
             AddItems(childs);
         }
         #endregion Add sItems
-
-        #region Size
-        /// <summary>
-        /// Update the rectTransform size to match the elements of the grid
-        /// </summary>
-        public void Resize()
-        {
-            int fullNonEmpty = fullGrid.transform.childCount > 0 ? 1 : 0;
-            int nonFullNonEmpty = nonFullGrid.transform.childCount > 0 ? 1 : 0;
-            int nonEmpty = Mathf.Min(fullNonEmpty, nonFullNonEmpty);
-
-            fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
-            fullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (cellSize.y + spacing.y) * (fullGrid.transform.childCount / constraintCount) - spacing.y * fullNonEmpty);
-
-            nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
-            nonFullGridRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, cellSize.y * nonFullNonEmpty);
-
-            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, (cellSize.x + spacing.x) * constraintCount - spacing.x);
-            generalLayoutRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, fullGridRectTransform.sizeDelta.y + nonFullGridRectTransform.sizeDelta.y + spacing.y * nonEmpty);
-        }
-
-        public Vector2 GetSize()
-        {
-            return generalLayoutRectTransform.sizeDelta;
-        }
-        #endregion Size
 
         #region Setter
         public void SetCellSize(Vector2 size)
@@ -163,8 +134,6 @@ namespace Karuta.UIComponent
             this.cellSize = size;
             fullGrid.cellSize = cellSize;
             nonFullGrid.cellSize = cellSize;
-
-            Resize();
         }
 
         public void SetSpacing(Vector2 spacing)
@@ -173,8 +142,6 @@ namespace Karuta.UIComponent
             fullGrid.spacing = spacing;
             nonFullGrid.spacing = spacing;
             generalLayout.spacing = spacing.y;
-
-            Resize();
         }
 
         public void SetChildAlignment(TextAnchor anchor)
@@ -182,8 +149,6 @@ namespace Karuta.UIComponent
             childAlignment = anchor;
             fullGrid.childAlignment = anchor;
             nonFullGrid.childAlignment = anchor;
-
-            Resize();
         }
 
         public void SetColumnNumber(int number)
@@ -193,29 +158,6 @@ namespace Karuta.UIComponent
             constraintCount = number;
             fullGrid.constraintCount = number;
             nonFullGrid.constraintCount = number;
-
-            Resize();
-        }
-
-        public void SetAllParameters(Vector2 cellSize, Vector2 spacing, int columnNumber)
-        {
-            // Cell Size
-            this.cellSize = cellSize;
-            fullGrid.cellSize = cellSize;
-            nonFullGrid.cellSize = cellSize;
-
-            // Spacing
-            this.spacing = spacing;
-            fullGrid.spacing = spacing;
-            nonFullGrid.spacing = spacing;
-            generalLayout.spacing = spacing.y;
-
-            // Column Number
-            this.constraintCount = columnNumber;
-            fullGrid.constraintCount = columnNumber;
-            nonFullGrid.constraintCount = columnNumber;
-
-            Resize();
         }
         #endregion Setter
 
@@ -247,9 +189,9 @@ namespace Karuta.UIComponent
             nonFullGrid.gameObject.SetActive(nonFullGrid.transform.childCount > 0);
         }
 
-        public int GetNuberChild()
+        public int GetChildNumber()
         {
-            return fullGrid.transform.childCount;
+            return fullGrid.transform.childCount + nonFullGrid.transform.childCount;
         }
 
 #if UNITY_EDITOR
@@ -258,20 +200,10 @@ namespace Karuta.UIComponent
         {
             if (Selection.activeGameObject != this.gameObject) { return; }
 
-            fullGrid.cellSize = cellSize;
-            nonFullGrid.cellSize = cellSize;
-
-            fullGrid.spacing = spacing;
-            nonFullGrid.spacing = spacing;
-            generalLayout.spacing = spacing.y;
-
-            fullGrid.childAlignment = childAlignment;
-            nonFullGrid.childAlignment = childAlignment;
-
-            fullGrid.constraintCount = constraintCount;
-            nonFullGrid.constraintCount = constraintCount;
-
-            Resize();
+            SetCellSize(cellSize);
+            SetSpacing(spacing);
+            SetChildAlignment(childAlignment);
+            SetColumnNumber(constraintCount);
 
             UpdateActive();
         }

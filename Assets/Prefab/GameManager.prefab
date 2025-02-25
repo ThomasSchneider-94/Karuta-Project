@@ -84,11 +84,11 @@ MonoBehaviour:
       texture: {fileID: 2800000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
       videoPath: 
     decksSelectionBackground:
-      isTexture: 1
+      isTexture: 0
       texture: {fileID: 0}
       videoPath: 
     gameBackground:
-      isTexture: 1
+      isTexture: 0
       texture: {fileID: 0}
       videoPath: 
     questionPanelColor: {r: 0, g: 0, b: 0, a: 0.4}
@@ -128,6 +128,7 @@ MonoBehaviour:
     deckSelectionButtonOutlineColor: {r: 0, g: 0, b: 0, a: 1}
     deckSelectionButtonInsideColor: {r: 1, g: 1, b: 1, a: 1}
     deckSelectionButtonTextColor: {r: 0, g: 0, b: 0, a: 1}
+    deckSelectionButtonSelectedColor: {r: 0, g: 0, b: 0, a: 0}
     deckDownloadButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
     deckDownloadButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
     selectAllToggleLabelColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
@@ -147,6 +148,14 @@ MonoBehaviour:
     notFoundArrowOutlineColor: {r: 0, g: 0, b: 0, a: 0}
     notFoundArrowInsideColor: {r: 0, g: 0, b: 0, a: 0}
     notFoundArrowTextColor: {r: 0, g: 0, b: 0, a: 0}
+    deleteModeButtonOutlineColor: {r: 0.9882353, g: 0.8, b: 0.6117647, a: 1}
+    deleteModeButtonInsideColor: {r: 0.99215686, g: 0.627451, b: 0.8156863, a: 1}
+    deleteModeButtonIconColor: {r: 1, g: 1, b: 1, a: 1}
+    deleteModeButtonSelectedColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+    categoryLabelColor: {r: 0, g: 0, b: 0, a: 1}
+    categoryLabelOutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    typeLabelColor: {r: 0, g: 0, b: 0, a: 1}
+    typeLabelOutlineColor: {r: 1, g: 1, b: 1, a: 1}
     mainColor: {r: 0, g: 0.050980568, b: 1, a: 1}
     mainTextColor: {r: 1, g: 1, b: 1, a: 1}
     secondaryColor: {r: 0, g: 0, b: 0, a: 1}

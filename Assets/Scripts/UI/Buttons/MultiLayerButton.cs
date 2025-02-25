@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-namespace Karuta.UIComponent
+namespace Karuta.UI.CustomButton
 {
     [System.Serializable]
     public class ButtonLayer
@@ -17,14 +17,8 @@ namespace Karuta.UIComponent
 
     public class MultiLayerButton : Button
     {
-        [SerializeField] protected TextMeshProUGUI textMesh;
-
         [Header("Button Layers")]
         [SerializeField] protected List<ButtonLayer> buttonLayers;
-
-        [Header("Disabled")]
-        [SerializeField] protected bool useDisabledColor;
-
 
         public void AddButtonLayer(ButtonLayer buttonLayer)
         {
@@ -34,12 +28,13 @@ namespace Karuta.UIComponent
         #region Setters
         public void SetImage(int i, Image image)
         {
-            if (i > 0)
+            if (i == 0)
+            {
+                targetGraphic = image;
+            }
+            else
             {
                 buttonLayers[i - 1].image = image;
-                buttonLayers[i - 1].image.sprite = buttonLayers[i - 1].sprite;
-                buttonLayers[i - 1].image.color = buttonLayers[i - 1].color;
-                buttonLayers[i - 1].image.transform.localScale = buttonLayers[i].scale;
             }
         }
 
@@ -186,41 +181,16 @@ namespace Karuta.UIComponent
                     layer.image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
                 }
             }
-            else
-            {
-                if (useDisabledColor)
-                {
-                    // Switch for a single variable
-                    Color tintColor = interactable switch
-                    {
-                        true => colors.normalColor,
-                        false => colors.disabledColor,
-                    };
-                    image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
-                    foreach (ButtonLayer layer in buttonLayers)
-                    {
-
-                        layer.image.CrossFadeColor(tintColor * colors.colorMultiplier, instant ? 0f : colors.fadeDuration, true, true);
-                    }
-                }
-            }
         }
 
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
 
-            Vector2 size = targetGraphic.rectTransform.sizeDelta;
-
             foreach (ButtonLayer buttonLayer in buttonLayers)
             {
-                buttonLayer.image.rectTransform.sizeDelta = size;
+                buttonLayer.image.rectTransform.sizeDelta = targetGraphic.rectTransform.sizeDelta;
             }
-        }
-
-        public TextMeshProUGUI GetLabel()
-        {
-            return textMesh;
         }
 
 #if UNITY_EDITOR

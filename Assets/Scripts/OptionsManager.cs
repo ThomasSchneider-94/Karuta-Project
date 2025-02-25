@@ -66,14 +66,14 @@ namespace Karuta
         {
             categoriesIcons.Clear();
 
-            // Read the deck categories and deck types
+            // Read the Deck categories and Deck types
             if (File.Exists(LoadManager.CategoriesFilePath))
             {
                 CategoriesAndTypes categoriesAndTypes = JsonUtility.FromJson<CategoriesAndTypes>(File.ReadAllText(LoadManager.CategoriesFilePath));
 
                 foreach (Category category in categoriesAndTypes.categories)
                 {
-                    categoriesIcons.Add(LoadManager.Instance.LoadCategoryVisualSprite(category.icon));
+                    categoriesIcons.Add(LoadManager.Instance.LoadCategoryVisualFromFile(category.icon));
                 }
             }
 
@@ -187,7 +187,7 @@ namespace Karuta
         }
 
         /// <summary>
-        /// Get if the category is the currently active
+        /// Get if the Category is the currently active
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>

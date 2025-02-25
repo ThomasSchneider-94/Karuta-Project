@@ -28,6 +28,11 @@ namespace Karuta
      * - Themes
      * - Upgrade the print for download
      * - Refactor pour sécuriser quand aucune data
+     * - Disable wrapping in text
+     * - Init visuals during game
+     * - GetComponents
+     * - Remove Get___()
+     * - Make a download screen manager
      */
 
     /* BUGS : 
@@ -45,14 +50,14 @@ namespace Karuta
         [SerializeField] private int selectedDecksMax = 2;
         [SerializeField] private List<int> selectedDecks = new();
 
-        /* The deck list is sorted like this :
-         *  - First sorted on the deck category,
-         *  - Secondly sorted on the deck type,
+        /* The Deck list is sorted like this :
+         *  - First sorted on the Deck Category,
+         *  - Secondly sorted on the Deck CardType,
          *  - Then the decks are sorted by alphabetical order.
          *  
-         *  - Issue with the different category toggle
+         *  - Issue with the different Category toggle
          *  
-         *   The list decksNumbers is the count deck for each category / type couple.
+         *   The list decksNumbers is the count Deck for each Category / CardType couple.
          */
         private readonly List<DeckInfo> deckInfoList = new();
         private readonly List<int> decksCount = new();
@@ -172,13 +177,13 @@ namespace Karuta
             {
                 DeckInfo deckInfo = new(jsonDeckInfo);
 
-                if (deckInfo.GetCategory() >= categories.Count && deckInfo.GetDeckType() >= types.Count)
+                if (deckInfo.Category >= categories.Count && deckInfo.DeckType >= types.Count)
                 {
-                    Debug.LogWarning("Deck " + deckInfo.GetName() + " category or type is not supported");
+                    Debug.LogWarning("Deck " + deckInfo.DeckName + " category or type is not supported");
                     continue;
                 }
                 deckInfoList.Add(deckInfo);
-                decksCount[deckInfo.GetCategory() * types.Count + deckInfo.GetDeckType()]++;
+                decksCount[deckInfo.Category * types.Count + deckInfo.DeckType]++;
             }
 
             DecksInformationsQuickSort(0, deckInfoList.Count - 1);
@@ -195,7 +200,7 @@ namespace Karuta
         /// </summary>
         private void LoadCategoriesAndTypes()
         {
-            // Read the deck categories and deck types
+            // Read the Deck categories and Deck types
             if (File.Exists(LoadManager.CategoriesFilePath))
             {
                 CategoriesAndTypes categoriesAndTypes = JsonUtility.FromJson<CategoriesAndTypes>(File.ReadAllText(LoadManager.CategoriesFilePath));
@@ -213,7 +218,7 @@ namespace Karuta
         /// </summary>
         private void LoadDecksInformation()
         {
-            // Check if the deck list file exists
+            // Check if the Deck list file exists
             if (File.Exists(LoadManager.DecksFilePath))
             {
                 // Read the content of the file
@@ -221,13 +226,13 @@ namespace Karuta
                 {
                     DeckInfo deckInfo = new(jsonDeckInfo);
 
-                    if (deckInfo.GetCategory() >= categories.Count && deckInfo.GetDeckType() >= types.Count)
+                    if (deckInfo.Category >= categories.Count && deckInfo.DeckType >= types.Count)
                     {
-                        Debug.LogWarning("Deck " + deckInfo.GetName() + " category or type is not supported");
+                        Debug.LogWarning("Deck " + deckInfo.DeckName + " category or type is not supported");
                         continue;
                     }
                     deckInfoList.Add(deckInfo);
-                    decksCount[deckInfo.GetCategory() * types.Count + deckInfo.GetDeckType()]++;
+                    decksCount[deckInfo.Category * types.Count + deckInfo.DeckType]++;
                 }
             }
             else
@@ -272,12 +277,7 @@ namespace Karuta
         {
             StringBuilder dump = new();
 
-            dump.Append("Counts : [");
-            foreach (int count in decksCount)
-            {
-                dump.Append(count + ", ");
-            }
-            dump.Append("]\n");
+            dump.Append("Counts : [" + string.Join(", ", decksCount) + "]\n");
 
             dump.Append("Decks : [\n");
             foreach (DeckInfo deckInfo in deckInfoList)
@@ -351,7 +351,7 @@ namespace Karuta
 
         #region Count
         /// <summary>
-        /// Get the number of deck of each category / type
+        /// Get the number of Deck of each Category / CardType
         /// </summary>
         /// <returns></returns>
         public List<int> GetDecksCount()
@@ -360,7 +360,7 @@ namespace Karuta
         }
 
         /// <summary>
-        /// Get the number of deck of a category
+        /// Get the number of Deck of a Category
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
@@ -375,7 +375,7 @@ namespace Karuta
         }
 
         /// <summary>
-        /// Get the number of deck of a type
+        /// Get the number of Deck of a CardType
         /// </summary>
         /// <param name="category"></param>
         /// <param name="type"></param>
@@ -388,7 +388,7 @@ namespace Karuta
 
         #region Index
         /// <summary>
-        /// Get the index of the first deck of the category
+        /// Get the index of the first Deck of the Category
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
@@ -403,7 +403,7 @@ namespace Karuta
         }
 
         /// <summary>
-        /// Get the index of the first deck of the type
+        /// Get the index of the first Deck of the CardType
         /// </summary>
         /// <param name="category"></param>
         /// <param name="type"></param>
@@ -448,7 +448,7 @@ namespace Karuta
             return types;
         }
 
-        public string GetType(int i)
+        public string GetTypeName(int i)
         {
             return types[i];
         }

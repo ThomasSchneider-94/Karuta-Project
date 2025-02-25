@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Karuta.Objects;
 using Karuta.Commons;
+using UnityEditor;
 
 namespace Karuta
 {
@@ -144,6 +145,8 @@ namespace Karuta
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (Selection.activeGameObject != this.gameObject) { return; }
+
             if (applier != null)
             {
                 applier.VisualizeApplication(currentTheme, baseTheme);

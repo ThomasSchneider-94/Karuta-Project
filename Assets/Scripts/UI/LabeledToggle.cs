@@ -1,20 +1,26 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
-using TMPro;
 
-namespace Karuta.UIComponent
+namespace Karuta.UI
 {
     public class LabeledToggle : Toggle
     {
         [Header("Toggle Label")]
         [SerializeField] private Text labelText;
         [SerializeField] private string label;
-        [SerializeField] private Outline outline;
+        public Outline outline;
 
-        [Header("Check Mark Background")]
-        [SerializeField] private Image backgroundOutline;
-        [SerializeField] private Image background;
+        public Image Background { get; private set; }
+        public Image BackgroundOutline {  get; private set; }
+
+        override protected void Awake()
+        {
+            base.Awake();
+
+            Background = GetComponent<Image>();
+            BackgroundOutline = GetComponent<Image>();
+        }
+
 
         public void SetLabel(string label)
         {
@@ -27,11 +33,6 @@ namespace Karuta.UIComponent
             return labelText;
         }
 
-        public Outline GetOutline()
-        {
-            return outline;
-        }
-
         public Image GetBackgound()
         {
             return background;
@@ -42,6 +43,7 @@ namespace Karuta.UIComponent
             return backgroundOutline;
         }
 
+        /*
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -49,6 +51,6 @@ namespace Karuta.UIComponent
 
             SetLabel(label);
         }
-#endif
+#endif*/
     }
 }

@@ -48,3 +48,17 @@ MonoBehaviour:
   connexionCheckTimeout: 60
   minDownloadedBytes: 2048
   defaultSprite: {fileID: 21300000, guid: 610beb5aa0f62314f8a98f4c6cd23144, type: 3}
+  decksFile: DecksInfo.json
+  categoriesFile: Categories.json
+  decksDirectory: Decks
+  categoryVisualsDirectory: Categories Visual
+  coversDirectory: Covers
+  visualsDirectory: Visuals
+  audioDirectory: Audio
+  deckNamesEp: deck_names
+  deckDataEp: deck_metadata/
+  categoriesAndTypesEp: get_categories_and_types
+  categoriesIconEp: get_categories
+  coversEp: cover/
+  visualsEp: visual/
+  audioEp: sound/

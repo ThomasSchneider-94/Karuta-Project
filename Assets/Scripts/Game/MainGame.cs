@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using Karuta.Objects;
+using Karuta.UI.CustomButton;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
@@ -115,11 +116,11 @@ namespace Karuta.Game
             {
                 DeckInfo deck = DecksManager.Instance.GetDeck(deckIndex);
 
-                JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategoryName(deck.GetCategory()), deck.GetName() + ".json")));
+                JsonCards jsonCards = JsonUtility.FromJson<JsonCards>(File.ReadAllText(Path.Combine(LoadManager.DecksDirectoryPath, DecksManager.Instance.GetCategoryName(deck.Category), deck.DeckName + ".json")));
 
                 foreach (JsonCard jsonCard in jsonCards.cards)
                 {
-                    cards.Add(new(deck.GetName(), jsonCard));
+                    cards.Add(new(deck.DeckName, jsonCard));
                 }
             }
 
@@ -153,23 +154,23 @@ namespace Karuta.Game
             
             audioLoaded = false;
 
-            // Load visual and audio
-            Debug.Log("Visual already initialized: " + currentCard.IsVisualInitialized().ToString());
-            if (currentCard.IsVisualInitialized())
+            // Load Visual and audio
+            Debug.Log("Visual already initialized: " + currentCard.IsVisualInitialized.ToString());
+            if (currentCard.IsVisualInitialized)
             {
                 visualLoaded = true;
             }
             else
             {
                 visualLoaded = false;
-                loadManager.LoadVisual(currentCard.GetVisualName(), OnVisualLoaded);
+                loadManager.LoadCardVisual(currentCard.VisualName, OnVisualLoaded);
             }
 
-            loadManager.LoadAudio(currentCard.GetAudioName(), OnAudioLoaded);
+            loadManager.LoadCardAudio(currentCard.AudioName, OnAudioLoaded);
         }
 
         /// <summary>
-        /// Called when visual loaded
+        /// Called when Visual loaded
         /// </summary>
         /// <param name="sprite"></param>
         private void OnVisualLoaded(Sprite sprite, bool success)
@@ -285,13 +286,13 @@ namespace Karuta.Game
 
         #region Card Visual and Information
         /// <summary>
-        /// Set visual informations on the scene
+        /// Set Visual informations on the scene
         /// </summary>
         private void SetCardVisualAndInformation()
         {
             // Visual
-            // Get the hiding visual of the card visual
-            Sprite sprite = (optionsManager.AreAnswersHiden() && cardHiden ? hidingSprite : currentCard.GetVisual());
+            // Get the hiding Visual of the card Visual
+            Sprite sprite = (optionsManager.AreAnswersHiden() && cardHiden ? hidingSprite : currentCard.Visual);
 
             float scale = Mathf.Min(maxImageSize.x / sprite.textureRect.width, maxImageSize.y / sprite.textureRect.height);
             cardImage.rectTransform.sizeDelta = sprite.textureRect.size;
@@ -299,7 +300,7 @@ namespace Karuta.Game
             cardImage.sprite = sprite;
 
             // Information text
-            informationTextMesh.text = (optionsManager.AreAnswersHiden() && cardHiden ? "???\n???\n???" : currentCard.GetAnime() + "\n" + currentCard.GetCardType() + "\nDeck " + currentCard.GetDeck());
+            informationTextMesh.text = (optionsManager.AreAnswersHiden() && cardHiden ? "???\n???\n???" : currentCard.Anime + "\n" + currentCard.CardType + "\nDeck " + currentCard.Deck);
         }
 
         /// <summary>
@@ -365,7 +366,7 @@ namespace Karuta.Game
         }
 
         /// <summary>
-        /// Chech if the position is inside the visual card
+        /// Chech if the position is inside the Visual card
         /// </summary>
         /// <param name="currentPosition"></param>
         /// <returns></returns>
@@ -431,7 +432,7 @@ namespace Karuta.Game
             Color tmpColor = notFoundArrow.GetColor(0);
             tmpColor.a = notFoundColorA;
             notFoundArrow.SetColor(0, tmpColor);
-            notFoundArrow.GetLabel().color = tmpColor;
+            //notFoundArrow.Label.color = tmpColor;
 
             tmpColor = notFoundArrow.GetColor(1);
             tmpColor.a = notFoundColorA;
@@ -440,7 +441,7 @@ namespace Karuta.Game
             tmpColor = foundArrow.GetColor(0);
             tmpColor.a = foundColorA;
             foundArrow.SetColor(0, tmpColor);
-            foundArrow.GetLabel().color = tmpColor;
+            //foundArrow.Label.color = tmpColor;
 
             tmpColor = foundArrow.GetColor(1);
             tmpColor.a = foundColorA;

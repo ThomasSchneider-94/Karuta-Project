@@ -272,19 +272,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4143403053470347314}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Karuta.Commons.Options, Assembly-CSharp
-        m_MethodName: NextCurrentCategory
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   buttonLayers:
   - image: {fileID: 1968225418801097566}
     sprite: {fileID: 21300000, guid: 885f5bb2b78dde84cbdbc46be8490b8a, type: 3}
@@ -294,7 +282,6 @@ MonoBehaviour:
     sprite: {fileID: 0}
     color: {r: 1, g: 1, b: 1, a: 1}
     scale: {x: 0.9, y: 0.9}
-  useDisabledColor: 1
 --- !u!95 &7446383397677413905
 Animator:
   serializedVersion: 5

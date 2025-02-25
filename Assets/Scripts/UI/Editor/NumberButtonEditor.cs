@@ -1,6 +1,6 @@
 using UnityEditor;
 using UnityEngine;
-using Karuta.UIComponent;
+using Karuta.UI.CustomButton;
 using UnityEditor.UI;
 
 namespace Karuta.EditorLayout

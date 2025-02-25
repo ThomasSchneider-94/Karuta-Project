@@ -34,102 +34,70 @@ namespace Karuta.Objects
 
     public class DeckInfo
     {
-        private readonly string deckName;
-        private readonly int category;
-        private readonly int type;
-        private readonly Sprite cover;
-        private readonly string coverName;
-        private readonly bool isDownloaded;
-        
-        #region Constructors
-        public DeckInfo(string deckName, int category, int type, Sprite cover, string coverName, bool isDownloaded)
+        public string DeckName { get; }
+        public int Category { get; }
+        public int DeckType { get; }
+        public Sprite Cover { get; }
+        public string CoverName { get; }
+        public bool IsDownloaded { get; }
+
+        #region Constructor
+        public DeckInfo(string deckName, int category, int deckType, Sprite cover, string coverName, bool isDownloaded)
         {
-            this.deckName = deckName;
-            this.category = category;
-            this.type = type;
-            this.cover = cover;
-            this.coverName = coverName;
-            this.isDownloaded = isDownloaded;
+            this.DeckName = deckName;
+            this.Category = category;
+            this.DeckType = deckType;
+            this.Cover = cover;
+            this.CoverName = coverName;
+            this.IsDownloaded = isDownloaded;
         }
 
         public DeckInfo(JsonDeckInfo jsonDeckInfo)
         {
-            this.deckName = jsonDeckInfo.name;
-            this.category = jsonDeckInfo.category;
-            this.type = jsonDeckInfo.type;
-            this.cover = LoadManager.Instance.LoadCoverSprite(jsonDeckInfo.cover);
-            this.coverName = jsonDeckInfo.cover;
-            this.isDownloaded = jsonDeckInfo.isDownloaded;
+            this.DeckName = jsonDeckInfo.name;
+            this.Category = jsonDeckInfo.category;
+            this.DeckType = jsonDeckInfo.type;
+            this.Cover = LoadManager.Instance.LoadCoverFromFile(jsonDeckInfo.cover);
+            this.CoverName = jsonDeckInfo.cover;
+            this.IsDownloaded = jsonDeckInfo.isDownloaded;
         }
         #endregion Constructors
-        
+
         public string Dump()
         {
-            return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", deckName, category, type, coverName, isDownloaded);
+            return string.Format("Deck {0}: Category {1}; Type {2}; Cover: {3}; isDownloaded: {4}", DeckName, DecksManager.Instance.GetCategoryName(Category), DecksManager.Instance.GetTypeName(DeckType), CoverName, IsDownloaded);
         }
 
         /// <summary>
-        /// Return if the deck is greater than the given deck argument
+        /// Return if the Deck is greater than the given Deck argument
         /// </summary>
         /// <param name="deck"></param>
         /// <returns></returns>
         public bool IsGreaterThan(DeckInfo deck)
         {
-            if (category < deck.category)
+            if (Category < deck.Category)
             {
                 return false;
             }
-            else if (category > deck.category)
+            else if (Category > deck.Category)
             {
                 return true;
             }
             else
             {
-                if (type < deck.type)
+                if (DeckType < deck.DeckType)
                 {
                     return false;
                 }
-                else if (type > deck.type)
+                else if (DeckType > deck.DeckType)
                 {
                     return true;
                 }
                 else
                 {
-                    return String.Compare(deckName, deck.deckName) > 0;
+                    return String.Compare(DeckName, deck.DeckName) > 0;
                 }
             }
         }
-
-        #region Getter
-        public string GetName()
-        {
-            return deckName;
-        }
-
-        public int GetCategory()
-        {
-            return category;
-        }
-
-        public int GetDeckType()
-        {
-            return type;
-        }
-
-        public Sprite GetCover()
-        {
-            return cover;
-        }
-
-        public string GetCoverName()
-        {
-            return coverName;
-        }
-
-        public bool IsDownloaded()
-        {
-            return isDownloaded;
-        }
-        #endregion Getter
     }
 }

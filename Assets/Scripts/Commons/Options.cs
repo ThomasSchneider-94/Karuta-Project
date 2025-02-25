@@ -1,4 +1,4 @@
-using Karuta.UIComponent;
+using Karuta.UI.CustomButton;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;

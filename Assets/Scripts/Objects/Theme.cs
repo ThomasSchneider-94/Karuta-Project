@@ -105,7 +105,7 @@ namespace Karuta.Objects
         public readonly string categoryLabelColor;
         public readonly string categoryLabelOutlineColor;
 
-        // Type Label Colors
+        // CardType Label Colors
         public readonly string typeLabelColor;
         public readonly string typeLabelOutlineColor;
 

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6566003903036171809}
   - component: {fileID: 6684672104317802236}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Themes
+  m_text: Label
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3025aaf5d5fdb914eb93ba4496415523, type: 2}
   m_sharedMaterial: {fileID: -6772991938756124065, guid: 3025aaf5d5fdb914eb93ba4496415523, type: 2}
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27.2
+  m_fontSize: 72
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 7635173863356903429}
   - component: {fileID: 7666044131801687644}
   - component: {fileID: 4143403053470347314}
-  - component: {fileID: 3123658344248235655}
+  - component: {fileID: 1896289335674601882}
   - component: {fileID: 3972655487316602558}
   m_Layer: 5
   m_Name: Button
@@ -214,7 +214,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3123658344248235655
+--- !u!114 &1896289335674601882
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6005370005558533576}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 546aa62015bb2a44f9c538d3abab1984, type: 3}
+  m_Script: {fileID: 11500000, guid: edf9b3430f663fd409275b7d9b5b6e99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -258,13 +258,12 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  textMesh: {fileID: 6684672104317802236}
   buttonLayers:
   - image: {fileID: 1101812703547515451}
     sprite: {fileID: 21300000, guid: 9e4f9f00405cfab44be7bab04b4af6bf, type: 3}
     color: {r: 1, g: 0, b: 0, a: 1}
     scale: {x: 0.98125, y: 0.9}
-  useDisabledColor: 0
+  buttonLabelMesh: {fileID: 6684672104317802236}
 --- !u!95 &3972655487316602558
 Animator:
   serializedVersion: 5

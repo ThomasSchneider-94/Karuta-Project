@@ -23,86 +23,49 @@ namespace Karuta.Objects
 
     public class Card
     {
-        private readonly string deck;
-        private readonly string anime;
-        private readonly string type;
-        private readonly string visualName;
-        private Sprite visual;
-        private bool visualInitialized;
-        private readonly string audioName;
+        public string Deck { get;}
+        public string Anime { get;}
+        public string CardType { get;}
+        public string VisualName { get; }
+        public Sprite Visual { get; private set; }
+        public bool IsVisualInitialized { get; private set; }
+        public string AudioName { get; }
 
         #region Constructors
         public Card(string deck, string anime, string type, string visualName, Sprite visual, bool visualInitialized, string audioName)
         {
-            this.deck = deck;
-            this.anime = anime;
-            this.type = type;
-            this.visualName = visualName;
-            this.visual = visual;
-            this.visualInitialized = visualInitialized;
-            this.audioName = audioName;
+            this.Deck = deck;
+            this.Anime = anime;
+            this.CardType = type;
+            this.VisualName = visualName;
+            this.Visual = visual;
+            this.IsVisualInitialized = visualInitialized;
+            this.AudioName = audioName;
         }
 
         public Card(string deck, JsonCard jsonCard)
         {
-            this.deck = deck;
-            this.anime = jsonCard.anime;
-            this.type = jsonCard.type;
+            this.Deck = deck;
+            this.Anime = jsonCard.anime;
+            this.CardType = jsonCard.type;
 
-            this.visualName = jsonCard.visual;
-            this.visual = null;
-            this.visualInitialized = false;
+            this.VisualName = jsonCard.visual;
+            this.Visual = null;
+            this.IsVisualInitialized = false;
 
-            this.audioName = jsonCard.audio;
+            this.AudioName = jsonCard.audio;
         }
         #endregion Constructors
 
-        public void InitVisual(Sprite visual, bool visualInitialized)
+        public void InitVisual(Sprite visual, bool isVisualInitialized)
         {
-            this.visual = visual;
-            this.visualInitialized = visualInitialized;
+            this.Visual = visual;
+            this.IsVisualInitialized = isVisualInitialized;
         }
 
         public string Dump()
         {
-            return string.Format("Deck {0}: {1} - {2}", deck, anime, type);
+            return string.Format("Deck {0}: {1} - {2}", Deck, Anime, CardType);
         }
-
-        #region Getter
-        public string GetDeck()
-        {
-            return deck;
-        }
-
-        public string GetAnime()
-        {
-            return anime;
-        }
-
-        public string GetCardType()
-        {
-            return type;
-        }
-
-        public string GetVisualName()
-        {
-            return visualName;
-        }
-
-        public Sprite GetVisual()
-        {
-            return visual;
-        }
-
-        public bool IsVisualInitialized()
-        {
-            return visualInitialized;
-        }
-
-        public string GetAudioName()
-        {
-            return audioName;
-        }
-        #endregion Getter
     }
 }

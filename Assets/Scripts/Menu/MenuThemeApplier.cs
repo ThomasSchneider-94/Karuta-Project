@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Karuta.Objects;
 using Karuta.Commons;
+using Karuta.UI.CustomButton;
 using Karuta.UIComponent;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 
 namespace Karuta.Menu
 {
@@ -22,10 +22,10 @@ namespace Karuta.Menu
         [SerializeField] private List<NumberButton> questionButtons;
 
         [Header("Option Panels Buttons")]
-        [SerializeField] private List<MultiLayerButton> optionsPanelsButtons;
+        [SerializeField] private List<LabeledButton> optionsPanelsButtons;
 
         [Header("Deck Download")]
-        [SerializeField] private DeckDownload deckDownload;
+        [SerializeField] private DownloadPanelManager downloadPanelManager;
         [SerializeField] private List<MultiLayerButton> downloadButtons;
         [SerializeField] private SelectionButton deleteModeButton;
         [SerializeField] private LabeledToggle selectAllToggle;
@@ -50,9 +50,10 @@ namespace Karuta.Menu
             panelManager.PanelUpdateEvent.AddListener(ApplyBackground);
             deckSelection.ContainersCreatedEvent.AddListener(ApplyDeckSelectionContainersColors);
             deckSelection.ButtonsCreatedEvent.AddListener(ApplyDeckSelectionButtonsColors);
-            deckDownload.TogglesCreatedEvent.AddListener(ApplyDeckDownloadTogglesColors);
+            downloadPanelManager.TogglesCreatedEvent.AddListener(ApplyDeckDownloadTogglesColors);
 
             base.OnEnable();
+
 
             themeManager.UpdateThemeEvent.AddListener(SoftApplyTheme);
         }
@@ -151,11 +152,11 @@ namespace Karuta.Menu
 
         private void ApplyOptionPanelsButtonsColors(Theme currentTheme, BaseTheme baseTheme)
         {
-            foreach (MultiLayerButton button in optionsPanelsButtons)
+            foreach (LabeledButton button in optionsPanelsButtons)
             {
-                button.SetColor(0, GetColorFromString(currentTheme.panelButtonOutlineColor, baseTheme.panelButtonOutlineColor));
-                button.SetColor(1, GetColorFromString(currentTheme.panelButtonInsideColor, baseTheme.panelButtonInsideColor));
-                button.GetLabel().color = GetColorFromString(currentTheme.panelButtonTextColor, baseTheme.panelButtonTextColor);
+                //button.SetColor(0, GetColorFromString(currentTheme.panelButtonOutlineColor, baseTheme.panelButtonOutlineColor));
+                //button.SetColor(1, GetColorFromString(currentTheme.panelButtonInsideColor, baseTheme.panelButtonInsideColor));
+                //button.ButtonLabel.color = GetColorFromString(currentTheme.panelButtonTextColor, baseTheme.panelButtonTextColor);
             }
         }
 
@@ -193,7 +194,7 @@ namespace Karuta.Menu
 
         private void ApplyDeckDownloadTogglesColors(Theme currentTheme, BaseTheme baseTheme)
         {
-            foreach (LabeledToggle toggle in deckDownload.GetToggles())
+            foreach (LabeledToggle toggle in downloadPanelManager.Toggles)
             {
                 toggle.GetText().color = GetColorFromString(currentTheme.deckDownloadTogglesLabelColor, baseTheme.deckDownloadTogglesLabelColor);
                 toggle.GetOutline().effectColor = GetColorFromString(currentTheme.deckDownloadTogglesLabelOutlineColor, baseTheme.deckDownloadTogglesLabelOutlineColor);
@@ -222,12 +223,12 @@ namespace Karuta.Menu
 
         private void ApplyDeckSelectionButtonsColors(Theme currentTheme, BaseTheme baseTheme)
         {
-            foreach (SelectionButton button in deckSelection.GetSelectionButtons())
+            foreach (MultiLayerButton button in deckSelection.Buttons)
             {
                 button.SetColor(0, GetColorFromString(currentTheme.deckSelectionButtonInsideColor, baseTheme.deckSelectionButtonInsideColor));
                 button.SetColor(1, GetColorFromString(currentTheme.deckSelectionButtonOutlineColor, baseTheme.deckSelectionButtonOutlineColor));
-                button.GetLabel().color = GetColorFromString(currentTheme.deckSelectionButtonTextColor, baseTheme.deckSelectionButtonTextColor);
-                button.SetSelectedColor(GetColorFromString(currentTheme.deckSelectionButtonSelectedColor, baseTheme.deckSelectionButtonSelectedColor));
+                //button.ButtonLabel.color = GetColorFromString(currentTheme.deckSelectionButtonTextColor, baseTheme.deckSelectionButtonTextColor);
+                //button.SetSelectedColor(GetColorFromString(currentTheme.deckSelectionButtonSelectedColor, baseTheme.deckSelectionButtonSelectedColor));
             }
         }
 
@@ -238,12 +239,12 @@ namespace Karuta.Menu
 
         private void ApplyDeckSelectionContainersColors(Theme currentTheme, BaseTheme baseTheme)
         {
-            foreach(Container container in deckSelection.GetCategoryContainers())
+            foreach(Container container in deckSelection.CategoryContainers)
             {
                 container.GetNameTextMesh().color = GetColorFromString(currentTheme.categoryLabelColor, baseTheme.categoryLabelColor);
                 container.GetNameTextMesh().outlineColor = GetColorFromString(currentTheme.categoryLabelOutlineColor, baseTheme.categoryLabelOutlineColor);
             }
-            foreach (Container container in deckSelection.GetTypeContainers())
+            foreach (Container container in deckSelection.TypeContainers)
             {
                 container.GetNameTextMesh().color = GetColorFromString(currentTheme.typeLabelColor, baseTheme.typeLabelColor);
                 container.GetNameTextMesh().outlineColor = GetColorFromString(currentTheme.typeLabelOutlineColor, baseTheme.typeLabelOutlineColor);

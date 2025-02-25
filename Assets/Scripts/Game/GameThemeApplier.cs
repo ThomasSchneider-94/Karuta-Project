@@ -2,7 +2,7 @@ using System.IO;
 using UnityEngine;
 using Karuta.Commons;
 using Karuta.Objects;
-using Karuta.UIComponent;
+using Karuta.UI.CustomButton;
 
 namespace Karuta.Game
 {
@@ -46,11 +46,11 @@ namespace Karuta.Game
         {
             notFoundArrow.SetColor(0, GetColorFromString(currentTheme.notFoundArrowOutlineColor, baseTheme.notFoundArrowOutlineColor));
             notFoundArrow.SetColor(1, GetColorFromString(currentTheme.notFoundArrowInsideColor, baseTheme.notFoundArrowInsideColor));
-            notFoundArrow.GetLabel().color = GetColorFromString(currentTheme.notFoundArrowTextColor, baseTheme.notFoundArrowTextColor);
+            //notFoundArrow.Label.color = GetColorFromString(currentTheme.notFoundArrowTextColor, baseTheme.notFoundArrowTextColor);
 
             foundArrow.SetColor(0, GetColorFromString(currentTheme.foundArrowOutlineColor, baseTheme.foundArrowOutlineColor));
             foundArrow.SetColor(1, GetColorFromString(currentTheme.foundArrowInsideColor, baseTheme.foundArrowInsideColor));
-            foundArrow.GetLabel().color = GetColorFromString(currentTheme.foundArrowTextColor, baseTheme.foundArrowTextColor);
+            //foundArrow.Label.color = GetColorFromString(currentTheme.foundArrowTextColor, baseTheme.foundArrowTextColor);
         }
         #endregion Theme Applier
     }
